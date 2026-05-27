@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FinteOne — Personal Finance Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com https://api.anthropic.com https://open.er-api.com; img-src 'self' data: blob:; connect-src 'self' https://api.anthropic.com https://api.openai.com https://open.er-api.com https://cdnjs.cloudflare.com;">
+<meta name="theme-color" content="#5C7A6B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="FinFlow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/layout.css">
+<link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/dark.css">
+</head>
+<body>
+<script id="darkMode-fast-path">
+(function(){try{const s=localStorage.getItem('finflow_dark_cache');if(s==='true')document.body.classList.add('dark');}catch(e){}})();
+</script>
+<canvas id="confettiCanvas" role="presentation" aria-hidden="true"></canvas>
+
+<!-- ── LOCK SCREEN ── -->
+<div id="lockScreen" style="display:none;">
+  <div class="lock-logo">Fin<span>Flow</span></div>
+  <div class="lock-card">
+    <div class="lock-title">🔒 Enter your PIN</div>
+    <div class="lock-sub">Your data is protected</div>
+    <div class="pin-dots" id="lockDots">
+      <div class="pin-dot" id="ld0"></div>
+      <div class="pin-dot" id="ld1"></div>
+      <div class="pin-dot" id="ld2"></div>
+      <div class="pin-dot" id="ld3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="lockKeyPress('1')">1</button>
+      <button class="pin-key" onclick="lockKeyPress('2')">2</button>
+      <button class="pin-key" onclick="lockKeyPress('3')">3</button>
+      <button class="pin-key" onclick="lockKeyPress('4')">4</button>
+      <button class="pin-key" onclick="lockKeyPress('5')">5</button>
+      <button class="pin-key" onclick="lockKeyPress('6')">6</button>
+      <button class="pin-key" onclick="lockKeyPress('7')">7</button>
+      <button class="pin-key" onclick="lockKeyPress('8')">8</button>
+      <button class="pin-key" onclick="lockKeyPress('9')">9</button>
+      <button class="pin-key del" onclick="lockKeyPress('bio')" title="Biometric (if available)">🔑</button>
+      <button class="pin-key" onclick="lockKeyPress('0')">0</button>
+      <button class="pin-key del" onclick="lockKeyPress('del')" aria-label="Delete digit">⌫</button>
+    </div>
+    <div class="lock-error" id="lockError"></div>
+  </div>
+</div>
+
+<!-- ── PIN SETUP MODAL ── -->
+<div class="modal-overlay" id="pinSetupModal" onclick="if(event.target===this)closePinSetup()">
+  <div class="pmodal" style="max-width:360px;" id="pinSetupCard">
+    <button class="close-btn" onclick="closePinSetup()" title="Close PIN setup" aria-label="Close PIN setup">&#215;</button>
+    <h4 id="pinSetupTitle">Set PIN</h4>
+    <p id="pinSetupDesc" style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Choose a 4-digit PIN to protect your data.</p>
+    <div class="pin-dots" id="setupDots">
+      <div class="pin-dot" id="sd0"></div>
+      <div class="pin-dot" id="sd1"></div>
+      <div class="pin-dot" id="sd2"></div>
+      <div class="pin-dot" id="sd3"></div>
+    </div>
+    <div class="pin-pad" style="margin-top:10px;">
+      <button class="pin-key" onclick="setupKeyPress('1')">1</button>
+      <button class="pin-key" onclick="setupKeyPress('2')">2</button>
+      <button class="pin-key" onclick="setupKeyPress('3')">3</button>
+      <button class="pin-key" onclick="setupKeyPress('4')">4</button>
+      <button class="pin-key" onclick="setupKeyPress('5')">5</button>
+      <button class="pin-key" onclick="setupKeyPress('6')">6</button>
+      <button class="pin-key" onclick="setupKeyPress('7')">7</button>
+      <button class="pin-key" onclick="setupKeyPress('8')">8</button>
+      <button class="pin-key" onclick="setupKeyPress('9')">9</button>
+      <button class="pin-key del" style="visibility:hidden"></button>
+      <button class="pin-key" onclick="setupKeyPress('0')">0</button>
+      <button class="pin-key del" onclick="setupKeyPress('del')" aria-label="Delete digit">⌫</button>
+    </div>
+    <div class="lock-error" id="setupError"></div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn-s" onclick="closePinSetup()">Cancel</button>
+      <button class="btn-d" id="pinRemoveBtn" onclick="removePin()" style="display:none;color:var(--danger);">Remove PIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ONBOARDING WIZARD ── -->
+<div id="onboardOverlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="obHeading">
+  <div class="ob-card">
+    <div class="ob-logo">Fin<span>Flow</span></div>
+    <div class="ob-step-dots">
+      <div class="ob-dot active" id="obDot0"></div>
+      <div class="ob-dot" id="obDot1"></div>
+      <div class="ob-dot" id="obDot2"></div>
+      <div class="ob-dot" id="obDot3"></div>
+      <div class="ob-dot" id="obDot4"></div>
+      <div class="ob-dot" id="obDot5"></div>
+      <div class="ob-dot" id="obDot6"></div>
+      <div class="ob-dot" id="obDot7"></div>
+    </div>
+
+    <!-- Step 0: Welcome -->
+    <div id="obStep0">
+      <div class="ob-h" id="obHeading">Welcome to FinFlow</div>
+      <div class="ob-sub">Your personal finance dashboard — track bills, income, loans, and savings. Everything lives privately in your browser.</div>
+      <button class="ob-btn-primary" onclick="obGoTo(1)">Get Started &rarr;</button>
+    </div>
+
+    <!-- Step 1: Name + Currency -->
+    <div id="obStep1" style="display:none;">
+      <div class="ob-h">A few quick details</div>
+      <div class="ob-sub">Personalise your dashboard. You can change these any time.</div>
+      <div class="ob-row">
+        <div class="ob-label">Your name (optional)</div>
+        <input class="ob-input" id="obName" type="text" placeholder="e.g. Alex" autocomplete="given-name" maxlength="40">
+      </div>
+      <div class="ob-row">
+        <div class="ob-label">Currency</div>
+        <select class="ob-select" id="obCurrency" onchange="obUpdateAmtPrefix()"></select>
+      </div>
+      <div class="ob-nav">
+        <button class="ob-back" onclick="obGoTo(0)">&#8592; Back</button>
+        <button class="ob-btn-primary" onclick="obGoTo(2)">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Income sources -->
+    <div id="obStep2" style="display:none;">
+      <div class="ob-h">Income sources</div>
+      <div class="ob-sub">Add each income source — salary, freelance, benefits, anything received monthly. Press + or Enter after each one.</div>
+      <div class="ob-add-row">
+        <input class="ob-input" id="obIncName" type="text" placeholder="Source (e.g. Salary, Freelance)" maxlength="60"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();obAddIncome();}">
+        <div class="ob-amount-wrap" style="flex:0 0 110px;">
+          <span class="ob-amount-prefix" id="obAmtPrefix">$</span>
+          <input class="ob-amount-input" id="obIncAmt" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();obAddIncome();}">
+        </div>
+        <button class="ob-add-btn" onclick="obAddIncome()" title="Add income source" aria-label="Add income source">+</button>
+      </div>
+      <div class="ob-err" id="obIncomeErr"></div>
+      <div id="obIncList" class="ob-item-list ob-list-empty"></div>
+      <div class="ob-nav" style="margin-top:14px;">
+        <button class="ob-back" onclick="obGoTo(1)">&#8592; Back</button>
+        <button class="ob-btn-primary" onclick="obSaveIncome()">Next &rarr;</button>
+      </div>
+      <button class="ob-btn-sec" onclick="obGoTo(3)">Skip — I'll add income later</button>
+    </div>
+
+    <!-- Step 3: Expenses -->
+    <div id="obStep3" style="display:none;">
+      <div class="ob-h">Monthly expenses</div>
+      <div class="ob-sub">Fill in the details below and press <strong>Add Expense</strong> to add each one.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
+        <div style="grid-column:1/-1;">
+          <div class="ob-label">Expense name</div>
+          <input class="ob-input" id="obExpName" type="text" placeholder="e.g. Rent, Netflix" maxlength="60"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('obExpAmt').focus();}">
+        </div>
+        <div>
+          <div class="ob-label">Amount</div>
+          <div class="ob-amount-wrap">
+            <span class="ob-amount-prefix" id="obExpPrefix">$</span>
+            <input class="ob-amount-input" id="obExpAmt" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('obExpWeek').focus();}">
+          </div>
+        </div>
+        <div>
+          <div class="ob-label">Week</div>
+          <select class="ob-select" id="obExpWeek">
+            <option value="0">Week 1</option>
+            <option value="1">Week 2</option>
+            <option value="2">Week 3</option>
+            <option value="3">Week 4</option>
+          </select>
+        </div>
+        <div>
+          <div class="ob-label">Due day (optional)</div>
+          <input class="ob-input" id="obExpDue" type="number" min="1" max="31" placeholder="e.g. 15" inputmode="numeric">
+        </div>
+        <div>
+          <div class="ob-label">Note (optional)</div>
+          <input class="ob-input" id="obExpNote" type="text" placeholder="e.g. Annual plan" maxlength="120"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();obAddExpense();}">
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <div class="ob-label">Receipt photo (optional)</div>
+        <label class="receipt-upload-zone" style="padding:10px 14px;font-size:12px;cursor:pointer;" id="obExpReceiptZone">
+          <span id="obExpReceiptLabel">&#128248; Tap to attach image</span>
+          <input type="file" id="obExpReceipt" accept="image/*" style="display:none;" onchange="obHandleReceiptFile(this)">
+        </label>
+      </div>
+      <div class="ob-err" id="obExpErr"></div>
+      <button class="ob-add-btn full" onclick="obAddExpense()">+ Add Expense</button>
+      <div id="obExpList" class="ob-item-list ob-list-empty"></div>
+      <div class="ob-nav" style="margin-top:14px;">
+        <button class="ob-back" onclick="obGoTo(2)">&#8592; Back</button>
+        <button class="ob-btn-primary" onclick="obGoTo(4)">Next &rarr;</button>
+      </div>
+      <button class="ob-btn-sec" onclick="obGoTo(4)">Skip — I'll add expenses later</button>
+    </div>
+
+    <!-- Step 4: Loans -->
+    <div id="obStep4" style="display:none;">
+      <div class="ob-h">Loans &amp; debts</div>
+      <div class="ob-sub">Add credit cards, car loans, student loans — anything you're paying down.</div>
+      <div class="ob-loan-form">
+        <div class="ob-loan-full">
+          <div class="ob-label">Loan / debt name</div>
+          <input class="ob-input" id="obLoanName" type="text" placeholder="e.g. Visa Card, Car Loan" maxlength="60"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();obAddLoan();}">
+        </div>
+        <div>
+          <div class="ob-label">Current balance</div>
+          <div class="ob-amount-wrap">
+            <span class="ob-amount-prefix" id="obLoanPrefix">$</span>
+            <input class="ob-amount-input" id="obLoanBal" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal">
+          </div>
+        </div>
+        <div>
+          <div class="ob-label">Interest rate %</div>
+          <input class="ob-input" id="obLoanRate" type="number" min="0" max="100" step="0.01" placeholder="e.g. 19.99" inputmode="decimal">
+        </div>
+        <div class="ob-loan-full">
+          <div class="ob-label">Min. monthly payment</div>
+          <div class="ob-amount-wrap">
+            <span class="ob-amount-prefix" id="obLoanMinPrefix">$</span>
+            <input class="ob-amount-input" id="obLoanMin" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();obAddLoan();}">
+          </div>
+        </div>
+      </div>
+      <div class="ob-err" id="obLoanErr"></div>
+      <button class="ob-add-btn full" onclick="obAddLoan()">+ Add Loan</button>
+      <div id="obLoanList" class="ob-item-list ob-list-empty"></div>
+      <div class="ob-nav" style="margin-top:14px;">
+        <button class="ob-back" onclick="obGoTo(3)">&#8592; Back</button>
+        <button class="ob-btn-primary" onclick="obGoTo(5)">Next &rarr;</button>
+      </div>
+      <button class="ob-btn-sec" onclick="obGoTo(5)">Skip — no loans to add</button>
+    </div>
+
+    <!-- Step 5: Savings goals -->
+    <div id="obStep5" style="display:none;">
+      <div class="ob-h">Savings goals</div>
+      <div class="ob-sub">Set up goals like an Emergency Fund or Vacation. Press + to add each one.</div>
+      <div class="ob-add-row" style="flex-wrap:wrap;gap:6px;">
+        <input class="ob-input" id="obSavName" type="text" placeholder="Goal name (e.g. Emergency Fund)" maxlength="60"
+          style="flex:1 1 160px;" onkeydown="if(event.key==='Enter'){event.preventDefault();obAddSaving();}">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;margin-bottom:6px;">
+        <div>
+          <div class="ob-label">Target amount</div>
+          <div class="ob-amount-wrap">
+            <span class="ob-amount-prefix" id="obSavPrefix">$</span>
+            <input class="ob-amount-input" id="obSavTarget" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal">
+          </div>
+        </div>
+        <div>
+          <div class="ob-label">Current balance</div>
+          <div class="ob-amount-wrap">
+            <span class="ob-amount-prefix" id="obSavBalPrefix">$</span>
+            <input class="ob-amount-input" id="obSavBal" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal">
+          </div>
+        </div>
+        <div>
+          <div class="ob-label">Monthly contribution</div>
+          <div class="ob-amount-wrap">
+            <span class="ob-amount-prefix" id="obSavContribPrefix">$</span>
+            <input class="ob-amount-input" id="obSavContrib" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();obAddSaving();}">
+          </div>
+        </div>
+        <div>
+          <div class="ob-label">Interest rate % p.a.</div>
+          <input class="ob-input" id="obSavRate" type="number" min="0" max="30" step="0.1" placeholder="e.g. 2.5" inputmode="decimal">
+        </div>
+      </div>
+      <div class="ob-err" id="obSavErr"></div>
+      <button class="ob-add-btn full" onclick="obAddSaving()">+ Add Goal</button>
+      <div id="obSavList" class="ob-item-list ob-list-empty"></div>
+      <div class="ob-nav" style="margin-top:14px;">
+        <button class="ob-back" onclick="obGoTo(4)">&#8592; Back</button>
+        <button class="ob-btn-primary" onclick="obGoTo(6)">Next &rarr;</button>
+      </div>
+      <button class="ob-btn-sec" onclick="obGoTo(6)">Skip — no savings goals yet</button>
+    </div>
+
+    <!-- Step 6: PIN (optional) -->
+    <div id="obStep6" style="display:none;">
+      <div class="ob-h">Protect your data</div>
+      <div class="ob-sub">Set a 4-digit PIN so only you can access your finances. Completely optional.</div>
+      <div class="ob-phase-lbl" id="obPinPhaseLabel">Enter a new PIN</div>
+      <div class="ob-pin-dots">
+        <div class="pin-dot" id="opd0"></div>
+        <div class="pin-dot" id="opd1"></div>
+        <div class="pin-dot" id="opd2"></div>
+        <div class="pin-dot" id="opd3"></div>
+      </div>
+      <div class="ob-pin-pad">
+        <button class="pin-key" onclick="obPinKey('1')">1</button>
+        <button class="pin-key" onclick="obPinKey('2')">2</button>
+        <button class="pin-key" onclick="obPinKey('3')">3</button>
+        <button class="pin-key" onclick="obPinKey('4')">4</button>
+        <button class="pin-key" onclick="obPinKey('5')">5</button>
+        <button class="pin-key" onclick="obPinKey('6')">6</button>
+        <button class="pin-key" onclick="obPinKey('7')">7</button>
+        <button class="pin-key" onclick="obPinKey('8')">8</button>
+        <button class="pin-key" onclick="obPinKey('9')">9</button>
+        <button class="pin-key del" style="visibility:hidden;"></button>
+        <button class="pin-key" onclick="obPinKey('0')">0</button>
+        <button class="pin-key del" onclick="obPinKey('del')" aria-label="Delete digit">&#9003;</button>
+      </div>
+      <div class="ob-err" id="obPinErr" style="text-align:center;margin-top:8px;"></div>
+      <div class="ob-nav" style="margin-top:16px;">
+        <button class="ob-back" onclick="obGoTo(5)">&#8592; Back</button>
+      </div>
+      <button class="ob-btn-sec" onclick="obGoTo(7)">Skip — no PIN needed</button>
+    </div>
+
+    <!-- Step 7: Done -->
+    <div id="obStep7" style="display:none;">
+      <div class="ob-success-icon">&#9989;</div>
+      <div class="ob-h">You're all set!</div>
+      <div class="ob-sub" id="obDoneMsg">Your dashboard is ready with your data loaded in.</div>
+      <button class="ob-btn-primary" onclick="obFinish()">Open Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<a href="#main-content" class="skip-nav">Skip to main content</a>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">Finte<span>One</span></div>
+  <div class="topbar-center">
+    <div class="month-nav">
+      <button onclick="changeMonth(-1)" title="Previous month" aria-label="Previous month">&#8249;</button>
+      <span class="month-label" id="monthLabel">May 2026</span>
+      <button onclick="changeMonth(1)" title="Next month" aria-label="Next month">&#8250;</button>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="health-badge" onclick="openHealthModal()" title="Financial Health Score">
+      <span class="score" id="healthScore">—</span>
+      <span class="hlabel">/ 100</span>
+    </div>
+    <button class="dk-btn" onclick="openPinSetup()" id="pinBtn" aria-label="PIN / lock screen" title="Set PIN protection" style="font-size:13px;">🔒</button>
+    <button class="dk-btn" onclick="toggleDark()" id="dkBtn" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
+    <button class="tbtn hide-mobile no-print" onclick="toggleNotifications()" id="notifBtn" title="Bill reminders">&#128276;</button>
+    <button class="tbtn hide-mobile no-print" onclick="openCurrencyModal()" title="Currency settings">&#127759;</button>
+    <button class="tbtn hide-mobile no-print" onclick="openCompareModal()" title="Compare two months">&#9878; Compare</button>
+    <button class="tbtn hide-mobile no-print" onclick="exportData()">&#128190; Export</button>
+    <button class="tbtn hide-mobile no-print" onclick="openImport()">&#128228; Import</button>
+    <button class="tbtn hide-mobile no-print" onclick="window.print()">&#128438; Print</button>
+    <button class="dk-btn hide-mobile no-print" onclick="openSettings()" title="Settings" aria-label="Settings" style="font-size:15px;">&#9881;</button>
+    <button class="dk-btn show-mobile no-print" onclick="toggleMobileMenu()" id="mobileMenuBtn" aria-label="More actions" title="More actions" style="font-size:18px;font-weight:600;letter-spacing:1px;">&#8943;</button>
+  </div>
+</div>
+
+<!-- ── DEMO DATA BANNER ── -->
+<div id="demoBanner" style="display:none;" class="demo-banner no-print" role="alert" aria-live="polite">
+  <span class="demo-banner-text">&#9888; Demo data is active — this is not your real financial data.</span>
+  <button class="demo-banner-btn" onclick="showOnboarding()" title="Go back to setup">Resume Setup</button>
+  <button class="demo-banner-btn primary" onclick="confirmDemoReset()" title="Wipe demo data and start fresh">Start Fresh</button>
+  <button class="demo-banner-close" onclick="this.parentElement.style.display='none'" aria-label="Dismiss banner">&#215;</button>
+</div>
+
+<!-- MOBILE ACTION SHEET -->
+<div id="mobileMenuSheet" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:500;background:var(--white);border-top:1px solid var(--border);border-radius:16px 16px 0 0;padding:16px;box-shadow:0 -4px 20px rgba(0,0,0,.12);">
+  <div style="width:36px;height:4px;background:var(--border-strong);border-radius:2px;margin:0 auto 16px;"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <button class="mbtn" onclick="toggleNotifications();toggleMobileMenu();" id="mobileNotifBtn">&#128276; Reminders</button>
+    <button class="mbtn" onclick="openCurrencyModal();toggleMobileMenu();">&#127759; Currency</button>
+    <button class="mbtn" onclick="openCompareModal();toggleMobileMenu();">&#9878; Compare</button>
+    <button class="mbtn" onclick="exportData();toggleMobileMenu();">&#128190; Export</button>
+    <button class="mbtn" onclick="openImport();toggleMobileMenu();">&#128228; Import</button>
+    <button class="mbtn" onclick="window.print();toggleMobileMenu();">&#128438; Print</button>
+    <button class="mbtn" onclick="openSettings();toggleMobileMenu();" style="grid-column:1/-1;">&#9881; Settings &amp; Danger Zone</button>
+  </div>
+  <button onclick="toggleMobileMenu()" style="width:100%;margin-top:12px;padding:12px;border:none;background:var(--slate-light);border-radius:var(--radius-xs);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;">Cancel</button>
+</div>
+<div id="mobileMenuOverlay" style="display:none;position:fixed;inset:0;z-index:499;background:rgba(0,0,0,.3);" onclick="toggleMobileMenu()"></div>
+
+<!-- TABS -->
+<div class="tab-bar no-print">
+  <button class="tab active" id="tab-dashboard"  onclick="switchTab('dashboard',this)"><span class="ti">&#127974;</span><span class="tl"> Dashboard</span></button>
+  <button class="tab" id="tab-expenses"           onclick="switchTab('expenses',this)"><span class="ti">&#128179;</span><span class="tl"> Expenses</span></button>
+  <button class="tab" id="tab-revenue"            onclick="switchTab('revenue',this)"><span class="ti">&#128200;</span><span class="tl"> Revenue</span></button>
+  <button class="tab" id="tab-loans"              onclick="switchTab('loans',this)"><span class="ti">&#127968;</span><span class="tl"> Loans</span> <span class="tbadge" id="loanBadge">5</span></button>
+  <button class="tab" id="tab-savings"            onclick="switchTab('savings',this)"><span class="ti">&#127381;</span><span class="tl"> Savings</span></button>
+  <button class="tab" id="tab-calendar"           onclick="switchTab('calendar',this)"><span class="ti">&#128197;</span><span class="tl"> Calendar</span></button>
+  <button class="tab" id="tab-analytics"          onclick="switchTab('analytics',this)"><span class="ti">&#128202;</span><span class="tl"> Analytics</span></button>
+  <button class="tab" id="tab-archive"            onclick="switchTab('archive',this)"><span class="ti">&#128230;</span><span class="tl"> Archive</span> <span class="tbadge" id="archiveBadge">0</span></button>
+</div>
+
+<div class="main" id="main-content">
+<!-- ═══ DASHBOARD ═══ -->
+<div class="section active" id="section-dashboard">
+
+  <!-- ── HERO STRIP ── -->
+  <div class="dash-hero">
+    <div class="hero-left">
+      <div class="hero-month-lbl" id="d-hero-month">May 2026</div>
+      <div class="hero-net pos" id="d-cashflow">—</div>
+      <div class="hero-sub" id="d-hero-sub">Income $0 &nbsp;·&nbsp; Expenses $0 &nbsp;·&nbsp; Pending $0</div>
+    </div>
+    <div class="hero-right">
+      <span class="hero-badge hb-neutral" id="d-hero-mom" style="display:none;"></span>
+      <span class="hero-badge hb-warn" id="d-hero-pending" style="display:none;"></span>
+      <span class="hero-badge hb-blue" id="d-hero-health"></span>
+    </div>
+  </div>
+
+  <!-- ── KPI ROW ── -->
+  <div class="dash-kpi-row">
+    <div class="dash-kpi dkpi-sage">
+      <div class="dkl">Income</div>
+      <div class="dkv" id="d-income">—</div>
+      <div class="dkd dp" id="d-inc-d" style="display:none;"></div>
+    </div>
+    <div class="dash-kpi dkpi-danger">
+      <div class="dkl">Expenses</div>
+      <div class="dkv" id="d-expenses">—</div>
+      <div class="dkd" id="d-exp-d" style="display:none;"></div>
+    </div>
+    <div class="dash-kpi dkpi-amber">
+      <div class="dkl">Pending Bills</div>
+      <div class="dkv" id="d-pending">—</div>
+      <div class="dkd" id="d-pend-sub" style="background:var(--amber-light);color:var(--amber);"></div>
+    </div>
+    <div class="dash-kpi dkpi-gold">
+      <div class="dkl">Total Debt</div>
+      <div class="dkv" id="d-debt">—</div>
+      <div class="dkd" id="d-dti" style="background:var(--gold-light);color:var(--gold);"></div>
+    </div>
+    <div class="dash-kpi dkpi-blue">
+      <div class="dkl">Savings</div>
+      <div class="dkv" id="d-savings">—</div>
+      <div class="dkd" id="d-sav-sub" style="background:var(--blue-light);color:var(--blue);"></div>
+    </div>
+    <div class="dash-kpi dkpi-success">
+      <div class="dkl">Monthly Pmts</div>
+      <div class="dkv" id="d-minpmts">—</div>
+      <div class="dkd" id="d-dti-lbl" style="background:var(--success-light);color:var(--success);">DTI</div>
+    </div>
+  </div>
+
+  <!-- ── ROW 1: Trend chart (wide) + Spending donut + Upcoming bills ── -->
+  <div class="dash-3col">
+
+    <!-- Income vs Expenses — 6-month area chart -->
+    <div class="dc">
+      <div class="dct">Income vs Expenses
+        <span class="dcl">Last 6 months</span>
+      </div>
+      <div style="position:relative;height:180px;"><canvas id="trendChart" role="img" aria-label="Income vs expenses trend">Trend.</canvas></div>
+      <!-- Inline legend -->
+      <div style="display:flex;gap:14px;margin-top:8px;font-size:10px;color:var(--text-muted);">
+        <span><span style="display:inline-block;width:10px;height:2px;background:#276749;border-radius:1px;margin-right:4px;vertical-align:middle;"></span>Income</span>
+        <span><span style="display:inline-block;width:10px;height:2px;background:#C53030;border-radius:1px;margin-right:4px;vertical-align:middle;"></span>Expenses</span>
+      </div>
+    </div>
+
+    <!-- Expense Category Donut -->
+    <div class="dc">
+      <div class="dct">Spending Breakdown
+        <span class="dcl" id="d-cat-month"></span>
+      </div>
+      <div style="position:relative;height:160px;"><canvas id="categoryChart" role="img" aria-label="Categories">Categories.</canvas></div>
+    </div>
+
+    <!-- Upcoming Bills -->
+    <div class="dc">
+      <div class="dct">Upcoming Bills
+        <span class="dcl" id="d-bills-count"></span>
+      </div>
+      <div class="bill-list-dash" id="d-bills-list"></div>
+    </div>
+
+  </div>
+
+  <!-- ── ROW 2: Weekly bars + Expense paid/pending + Cash flow bar ── -->
+  <div class="dash-3col">
+
+    <!-- Weekly Paid vs Pending stacked bars -->
+    <div class="dc">
+      <div class="dct">Weekly Expenses
+        <div style="display:flex;gap:10px;font-size:10px;color:var(--text-muted);">
+          <span><span style="display:inline-block;width:8px;height:8px;background:#276749;border-radius:2px;margin-right:3px;vertical-align:middle;"></span>Paid</span>
+          <span><span style="display:inline-block;width:8px;height:8px;background:#B7791F;border-radius:2px;margin-right:3px;vertical-align:middle;"></span>Pending</span>
+        </div>
+      </div>
+      <div style="position:relative;height:160px;"><canvas id="weeklyChart" role="img" aria-label="Weekly expenses">Weekly expenses.</canvas></div>
+    </div>
+
+    <!-- Expense progress: paid vs pending bars -->
+    <div class="dc">
+      <div class="dct">Expense Progress
+        <span class="dcl" id="d-exp-prog-pct"></span>
+      </div>
+      <div class="exp-prog-block" id="d-exp-prog-block">
+        <div class="epb-row">
+          <span class="epb-label">Paid</span>
+          <div class="epb-bar"><div class="epb-fill" id="d-epb-paid" style="width:0%;background:var(--success);"></div></div>
+          <span class="epb-val" id="d-epb-paid-val" style="color:var(--success);">$0</span>
+        </div>
+        <div class="epb-row">
+          <span class="epb-label">Pending</span>
+          <div class="epb-bar"><div class="epb-fill" id="d-epb-pend" style="width:0%;background:var(--amber);"></div></div>
+          <span class="epb-val" id="d-epb-pend-val" style="color:var(--amber);">$0</span>
+        </div>
+        <div style="height:1px;background:var(--border);margin:6px 0;"></div>
+        <!-- Per-week expense sub-bars -->
+        <div id="d-week-prog-list"></div>
+      </div>
+    </div>
+
+    <!-- Cash Flow overview bar chart -->
+    <div class="dc">
+      <div class="dct">Cash Flow Overview</div>
+      <div style="position:relative;height:160px;"><canvas id="cashflowChart" role="img" aria-label="Cash flow">Cash flow.</canvas></div>
+    </div>
+
+  </div>
+
+  <!-- ── ROW 3: Loan payoff + Savings goals ── -->
+  <div class="dash-2col">
+
+    <!-- Loan Payoff Progress -->
+    <div class="dc">
+      <div class="dct">Loan Payoff Progress
+        <span class="dcl" id="d-loan-summary"></span>
+      </div>
+      <div id="loanProgressList"></div>
+    </div>
+
+    <!-- Savings Goals Progress -->
+    <div class="dc">
+      <div class="dct">Savings Goals
+        <span class="dcl" id="d-sav-summary"></span>
+      </div>
+      <div id="dashSavingsList"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ═══ EXPENSES ═══ -->
+<div class="section" id="section-expenses">
+  <div class="month-manager" role="navigation" aria-label="Month selector">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span style="font-weight:600;font-size:12px;color:var(--text-secondary);" aria-hidden="true">Month:</span>
+      <div id="monthTags" role="list" aria-label="Active months" style="display:flex;flex-wrap:nowrap;gap:5px;overflow-x:auto;max-width:100%;padding-bottom:2px;"></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="clone-btn" onclick="openCloneModal()">&#128260; Clone Month</button>
+      <button class="tbtn no-print" onclick="openCsvModal()" style="color:var(--blue);border-color:var(--blue-mid);">&#128229; Import CSV</button>
+      <button class="nm-btn" onclick="openNewMonthModal()">+ New Month</button>
+    </div>
+  </div>
+  <div class="stor-alert" id="storAlert">
+    <span>&#9888;</span><span id="storMsg">Storage is nearly full.</span>
+    <button class="tbtn" style="margin-left:auto;" onclick="exportData()">Export Backup</button>
+  </div>
+
+  <!-- Budget Envelopes -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">&#128179; Budget Envelopes</div>
+      <span id="overBudgetPill" class="pill pill-d" style="display:none;">&#9888; Over budget</span>
+    </div>
+    <div style="padding:12px;"><div class="envelopes-grid" id="envelopesGrid"></div></div>
+  </div>
+
+  <div class="tag-filter-bar" id="tagFilterBar"></div>
+
+  <div class="section-hdr" style="margin-bottom:10px;">
+    <div style="font-weight:600;font-size:14px;" id="expMonthHdr">May 2026 Expenses</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <button class="tbtn no-print" id="recurAutoFillBtn" onclick="recurringAutoFill()" style="color:var(--blue);border-color:var(--blue-mid);font-size:11px;display:none;">&#8635; Auto-fill Recurring</button>
+      <button class="reset-btn no-print" onclick="openResetModal('expenses')" title="Clear all expense items for this month">&#128465; Reset Expenses</button>
+    </div>
+  </div>
+
+  <div class="weeks-grid" id="weeksGrid"></div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="exp-footer">
+      <div class="efs"><div class="efl">Total</div><div class="efv" id="ef-total">$0</div></div>
+      <div class="efs"><div class="efl">Paid</div><div class="efv" style="color:var(--success);" id="ef-paid">$0</div></div>
+      <div class="efs"><div class="efl">Pending</div><div class="efv" style="color:var(--amber);" id="ef-pending">$0</div><div style="font-size:10px;color:var(--amber);" id="ef-pnote"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Weekly Comparison</div></div>
+    <div style="padding:13px;"><div style="position:relative;height:115px;"><canvas id="expSumChart" role="img" aria-label="Weekly comparison">Weekly totals.</canvas></div></div>
+  </div>
+</div>
+
+<!-- ═══ REVENUE ═══ -->
+<div class="section" id="section-revenue">
+  <div class="metrics-row" style="grid-template-columns:repeat(auto-fit,minmax(135px,1fr));">
+    <div class="mc al-sage"><div class="ml">Total Revenue</div><div class="mv" id="rev-total">$0</div><div class="ms">This month</div><div class="md" id="rev-delta"></div></div>
+    <div class="mc al-success"><div class="ml">Received</div><div class="mv" id="rev-received">$0</div><div class="ms">Confirmed</div></div>
+    <div class="mc"><div class="ml">Pending Income</div><div class="mv" id="rev-pending">$0</div><div class="ms">Awaiting</div></div>
+    <div class="mc al-gold"><div class="ml">YTD Income</div><div class="mv" id="rev-ytd">$0</div><div class="ms">Year to date</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">&#128197; Monthly Revenue &amp; Expense Tracker</div>
+      <div style="display:flex;gap:5px;" class="no-print">
+        <button class="rev-toggle-btn active" id="revT12" onclick="setRevWin(12,this)">Last 12</button>
+        <button class="rev-toggle-btn" id="revTAll" onclick="setRevWin(999,this)">All</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;"><table><thead id="revTHead"></thead><tbody id="revTBody"></tbody></table></div>
+  </div>
+  <div class="rev-grid" style="margin-top:14px;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Income Sources — <span id="revMonHdr" style="color:var(--sage);"></span></div>
+        <div style="display:flex;gap:6px;">
+          <button class="reset-btn no-print" onclick="openResetModal('revenue')" title="Clear all income sources for this month">&#128465; Reset</button>
+          <button class="nm-btn no-print" onclick="openRevModal(-1)">+ Add Income</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Source</th><th class="acol">Amount</th><th class="scol">Rcvd</th><th class="no-print" style="width:28px;"></th></tr></thead>
+        <tbody id="revTbody"></tbody>
+        <tfoot><tr style="background:var(--sage-light);"><td style="font-weight:700;font-size:12px;">Total</td><td class="acol" id="revTableTotal" style="font-weight:700;color:var(--sage);font-family:'DM Mono',monospace;">$0</td><td></td><td></td></tr></tfoot>
+      </table>
+    </div>
+    <div>
+      <div class="net-flow-card" style="margin-bottom:14px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-secondary);">Net Cash Position</div>
+        <div class="net-amount pos" id="netCash">$0</div>
+        <div style="font-size:12px;color:var(--text-secondary);">Income minus expenses</div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);margin-bottom:3px;"><span>Expense ratio</span><span id="expRatioPct">0%</span></div>
+          <div class="pbar" style="height:6px;"><div class="pfill pf-sage" id="expRatioBar" style="width:0%;"></div></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div style="font-weight:600;font-size:12px;margin-bottom:10px;">Monthly Income vs Expenses</div>
+        <div style="position:relative;height:155px;"><canvas id="incomeChart" role="img" aria-label="Income trend">Income.</canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOANS ═══ -->
+<div class="section" id="section-loans">
+  <div class="section-hdr">
+    <div class="section-title">Loan Portfolio</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span style="font-size:11px;color:var(--text-muted);">Strategy:</span>
+        <button class="strat-btn" id="btn-avalanche" onclick="setStrategy('avalanche')">&#9650; Avalanche</button>
+        <button class="strat-btn" id="btn-snowball" onclick="setStrategy('snowball')">&#9731; Snowball</button>
+      </div>
+      <button class="reset-btn no-print" onclick="openResetModal('loans')" title="Clear all loan payment history for this month">&#128465; Reset Pmts</button>
+      <button class="nm-btn no-print" onclick="openLoanModal(-1)">+ Add Loan</button>
+    </div>
+  </div>
+  <div id="strategyTip" class="strategy-tip"></div>
+  <div class="metrics-row">
+    <div class="mc al-danger"><div class="ml">Total Debt</div><div class="mv" id="loan-total">$0</div><div class="ms">All loans</div></div>
+    <div class="mc al-amber"><div class="ml">Monthly Pmts</div><div class="mv" id="loan-pmts">$0</div><div class="ms">Sum of minimums</div></div>
+    <div class="mc al-gold"><div class="ml">Total Interest</div><div class="mv" id="loan-int">$0</div><div class="ms">At min payments</div></div>
+    <div class="mc al-success"><div class="ml">Debt-Free</div><div class="mv" id="loan-free" style="font-size:13px;">—</div><div class="ms">Estimated date</div></div>
+  </div>
+  <div class="slider-panel no-print">
+    <div style="font-weight:600;font-size:12px;color:var(--sage);margin-bottom:8px;">&#127381; Extra Payment Simulator</div>
+    <div class="slider-row">
+      <span style="font-size:12px;color:var(--text-secondary);min-width:110px;">Extra monthly $</span>
+      <input type="range" id="bonusSlider" aria-label="Extra monthly payment amount" min="0" max="2000" step="50" value="0" oninput="updateBonus(this.value)">
+      <span class="sv" id="bonusVal">$0</span>
+    </div>
+    <div id="bonusResult" style="font-size:12px;color:var(--text-secondary);margin-top:4px;min-height:16px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">&#128200; Balance Paydown Trajectory</div><span style="font-size:11px;color:var(--text-muted);">Hover for values</span></div>
+    <div style="padding:14px;"><div style="position:relative;height:215px;"><canvas id="paydownChart" role="img" aria-label="Paydown trajectory">Paydown.</canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">&#129518; Paydown Calculator</div><span style="font-size:11px;color:var(--text-muted);">Simulate any scenario</span></div>
+    <div style="padding:15px;">
+      <div class="loan-grid">
+        <div style="display:grid;gap:9px;">
+          <div class="fr">
+            <div class="fg"><label for="calcSel" class="fl">Select Loan</label><select class="fi" id="calcSel" onchange="calcFromLoan()"><option value="custom">Custom</option></select></div>
+            <div class="fg"><label for="calcP" class="fl">Principal ($)</label><input class="fi" type="number" id="calcP" aria-label="Principal balance" placeholder="e.g. 10000" oninput="runCalc()"></div>
+          </div>
+          <div class="fr">
+            <div class="fg"><label for="calcR" class="fl">Interest Rate (%)</label><input class="fi" type="number" id="calcR" aria-label="Annual interest rate" placeholder="e.g. 19.99" step="0.01" oninput="runCalc()"></div>
+            <div class="fg"><label for="calcMin" class="fl">Min. Payment ($)</label><input class="fi" type="number" id="calcMin" aria-label="Minimum monthly payment" placeholder="e.g. 250" oninput="runCalc()"></div>
+          </div>
+          <div class="fr">
+            <div class="fg"><label for="calcT" class="fl">Target Payoff</label><input class="fi" type="number" id="calcT" aria-label="Target payoff months" placeholder="e.g. 36" inputmode="numeric" oninput="runCalc()"></div>
+            <div class="fg"><label for="calcPT" class="fl">Period</label><select class="fi" id="calcPT" onchange="runCalc()"><option value="months">Months</option><option value="years">Years</option></select></div>
+          </div>
+          <div class="fg"><label for="calcE" class="fl">Extra Monthly ($)</label><input class="fi" type="number" id="calcE" aria-label="Extra monthly payment" placeholder="0" inputmode="decimal" oninput="runCalc()"></div>
+        </div>
+        <div class="calc-result">
+          <div class="rr"><span class="rl">Monthly Payment</span><span class="rv big" id="calcMonthly">$0</span></div>
+          <div class="rr"><span class="rl">Total Paid</span><span class="rv" id="calcTotal">$0</span></div>
+          <div class="rr"><span class="rl">Total Interest</span><span class="rv" id="calcInterest">$0</span></div>
+          <div class="rr"><span class="rl">Saved vs Min</span><span class="rv" id="calcSaved" style="color:var(--success);">$0</span></div>
+          <div class="rr"><span class="rl">Payoff Date</span><span class="rv" id="calcDate">—</span></div>
+          <div style="margin-top:10px;">
+            <div style="font-size:11px;color:var(--text-secondary);margin-bottom:3px;">Interest vs Principal</div>
+            <div class="pbar" style="height:7px;"><div class="pfill pf-danger" id="intBar" style="width:0%;"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:2px;"><span id="intLbl">0%</span><span id="prinLbl">100%</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <div style="font-weight:600;font-size:12px;margin-bottom:6px;">Amortization Schedule</div>
+        <div class="amort-wrap"><table><thead><tr><th>#</th><th>Payment</th><th style="color:var(--success)">Principal</th><th style="color:var(--danger)">Interest</th><th>Balance</th></tr></thead><tbody id="amortBody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+  <div style="font-weight:600;font-size:13px;margin-bottom:10px;color:var(--text-secondary);">Active Loans &amp; Payment Tracking</div>
+  <div class="debt-list" id="loanList"></div>
+</div>
+
+<!-- ═══ SAVINGS ═══ -->
+<div class="section" id="section-savings">
+  <div class="section-hdr">
+    <div class="section-title">Savings Goals</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="reset-btn no-print" onclick="openResetModal('savings')" title="Clear all savings goals and balances">&#128465; Reset Savings</button>
+      <button class="nm-btn" onclick="openSavModal(-1)">+ Add Goal</button>
+    </div>
+  </div>
+  <div class="metrics-row">
+    <div class="mc al-blue"><div class="ml">Total Savings</div><div class="mv" id="sv-total">$0</div><div class="ms">All goals</div></div>
+    <div class="mc al-success"><div class="ml">Goals Complete</div><div class="mv" id="sv-done">0 / 0</div><div class="ms">Targets reached</div></div>
+    <div class="mc al-gold"><div class="ml">Est. Annual Interest</div><div class="mv" id="sv-int">$0</div><div class="ms">At current rates</div></div>
+    <div class="mc"><div class="ml">Monthly Contrib</div><div class="mv" id="sv-contrib">$0</div><div class="ms">Total contributions</div></div>
+  </div>
+
+  <!-- Savings ↔ Expense link notice -->
+  <div style="background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--blue);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+    <span>&#128161;</span>
+    <span>Savings contributions are automatically tracked as expenses in the current month under the <strong>Savings</strong> category when you mark a goal active.</span>
+  </div>
+
+  <div id="savingsGrid" class="savings-grid"></div>
+
+
+  <!-- FINANCIAL GOALS -->
+  <div class="card" style="margin-top:14px;">
+    <div class="card-header">
+      <div class="card-title">&#127919; Financial Goals</div>
+      <button class="nm-btn" onclick="openGoalModal(-1)" style="font-size:11px;padding:4px 9px;">+ Add Goal</button>
+    </div>
+    <div style="padding:12px;">
+      <div class="goals-grid" id="goalsGrid"></div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div style="font-weight:600;font-size:12px;margin-bottom:10px;">12-Month Savings Projection <span style="font-size:10px;color:var(--text-muted);">(with compound interest &amp; monthly contributions)</span></div>
+    <div style="position:relative;height:200px;"><canvas id="savChart" role="img" aria-label="Savings projection">Savings chart.</canvas></div>
+  </div>
+</div>
+
+<!-- ═══ CALENDAR ═══ -->
+<div class="section" id="section-calendar">
+  <div class="section-hdr">
+    <div class="section-title">Bill Calendar — <span id="calMonthTitle" style="color:var(--sage);"></span></div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span style="font-size:12px;color:var(--text-muted);display:none;" class="show-desktop">Bills appear when you set a due day on an expense item.</span>
+      <button class="tbtn no-print" onclick="switchTab('expenses',document.getElementById('tab-expenses'))" style="font-size:11px;color:var(--sage);border-color:var(--sage-mid);">&#128197; Go to Expenses to set due dates</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">&#128197; <span id="calMonTitle2"></span> Bills</div></div>
+    <div style="padding:12px;">
+      <div class="cal-hdr-row" id="calHdrRow"></div>
+      <div class="bill-calendar" id="billCal"></div>
+    </div>
+  </div>
+  <div class="two-eq" style="margin-top:14px;">
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-header"><div class="card-title">Upcoming Bills</div></div>
+      <div style="padding:0;" id="upcomingBills"></div>
+    </div>
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-header"><div class="card-title">&#8635; Recurring Detected</div><span style="font-size:11px;color:var(--text-muted);">Appears 2+ months</span></div>
+      <div style="padding:12px;" id="recurringList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ANALYTICS ═══ -->
+<div class="section" id="section-analytics">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;"><div class="section-title" style="margin-bottom:0;">Analytics &amp; Insights</div><button class="tbtn no-print" onclick="openCatManager()" style="font-size:11px;">&#127991; Manage Categories</button></div>
+  <div class="metrics-row">
+    <div class="mc al-sage"><div class="ml">Avg Monthly Income</div><div class="mv" id="an-avginc">$0</div><div class="ms">All months</div></div>
+    <div class="mc al-danger"><div class="ml">Avg Monthly Expenses</div><div class="mv" id="an-avgexp">$0</div><div class="ms">All months</div></div>
+    <div class="mc al-gold"><div class="ml">Best Month</div><div class="mv" id="an-best" style="font-size:13px;">—</div><div class="ms">Highest net</div></div>
+    <div class="mc al-amber"><div class="ml">Top Category</div><div class="mv" id="an-topcat" style="font-size:13px;">—</div><div class="ms">By total spend</div></div>
+  </div>
+  <div class="two-col">
+    <div>
+      <div class="chart-card">
+        <div style="font-weight:600;font-size:12px;margin-bottom:10px;">Category Spending Trend</div>
+        <div style="position:relative;height:200px;"><canvas id="catTrendChart" role="img" aria-label="Category trends">Category trends.</canvas></div>
+      </div>
+      <div class="chart-card">
+        <div style="font-weight:600;font-size:12px;margin-bottom:10px;">Monthly Net Flow Over Time</div>
+        <div style="position:relative;height:165px;"><canvas id="netChart" role="img" aria-label="Net flow">Net flow.</canvas></div>
+      </div>
+    </div>
+    <div>
+      <div class="chart-card" style="margin-bottom:14px;">
+        <div style="font-weight:600;font-size:12px;margin-bottom:10px;">Year-over-Year</div>
+        <div style="overflow-x:auto;" id="yoyTable"></div>
+      </div>
+      <div class="chart-card" style="margin-bottom:14px;">
+        <div style="font-weight:600;font-size:12px;margin-bottom:10px;">Budget vs Actual Variance (Last 3 Months)</div>
+        <div style="overflow-x:auto;" id="varianceTableWrap"></div>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <div class="card-header">
+          <div class="card-title">&#128161; Smart Insights</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button class="tbtn no-print" id="aiInsightBtn" onclick="runAiInsights()" style="font-size:11px;">&#128279; Connect AI</button>
+            <button class="tbtn no-print" id="aiManageBtn" onclick="openClaudeManage()" title="AI settings" style="font-size:11px;display:none;">&#9881; API</button>
+          </div>
+        </div>
+
+        <!-- Shortfall warning — computed, not AI -->
+        <div id="aiShortfallBanner" style="display:none;"></div>
+
+        <!-- AI action grid — visible when a provider is connected -->
+        <div id="aiActionGrid" style="display:none;" class="ai-section-pad">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin-bottom:8px;">AI Analysis</div>
+          <div class="ai-action-grid">
+            <button class="ai-mode-btn" id="modeBtn-general"  onclick="runInsightMode('general')">&#129302; General Insights</button>
+            <button class="ai-mode-btn" id="modeBtn-debt"     onclick="runInsightMode('debt')">&#128179; Debt Optimizer</button>
+            <button class="ai-mode-btn" id="modeBtn-anomaly"  onclick="runInsightMode('anomaly')">&#128269; Spending Anomalies</button>
+            <button class="ai-mode-btn" id="modeBtn-budget"   onclick="runInsightMode('budget')">&#128200; Budget Recommender</button>
+            <button class="ai-mode-btn" id="modeBtn-summary"  onclick="runInsightMode('summary')">&#128197; Monthly Summary</button>
+            <button class="ai-mode-btn" id="modeBtn-forecast" onclick="runInsightMode('forecast')">&#128302; Cash Flow Forecast</button>
+          </div>
+          <div class="ai-qa-row">
+            <input type="text" id="aiQuestion" class="fi" placeholder="Ask anything… e.g. Should I pay off MBNA or CL first?" style="font-size:12px;" onkeydown="if(event.key==='Enter')runInsightMode('qa')">
+            <button class="btn-p" onclick="runInsightMode('qa')" style="padding:8px 14px;font-size:12px;white-space:nowrap;">&#128172; Ask</button>
+          </div>
+        </div>
+
+        <div class="ai-insight-card" id="aiInsightCard" style="display:none;margin:12px 14px 0;"></div>
+        <div style="padding:14px;" id="insightsList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ARCHIVE ═══ -->
+<div class="section" id="section-archive">
+  <div class="section-hdr">
+    <div class="section-title">&#128230; Month Archive</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <span style="font-size:12px;color:var(--text-muted);" id="archiveThresholdLabel">Auto-archives months older than 6 months</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <label for="archiveThreshold" style="font-size:11px;color:var(--text-secondary);">Threshold:</label>
+        <select id="archiveThreshold" class="fi" style="width:auto;padding:4px 8px;font-size:12px;" onchange="updateArchiveThreshold(this.value)">
+          <option value="3">3 months</option>
+          <option value="6" selected>6 months</option>
+          <option value="9">9 months</option>
+          <option value="12">12 months</option>
+          <option value="0">Never auto-archive</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="auto-archive-banner">
+    <span>&#8505;</span>
+    <div>Archived months are <strong>read-only</strong> and still included in Analytics charts and the Revenue cross-month table. Restore any month to make it editable again. Auto-archiving runs each time you open the app.</div>
+  </div>
+
+  <div class="archive-readonly-banner" id="archiveBanner" style="display:none;">
+    <span>&#128274;</span>
+    <span id="archiveBannerMsg">This month is archived.</span>
+    <button class="restore-btn" style="margin-left:auto;" id="archiveBannerRestoreBtn" onclick="openRestoreModal(this.dataset.key)">Restore</button>
+  </div>
+
+  <div id="archiveList"></div>
+</div>
+
+</div><!-- /main -->
+
+<!-- MODALS -->
+<!-- Health -->
+<div class="modal-overlay" id="healthModal" onclick="if(event.target===this)closeHealthModal()">
+  <div class="modal">
+    <button class="close-btn" onclick="closeHealthModal()" title="Close health score" aria-label="Close health score">&#215;</button>
+    <h3>Financial Health Score</h3>
+    <p style="font-size:12px;color:var(--text-secondary);margin-top:3px;">Scored across 6 financial pillars</p>
+    <div class="score-ring">
+      <svg width="88" height="88" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#E2E8F0" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="#276749" stroke-width="10" stroke-dasharray="251" stroke-dashoffset="66" stroke-linecap="round" id="healthRing"/></svg>
+      <div class="score-txt"><span style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--success);" id="modalScore">—</span><span style="font-size:9px;color:var(--text-muted);">/ 100</span></div>
+    </div>
+    <div class="score-breakdown" id="scoreBreakdown"></div>
+    <p style="font-size:11px;color:var(--text-muted);margin-top:12px;border-top:1px solid var(--border);padding-top:10px;">Updates automatically as you mark items paid and manage loans.</p>
+  </div>
+</div>
+<!-- New Month -->
+<div class="modal-overlay" id="newMonthModal" onclick="if(event.target===this)closeNewMonthModal()">
+  <div class="pmodal">
+    <button class="close-btn" onclick="closeNewMonthModal()" title="Close new month" aria-label="Close new month">&#215;</button>
+    <h4>Add New Month</h4>
+    <div class="fl" style="display:block;margin-bottom:4px;">Month &amp; Year</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px;">
+      <select class="fi" id="newMonSelMonth" aria-label="Month"></select>
+      <select class="fi" id="newMonSelYear" aria-label="Year"></select>
+    </div>
+    <label for="cloneFromSel" class="fl" style="display:block;margin-bottom:4px;">Start with data from</label>
+    <select id="cloneFromSel"><option value="blank">Blank (empty)</option></select>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeNewMonthModal()">Cancel</button>
+      <button class="btn-p" onclick="createNewMonth()">Create Month</button>
+    </div>
+  </div>
+</div>
+<!-- Savings Goal -->
+<div class="modal-overlay" id="savModal" onclick="if(event.target===this)closeSavModal()">
+  <div class="pmodal">
+    <button class="close-btn" onclick="closeSavModal()" title="Close savings goal" aria-label="Close savings goal">&#215;</button>
+    <h4 id="savModalTitle">Add Savings Goal</h4>
+    <div class="fg" style="margin-bottom:9px;"><label for="savName" class="fl">Goal Name</label><input id="savName" aria-label="Goal name" placeholder="e.g. Emergency Fund"></div>
+    <div class="fr" style="margin-bottom:9px;">
+      <div class="fg"><label for="savTarget" class="fl">Target ($)</label><input id="savTarget" aria-label="Target amount" type="number" placeholder="e.g. 5000" inputmode="decimal"></div>
+      <div class="fg"><label for="savBal" class="fl">Current Balance ($)</label><input id="savBal" aria-label="Starting balance" type="number" placeholder="e.g. 500" inputmode="decimal"></div>
+    </div>
+    <div class="fr" style="margin-bottom:9px;">
+      <div class="fg"><label for="savContrib" class="fl">Monthly Contribution ($)</label><input id="savContrib" aria-label="Monthly contribution" type="number" placeholder="e.g. 100" inputmode="decimal"></div>
+      <div class="fg"><label for="savRate" class="fl">Interest Rate (% p.a.)</label><input id="savRate" aria-label="Interest rate percent" type="number" placeholder="e.g. 2.5" step="0.1" inputmode="decimal"></div>
+    </div>
+    <div style="background:var(--blue-light);border-radius:var(--radius-xs);padding:8px 10px;font-size:11px;color:var(--blue);margin-bottom:9px;">
+      &#128161; Monthly contribution will auto-appear as a Savings expense in your expense tracker.
+    </div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeSavModal()">Cancel</button>
+      <button class="btn-p" onclick="saveSavGoal()">Save Goal</button>
+    </div>
+  </div>
+</div>
+<!-- Deposit / Withdraw -->
+<div class="modal-overlay" id="txnModal" onclick="if(event.target===this)closeTxnModal()">
+  <div class="pmodal">
+    <button class="close-btn" onclick="closeTxnModal()" title="Close transaction" aria-label="Close transaction">&#215;</button>
+    <h4 id="txnTitle">Deposit to Savings</h4>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;" id="txnGoalName"></p>
+    <div class="fg" style="margin-bottom:9px;"><label for="txnAmount" class="fl">Amount ($)</label><input id="txnAmount" type="number" placeholder="0" min="0"></div>
+    <div class="fg" style="margin-bottom:9px;"><label for="txnNote" class="fl">Note (optional)</label><input id="txnNote" type="text" placeholder="e.g. Monthly transfer"></div>
+    <div id="txnWarnRow" style="background:var(--amber-light);border-radius:var(--radius-xs);padding:8px 10px;font-size:11px;color:var(--amber);margin-bottom:9px;display:none;">
+      &#9888; Withdrawing more than current balance will set balance to $0.
+    </div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeTxnModal()">Cancel</button>
+      <button class="btn-p" id="txnConfirmBtn" onclick="confirmTxn()">Confirm Deposit</button>
+    </div>
+  </div>
+</div>
+<!-- Due Date picker (inline click on calendar day) -->
+<div class="modal-overlay" id="dueDateModal" onclick="if(event.target===this)closeDueDateModal()">
+  <div class="pmodal">
+    <button class="close-btn" onclick="closeDueDateModal()" title="Close due date picker" aria-label="Close due date picker">&#215;</button>
+    <h4>Set Due Date</h4>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;" id="dueDateItemName"></p>
+    <div class="fg" style="margin-bottom:9px;"><label for="dueDayInput" class="fl">Day of month (1–31)</label><input id="dueDayInput" aria-label="Due day of month" type="number" min="1" max="31" placeholder="e.g. 15"></div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:9px;">This day will show as a bill on the Calendar every month for this expense.</div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="clearDueDate()">Clear Due Date</button>
+      <button class="btn-p" onclick="saveDueDate()">Set Date</button>
+    </div>
+  </div>
+</div>
+<!-- Delete savings confirm -->
+<div class="modal-overlay" id="delSavModal" onclick="if(event.target===this)closeDelSav()">
+  <div class="pmodal">
+    <button class="close-btn" onclick="closeDelSav()" title="Close delete confirmation" aria-label="Close delete confirmation">&#215;</button>
+    <h4>Delete Savings Goal?</h4>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;" id="delSavName"></p>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeDelSav()">Cancel</button>
+      <button class="btn-d" onclick="confirmDelSav()">Delete</button>
+    </div>
+  </div>
+</div>
+<!-- Import -->
+<div class="modal-overlay" id="importModal" onclick="if(event.target===this)closeImport()">
+  <div class="pmodal">
+    <button class="close-btn" onclick="closeImport()" title="Close import" aria-label="Close import">&#215;</button>
+    <h4>Import Backup</h4>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">Paste a previously exported JSON backup. This will overwrite all current data.</p>
+    <textarea id="importJson" rows="6" style="resize:vertical;" placeholder="Paste JSON here..."></textarea>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeImport()">Cancel</button>
+      <button class="btn-d" onclick="doImport()">Import &amp; Overwrite</button>
+    </div>
+  </div>
+</div>
+<!-- Envelope edit -->
+<div class="modal-overlay" id="envModal" onclick="if(event.target===this)closeEnvModal()">
+  <div class="pmodal">
+    <button class="close-btn" onclick="closeEnvModal()" title="Close budget envelope" aria-label="Close budget envelope">&#215;</button>
+    <h4>Edit Budget Cap</h4>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;" id="envCatName"></p>
+    <div class="fg" style="margin-bottom:9px;"><label for="envCapInput" class="fl">Monthly Cap ($)</label><input id="envCapInput" type="number" min="0"></div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeEnvModal()">Cancel</button>
+      <button class="btn-p" onclick="saveEnvCap()">Save Cap</button>
+    </div>
+  </div>
+</div>
+<script src="js/constants.js"></script>
+<script src="js/state.js"></script>
+<script src="js/health.js"></script>
+<script src="js/modals.js"></script>
+<script src="js/expenses.js"></script>
+<script src="js/revenue.js"></script>
+<script src="js/loans.js"></script>
+<script src="js/savings.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/archive.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/onboarding.js"></script>
+<script src="js/boot.js"></script>
+</body></html>

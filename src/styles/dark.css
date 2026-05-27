@@ -1,0 +1,118 @@
+/* dark.css — all dark mode overrides under body.dark and related selectors */
+
+body.dark{
+  --bg:#0F1117;--white:#1A1D27;--border:#2D3148;--border-strong:#3D4168;
+  --slate-light:#1e2133;--slate-mid:#2a2e45;--text-primary:#E8EAF0;--text-secondary:#8B90A8;--text-muted:#5a607a;
+  --shadow:0 1px 3px rgba(0,0,0,.3);--shadow-lg:0 4px 16px rgba(0,0,0,.4);
+}
+
+/* Lock screen dark */
+body.dark #lockScreen .pin-key{background:var(--slate-light);}
+
+/* Category badges dark */
+body.dark .cat-bank{background:#1a2d4a;color:#7eb3f5;}
+body.dark .cat-telecom{background:#2a1d4a;color:#b794f4;}
+body.dark .cat-auto{background:#3a2b10;color:#f6c97a;}
+body.dark .cat-utility{background:#0e2e1f;color:#68d391;}
+body.dark .cat-health{background:#3a1228;color:#f687b3;}
+body.dark .cat-loan{background:var(--slate-light);color:var(--text-secondary);}
+body.dark .cat-other{background:var(--slate-light);color:var(--text-muted);}
+
+/* Savings / debt / slider / calc dark */
+body.dark .sav-card{background:var(--white);border-color:var(--border);}
+body.dark .debt-item{background:var(--white);border-color:var(--border);}
+body.dark .slider-panel{background:#1e3028;border-color:#2d4a3a;}
+body.dark .calc-result{background:#1e3028;border-color:#2d4a3a;}
+body.dark .week-card{background:var(--white);}
+body.dark .fi{background:var(--slate-light);border-color:var(--border-strong);color:var(--text-primary);}
+body.dark .strategy-tip{background:var(--slate-light);border-color:var(--border);}
+
+/* Item note inline dark */
+body.dark .item-note-inline{background:#2a2510;border-color:var(--gold-mid);}
+
+/* Goal card dark */
+body.dark .goal-card{background:var(--white);border-color:var(--border);}
+
+/* Category pill opts dark */
+body.dark .cat-pill-opt.cat-bank{background:#1a2d4a;color:#7eb3f5;}
+body.dark .cat-pill-opt.cat-telecom{background:#2a1d4a;color:#b794f4;}
+body.dark .cat-pill-opt.cat-auto{background:#3a2b10;color:#f6c97a;}
+body.dark .cat-pill-opt.cat-utility{background:#0e2e1f;color:#68d391;}
+body.dark .cat-pill-opt.cat-health{background:#3a1228;color:#f687b3;}
+body.dark .cat-pill-opt.cat-loan{background:var(--slate-light);color:var(--text-secondary);}
+body.dark .cat-pill-opt.cat-other{background:var(--slate-light);color:var(--text-muted);}
+
+/* Due day btn dark */
+body.dark .due-day-btn{background:var(--slate-light);border-color:var(--border);}
+
+/* Amount inputs dark */
+body.dark .amt-input-big{background:var(--slate-light);border-color:var(--border-strong);color:var(--text-primary);}
+body.dark .item-name-input{background:var(--slate-light);color:var(--text-primary);}
+
+/* Receipt upload dark */
+body.dark .receipt-upload-zone{background:var(--slate-light);}
+
+/* Modal field input dark */
+body.dark .modal-field-input{background:var(--slate-light);border-color:var(--border-strong);color:var(--text-primary);}
+
+/* Demo banner dark */
+body.dark .demo-banner{background:var(--slate-light);border-bottom-color:var(--amber);}
+
+/* Reset / danger inputs dark */
+body.dark .full-reset-input{background:var(--slate-light);border-color:var(--border-strong);color:var(--text-primary);}
+body.dark .full-reset-input.matched{background:var(--danger-light);color:var(--danger);border-color:var(--danger);}
+body.dark .dz-card{background:var(--slate-light);border-color:var(--border-strong);}
+body.dark .settings-grid{background:var(--slate);}
+body.dark .dz-section{border-top-color:var(--border-strong);}
+
+/* Quick confirm no-button dark */
+body.dark .qc-no{background:var(--slate-light);}
+
+/* AI dark */
+body.dark .ai-insight-card{background:linear-gradient(135deg,#1e3028,#1a2d4a);border-color:var(--border-strong);}
+body.dark .ai-tab-btn{background:var(--white);}
+body.dark .ai-provider-row{border-color:var(--border);}
+body.dark .ai-mode-btn{background:var(--white);}
+
+/* CSV dark */
+body.dark .csv-drop-zone{background:var(--white);border-color:var(--border-strong);}
+body.dark .csv-drop-zone:hover{background:var(--slate-light);}
+body.dark .import-preview{border-color:var(--border);}
+
+/* Note input dark */
+body.dark .note-input{background:var(--slate-light);}
+
+/* Dashboard dark */
+body.dark .dash-hero::before{background:linear-gradient(135deg,#1a2e24 0%,#1e1a08 100%);}
+body.dark .net-flow-card{background:linear-gradient(135deg,#1e3028,#2a2510);border-color:#2d4a3a;}
+
+/* Archive dark */
+body.dark .archive-month-group-hdr{background:var(--slate-light);border-color:var(--border);}
+body.dark .archive-month-body{border-color:var(--border);}
+body.dark .archive-section-block{border-color:var(--border);}
+body.dark .archive-item-row{border-color:var(--border);}
+body.dark .archive-readonly-banner{background:var(--slate-light);border-color:var(--border-strong);}
+body.dark .danger-confirm-input{background:var(--slate-light);border-color:var(--danger-mid);color:var(--text-primary);}
+body.dark .danger-modal-body{background:#3a1212;border-color:var(--danger);}
+
+/* Mobile menu dark */
+body.dark #mobileMenuSheet{background:var(--white);}
+body.dark .mbtn{background:var(--white);border-color:var(--border);}
+
+/* Win / celebration dark */
+body.dark .debt-item.loan-paid-off{
+  background:linear-gradient(135deg,#0e2e1f 0%,var(--white) 60%)!important;
+  border-color:var(--success)!important;
+}
+body.dark .debt-free-card{background:linear-gradient(135deg,#0e2e1f,#0d2a19,#0e2e1f);border-color:var(--success);}
+body.dark .savings-all-complete{background:linear-gradient(135deg,#0e2e1f,#0d2a19);}
+body.dark .month-complete-banner{background:linear-gradient(135deg,#0e2e1f,#2a2510);}
+body.dark .goal-card.type-met{background:linear-gradient(135deg,#0e2e1f,var(--white) 60%)!important;}
+body.dark .sav-card.sav-complete{background:linear-gradient(135deg,#0e2e1f,var(--white) 55%);}
+body.dark .week-card.all-paid-card .week-header{background:linear-gradient(135deg,#0e2e1f,#0d2019)!important;}
+body.dark .week-table tbody tr.row-paid{
+  background:linear-gradient(90deg,#0e2e1f 0%,#0d2019 100%)!important;
+  border-left-color:var(--success)!important;
+}
+body.dark .week-table tbody tr.row-paid .item-name{color:#68d391;}
+body.dark .week-table tbody tr.row-paid .amt-col{color:#68d391;}

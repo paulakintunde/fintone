@@ -1,0 +1,246 @@
+// === loans.js ===
+
+function renderLoans(){
+  const sorted=[...S.loans];
+  if(S.strategy==='avalanche')sorted.sort((a,b)=>b.rate-a.rate);else sorted.sort((a,b)=>a.amount-b.amount);
+  // Strategy tip
+  document.getElementById('strategyTip').innerHTML=S.strategy==='avalanche'
+    ?'<span>⚡</span><div><strong>Avalanche strategy active</strong> — Sorted highest interest first. Pay minimums on all, throw every extra dollar at #1. Saves the most interest overall.</div>'
+    :'<span>⛄</span><div><strong>Snowball strategy active</strong> — Sorted smallest balance first. Pay off #1 completely, then roll that freed payment into #2. Builds momentum.</div>';
+  const list=document.getElementById('loanList');list.innerHTML='';
+  if(!sorted.length){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;border:2px dashed var(--border);border-radius:var(--radius);">No loans added yet.<br><button class="nm-btn" style="margin-top:10px" onclick="openLoanModal(-1)">+ Add your first loan</button></div>';document.getElementById('loan-total').textContent='$0';document.getElementById('loan-pmts').textContent='$0';document.getElementById('loan-int').textContent='$0';document.getElementById('loan-free').textContent='—';return;}
+  // Debt-free banner when all loans have zero balance
+  if(sorted.every(l=>l.amount<=0)){
+    const dfBanner=document.createElement('div');
+    dfBanner.className='debt-free-card';
+    dfBanner.innerHTML='<span class="df-icon">🎉</span><div class="df-title">You\'re Debt-Free!</div><div class="df-sub">All loan balances are at $0. Incredible achievement — keep it up!</div>';
+    list.appendChild(dfBanner);
+  }
+  sorted.forEach((loan,si)=>{
+    const oi=S.loans.indexOf(loan);
+    const oa=loan.originalAmount||loan.amount;
+    const pdPct=Math.min(100,Math.max(4,((oa-loan.amount)/oa)*100));
+    const ml=calcMTP(amt(loan.amount),loan.rate,amt(loan.minPayment));
+    const isTop=si===0;
+    const chips=loan.payments.map((p,pi)=>`<div class="pchip ${p.paid?'paid':'pending'}" onclick="toggleLP(${oi},${pi})">${p.paid?'✓':'○'} ${esc(p.month)}</div>`).join('');
+    const isPaidOff=loan.amount<=0;
+    const div=document.createElement('div');div.className='debt-item'+(isPaidOff?' loan-paid-off':'');
+    if(isTop)div.style.borderLeft='3px solid '+(S.strategy==='avalanche'?'var(--danger)':'var(--blue)');
+    div.innerHTML=`
+      <div class="debt-item-hdr">
+        <div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
+          <span class="debt-name" style="${isPaidOff?'text-decoration:line-through;color:var(--success);opacity:.8;':''}">${esc(loan.name)}</span>
+          ${isPaidOff?'<span class="loan-paid-badge">🏆 Paid Off!</span>':''}
+          ${isTop?`<span class="focus-lbl ${S.strategy==='avalanche'?'focus-av':'focus-sn'}">${S.strategy==='avalanche'?'⚡ Highest rate':'⛄ Smallest bal'}</span>`:''}
+          <span style="font-size:10px;color:var(--text-muted);">#${si+1}</span>
+        </div>
+        <div class="debt-meta"><span>◆ ${loan.rate}% APR</span><span>◆ Min ${fmt(amt(loan.minPayment))}/mo</span><span>◆ ${loan.payments.filter(p=>p.paid).length}/${loan.payments.length} paid</span></div>
+        </div>
+        <div style="text-align:right;">
+          <div class="bal-edit-wrap" style="justify-content:flex-end;margin-bottom:2px;">
+            <div class="debt-bal" id="bal-disp-${oi}">${fmt(amt(loan.amount))}</div>
+            <button class="bal-edit-btn" onclick="startEditBal(${oi})" title="Edit balance">&#9998;</button>
+          </div>
+          <div style="font-size:11px;color:var(--sage);font-weight:600;">Payoff: ${getPayoffDate(ml)}</div>
+        </div>
+      </div>
+      <div style="margin-bottom:4px;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-bottom:2px;"><span>Paid ${fmt(amt(oa)-amt(loan.amount))} of ${fmt(amt(oa))}</span><span>${pdPct.toFixed(0)}%</span></div>
+        <div class="pbar" style="height:7px;"><div class="pfill ${loan.rate>15?'pf-danger':loan.rate>10?'pf-amber':'pf-sage'}" style="width:${pdPct}%;"></div></div>
+      </div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:7px 0 4px;">Payment History — tap to toggle</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">${chips}</div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;" class="no-print">
+        <button class="nm-btn" style="font-size:11px;padding:4px 10px;" onclick="openLoanModal(${oi})">&#9998; Edit Loan</button>
+        <button class="tbtn" style="font-size:11px;padding:4px 9px;" onclick="addLP(${oi})">+ Log Month</button>
+        <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--sage);border-color:var(--sage);" onclick="useInCalc(${oi})">⊕ Calculator</button>
+        <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--blue);border-color:var(--blue-mid);" onclick="generatePaySchedule(${oi})" title="Pre-create 12 months of payment chips">&#128197; Generate Schedule</button>
+      </div>`;
+    list.appendChild(div);
+  });
+  document.getElementById('loan-total').textContent=fmt(totalDebt());
+  document.getElementById('loan-pmts').textContent=fmt(minPmts());
+  const ti=S.loans.reduce((s,l)=>{const m=calcMTP(amt(l.amount),l.rate,amt(l.minPayment));return m>=999?s+99999:s+(amt(l.minPayment)*m-amt(l.amount));},0);
+  document.getElementById('loan-int').textContent=fmt(Math.max(0,ti));
+  const mm=Math.max(...S.loans.map(l=>calcMTP(amt(l.amount),l.rate,amt(l.minPayment))));
+  document.getElementById('loan-free').textContent=getPayoffDate(mm);
+  document.getElementById('loanBadge').textContent=S.loans.length;
+  const sel=document.getElementById('calcSel');const cv=sel.value;
+  sel.innerHTML='<option value="custom">Custom</option>';
+  S.loans.forEach((l,i)=>{sel.innerHTML+=`<option value="${i}">${esc(l.name)}</option>`;});
+  // Restore previous selection only if it still exists; otherwise fall back to custom
+  if(cv==='custom'||S.loans[parseInt(cv)]){sel.value=cv;}else{sel.value='custom';}
+  renderPaydownChart();runCalc();updateBonus(document.getElementById('bonusSlider').value);
+}
+function calcMTP(bal,ar,mp){const r=ar/100/12;if(r===0)return Math.ceil(bal/mp);if(mp<=bal*r+0.01)return 999;return Math.ceil(-Math.log(1-(bal*r)/mp)/Math.log(1+r));}
+function getPayoffDate(months){
+  if(months>=999)return'Never — increase pmt';
+  const p=CMK.split(' ');let mo=MS.indexOf(p[0]),yr=parseInt(p[1]);
+  mo+=months;yr+=Math.floor(mo/12);mo=mo%12;return MS[mo]+' '+yr;
+}
+function toggleLP(li,pi){
+  const loan=S.loans[li];
+  const pmt=loan.payments[pi];
+  const wasUnpaid=!pmt.paid;
+  const prevAmount=loan.amount;
+  pmt.paid=!pmt.paid;
+  // Auto-reduce balance when marking paid
+  if(wasUnpaid&&loan.amount>0){
+    const r=loan.rate/100/12;
+    const intCharge=loan.amount*r;
+    const principalPaid=Math.max(0,loan.minPayment-intCharge);
+    loan.amount=Math.max(0,Math.round((loan.amount-principalPaid)*100)/100);
+  }
+  // Undo: restore balance estimate when un-marking
+  if(!wasUnpaid&&loan.originalAmount){
+    const paidCount=loan.payments.filter(p=>p.paid).length;
+    let bal=loan.originalAmount;
+    const r2=loan.rate/100/12;
+    for(let m=0;m<paidCount;m++){
+      if(bal<=0)break;
+      const ic=bal*r2;
+      const pc=Math.max(0,loan.minPayment-ic);
+      bal=Math.max(0,Math.round((bal-pc)*100)/100);
+    }
+    loan.amount=bal;
+  }
+  persist();renderLoans();updateHealth();
+
+  if(wasUnpaid){
+    // Small burst from the chip + flash animation via JS (not CSS class, avoids re-firing on every render)
+    const chips=document.querySelectorAll('.pchip.paid');
+    if(chips.length){
+      const lastChip=chips[chips.length-1];
+      lastChip.classList.add('chip-flash');
+      setTimeout(()=>lastChip.classList.remove('chip-flash'),300);
+      launchConfettiFromEl(lastChip,18);
+    }
+    // Loan fully paid off (balance hit 0)?
+    if(loan.amount<=0&&prevAmount>0){
+      celebrateLoanPaidOff(loan.name);
+      checkAllLoansDebtFree();
+    }
+    // All chips for this loan are paid?
+    else if(loan.payments.length>0&&loan.payments.every(p=>p.paid)){
+      setTimeout(()=>{launchConfetti(70);showToast('🎉 All payments logged for '+loan.name+'!');},200);
+    }
+  }
+}
+function startEditBal(li){
+  const disp=document.getElementById('bal-disp-'+li);
+  if(!disp)return;
+  const cur=amt(S.loans[li].amount);
+  disp.outerHTML=`<input class="bal-edit-input" id="bal-inp-${li}" type="number" value="${cur}" onblur="saveEditBal(this,${li})" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value=${cur};this.blur();}" autofocus>`;
+  setTimeout(()=>{const inp=document.getElementById('bal-inp-'+li);if(inp)inp.select();},30);
+}
+function saveEditBal(inp,li){
+  if(!inp||!document.getElementById('bal-inp-'+li))return; // already removed from DOM
+  const v=parseFloat(inp.value);
+  if(!isNaN(v)&&v>=0){
+    S.loans[li].amount=storeCents(v);
+    // If edited balance > originalAmount, update originalAmount too
+    if(S.loans[li].amount>(S.loans[li].originalAmount||0))S.loans[li].originalAmount=S.loans[li].amount;
+  }
+  const justPaidOff=(!isNaN(v)&&v===0&&S.loans[li]&&(S.loans[li].originalAmount||0)>0);
+  persist();renderLoans();updateHealth();
+  if(justPaidOff){celebrateLoanPaidOff(S.loans[li].name);checkAllLoansDebtFree();}
+  else showToast('✓ Balance updated');
+}
+function addLP(li){S.loans[li].payments.push({month:CMK,paid:false});persist();renderLoans();}
+function addLoan(){openLoanModal(-1);} // now opens modal
+function setStrategy(s){
+  S.strategy=s;
+  document.getElementById('btn-avalanche').classList.toggle('active',s==='avalanche');
+  document.getElementById('btn-snowball').classList.toggle('active',s==='snowball');
+  persist();renderLoans();
+}
+function generatePaySchedule(li){
+  const loan=S.loans[li];
+  // Build list of next 12 months starting from CMK
+  const parts=CMK.split(' ');let mo=MS.indexOf(parts[0]),yr=parseInt(parts[1]);
+  let added=0;
+  for(let i=0;i<12;i++){
+    const key=mk(mo,yr);
+    // Only add if not already present
+    if(!loan.payments.find(p=>p.month===key)){
+      loan.payments.push({month:key,paid:false});
+      added++;
+    }
+    mo++;if(mo>11){mo=0;yr++;}
+  }
+  if(added>0){persist();renderLoans();showToast('✓ Added '+added+' payment chips for '+loan.name);}
+  else showToast('All 12 months already logged','warn-t');
+}
+function useInCalc(i){document.getElementById('calcSel').value=i;calcFromLoan();}
+function calcFromLoan(){
+  const v=document.getElementById('calcSel').value;
+  if(v==='custom'){
+    ['calcP','calcR','calcMin','calcT','calcE'].forEach(id=>{document.getElementById(id).value='';});
+    runCalc();return;
+  }
+  const l=S.loans[parseInt(v)];
+  if(!l){document.getElementById('calcSel').value='custom';calcFromLoan();return;}
+  document.getElementById('calcP').value=amt(l.amount);
+  document.getElementById('calcR').value=l.rate;
+  document.getElementById('calcMin').value=amt(l.minPayment);
+  document.getElementById('calcT').value='';
+  document.getElementById('calcE').value='';
+  runCalc();
+}
+function runCalc(){
+  const P=parseFloat(document.getElementById('calcP').value)||0;
+  const ar=parseFloat(document.getElementById('calcR').value)||0;
+  const mp=parseFloat(document.getElementById('calcMin').value)||0;
+  const ex=parseFloat(document.getElementById('calcE').value)||0;
+  let tgt=parseInt(document.getElementById('calcT').value)||36;
+  if(document.getElementById('calcPT').value==='years')tgt*=12;
+  const r=ar/100/12;
+  let rp=r===0?P/tgt:P*(r*Math.pow(1+r,tgt))/(Math.pow(1+r,tgt)-1);
+  rp=Math.max(rp,mp)+ex;
+  let bal=P,tp=0,ti=0;const rows=[];
+  for(let m=1;m<=360&&bal>0.01;m++){const ic=bal*r;const ap=Math.min(rp,bal+ic);const pc=ap-ic;bal=Math.max(0,bal-pc);tp+=ap;ti+=ic;rows.push({m,pmt:ap,prin:pc,int:ic,bal});}
+  let mB=P,mT=0;for(let m=1;m<=600&&mB>0.01;m++){const ic=mB*r;const p2=Math.max(mp,mB+ic);mB=Math.max(0,mB-(p2-ic));mT+=p2;}
+  const sv=Math.max(0,mT-tp);
+  document.getElementById('calcMonthly').textContent=fmt(rp);document.getElementById('calcTotal').textContent=fmt(tp);
+  document.getElementById('calcInterest').textContent=fmt(ti);document.getElementById('calcSaved').textContent='+'+fmt(sv);
+  document.getElementById('calcDate').textContent=getPayoffDate(rows.length);
+  const ip=tp>0?ti/tp*100:0;
+  document.getElementById('intBar').style.width=ip.toFixed(1)+'%';
+  document.getElementById('intLbl').textContent=ip.toFixed(1)+'% interest';
+  document.getElementById('prinLbl').textContent=(100-ip).toFixed(1)+'% principal';
+  document.getElementById('amortBody').innerHTML=rows.map((row,idx)=>`<tr class="${idx===rows.length-1?'payoff-row':''}"><td style="font-family:'DM Mono',monospace;">${row.m}</td><td style="font-family:'DM Mono',monospace;">${fmt(row.pmt)}</td><td style="font-family:'DM Mono',monospace;color:var(--success)">${fmt(row.prin)}</td><td style="font-family:'DM Mono',monospace;color:var(--danger)">${fmt(row.int)}</td><td style="font-family:'DM Mono',monospace;">${fmt(row.bal)}</td></tr>`).join('');
+}
+function updateBonus(val){
+  val=parseFloat(val)||0;document.getElementById('bonusVal').textContent=fmt(val);
+  if(!S.loans.length){document.getElementById('bonusResult').textContent='';return;}
+  const sorted=[...S.loans];
+  if(S.strategy==='avalanche')sorted.sort((a,b)=>b.rate-a.rate);else sorted.sort((a,b)=>a.amount-b.amount);
+  const tgt=sorted[0];
+  const base=calcMTP(amt(tgt.amount),tgt.rate,amt(tgt.minPayment));
+  const nw=calcMTP(amt(tgt.amount),tgt.rate,amt(tgt.minPayment)+parseFloat(val));
+  const saved=base-nw;
+  document.getElementById('bonusResult').textContent=val>0
+    ?`+${fmt(val)}/mo on ${tgt.name}: pays off ${saved>0?saved+' months earlier':'at same time'}. All loans debt-free: ${getPayoffDate(Math.max(...S.loans.map(l=>calcMTP(amt(l.amount),l.rate,amt(l.minPayment)+val/S.loans.length))))}.`
+    :'Adjust the slider to see how extra payments speed up payoff.';
+}
+
+// ──────────────────────────────────────────────
+// LOAN PAID-OFF CELEBRATION
+// ──────────────────────────────────────────────
+function celebrateLoanPaidOff(loanName){
+  setTimeout(()=>{
+    launchConfetti(200);
+    showToast('🏆 Loan paid off: '+loanName+'!');
+  },150);
+}
+
+function checkAllLoansDebtFree(){
+  if(S.loans.length>0&&S.loans.every(l=>l.amount<=0)){
+    setTimeout(()=>{
+      launchConfetti(250);
+      showToast('🎉 DEBT FREE! All loans paid off!');
+    },400);
+    return true;
+  }
+  return false;
+}
