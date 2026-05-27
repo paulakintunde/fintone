@@ -1,4 +1,4 @@
-# FinFlow — Personal Finance Dashboard
+# FinteOne — Personal Finance Dashboard
 
 A private, browser-based personal finance tracker. All data is stored locally in your browser — nothing is sent to a server.
 
@@ -32,7 +32,7 @@ A private, browser-based personal finance tracker. All data is stored locally in
 
 ## Getting Started
 
-Open `src/index.html` in any modern browser (Chrome, Edge, Firefox, Safari). No installation, no server, no account required.
+Open `index.html` in any modern browser (Chrome, Edge, Firefox, Safari). No installation, no server, no account required.
 
 On first launch you will see the **Setup Wizard**. If you want to explore before committing, the app loads sample demo data — you can reset it at any time from Settings.
 

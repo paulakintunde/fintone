@@ -28,7 +28,8 @@ const DW=[
   {items:[{name:'Demo Groceries',amount:310,paid:true,dueDay:20},{name:'Demo Car Insurance',amount:148,paid:false,dueDay:22}]},
   {items:[{name:'Demo Streaming',amount:18,paid:true,dueDay:27},{name:'Demo Gym',amount:45,paid:false,dueDay:28}]}
 ];
-const DR=[{name:'Demo Primary Income',amount:3200,received:true},{name:'Demo Side Income',amount:750,received:false}];
+// Demo income — updated amounts from live
+const DR=[{name:'Demo Primary Income',amount:6200,received:true},{name:'Demo Side Income',amount:1750,received:false}];
 // Generate demo payment history relative to today — last 4 months paid, current month pending
 function _makeDemoPayments(){
   var now=new Date();
@@ -38,10 +39,10 @@ function _makeDemoPayments(){
   });
 }
 const DL=[
-  {name:'Demo Credit Card',amount:4800,originalAmount:6000,rate:19.99,minPayment:120,payments:_makeDemoPayments()},
-  {name:'Demo Personal Loan',amount:8500,originalAmount:10000,rate:8.5,minPayment:210,payments:_makeDemoPayments()}
+  {name:'Demo Credit Card',amount:400,originalAmount:600,rate:19.99,minPayment:20,payments:_makeDemoPayments()},
+  {name:'Demo Personal Loan',amount:850,originalAmount:1000,rate:8.5,minPayment:20,payments:_makeDemoPayments()}
 ];
-const DSV=[{name:'Demo Emergency Fund',target:8000,balance:2100,contribution:250,rate:2.5},{name:'Demo Vacation Fund',target:2500,balance:640,contribution:100,rate:1.5}];
+const DSV=[{name:'Demo Emergency Fund',target:8000,balance:21000,contribution:250,rate:2.5},{name:'Demo Vacation Fund',target:2500,balance:640,contribution:100,rate:1.5}];
 
 // Category chart colours — intentionally hardcoded for consistent chart rendering
 const catColors={'Banking':'#2B6CB0','Telecom':'#6B46C1','Auto':'#B7791F','Utilities':'#276749','Health':'#9D174D','Loan Pmt':'#718096','Savings':'#2B6CB0','Other':'#A0AEC0'};
