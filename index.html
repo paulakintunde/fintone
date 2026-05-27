@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FinteOne — Personal Finance Dashboard</title>
 <link rel="manifest" href="manifest.json">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob: https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com https://api.anthropic.com https://open.er-api.com; img-src 'self' data: blob:; connect-src 'self' https://api.anthropic.com https://api.openai.com https://open.er-api.com https://cdnjs.cloudflare.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com https://api.anthropic.com https://open.er-api.com; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://api.anthropic.com https://api.openai.com https://open.er-api.com https://cdnjs.cloudflare.com;">
 <meta name="theme-color" content="#5C7A6B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -16,11 +16,9 @@
 <link rel="stylesheet" href="styles/layout.css">
 <link rel="stylesheet" href="styles/components.css">
 <link rel="stylesheet" href="styles/dark.css">
+<script src="js/darkmode.js"></script>
 </head>
 <body>
-<script id="darkMode-fast-path">
-(function(){try{const s=localStorage.getItem('finflow_dark_cache');if(s==='true')document.body.classList.add('dark');}catch(e){}})();
-</script>
 <canvas id="confettiCanvas" role="presentation" aria-hidden="true"></canvas>
 
 <!-- ── LOCK SCREEN ── -->
@@ -36,27 +34,27 @@
       <div class="pin-dot" id="ld3"></div>
     </div>
     <div class="pin-pad">
-      <button class="pin-key" onclick="lockKeyPress('1')">1</button>
-      <button class="pin-key" onclick="lockKeyPress('2')">2</button>
-      <button class="pin-key" onclick="lockKeyPress('3')">3</button>
-      <button class="pin-key" onclick="lockKeyPress('4')">4</button>
-      <button class="pin-key" onclick="lockKeyPress('5')">5</button>
-      <button class="pin-key" onclick="lockKeyPress('6')">6</button>
-      <button class="pin-key" onclick="lockKeyPress('7')">7</button>
-      <button class="pin-key" onclick="lockKeyPress('8')">8</button>
-      <button class="pin-key" onclick="lockKeyPress('9')">9</button>
-      <button class="pin-key del" onclick="lockKeyPress('bio')" title="Biometric (if available)">🔑</button>
-      <button class="pin-key" onclick="lockKeyPress('0')">0</button>
-      <button class="pin-key del" onclick="lockKeyPress('del')" aria-label="Delete digit">⌫</button>
+      <button class="pin-key" data-action="lockKeyPress" data-arg="1">1</button>
+      <button class="pin-key" data-action="lockKeyPress" data-arg="2">2</button>
+      <button class="pin-key" data-action="lockKeyPress" data-arg="3">3</button>
+      <button class="pin-key" data-action="lockKeyPress" data-arg="4">4</button>
+      <button class="pin-key" data-action="lockKeyPress" data-arg="5">5</button>
+      <button class="pin-key" data-action="lockKeyPress" data-arg="6">6</button>
+      <button class="pin-key" data-action="lockKeyPress" data-arg="7">7</button>
+      <button class="pin-key" data-action="lockKeyPress" data-arg="8">8</button>
+      <button class="pin-key" data-action="lockKeyPress" data-arg="9">9</button>
+      <button class="pin-key del" data-action="lockKeyPress" data-arg="bio" title="Biometric (if available)">🔑</button>
+      <button class="pin-key" data-action="lockKeyPress" data-arg="0">0</button>
+      <button class="pin-key del" data-action="lockKeyPress" data-arg="del" aria-label="Delete digit">⌫</button>
     </div>
     <div class="lock-error" id="lockError"></div>
   </div>
 </div>
 
 <!-- ── PIN SETUP MODAL ── -->
-<div class="modal-overlay" id="pinSetupModal" onclick="if(event.target===this)closePinSetup()">
+<div class="modal-overlay" id="pinSetupModal" data-self-close="closePinSetup">
   <div class="pmodal" style="max-width:360px;" id="pinSetupCard">
-    <button class="close-btn" onclick="closePinSetup()" title="Close PIN setup" aria-label="Close PIN setup">&#215;</button>
+    <button class="close-btn" data-action="closePinSetup" title="Close PIN setup" aria-label="Close PIN setup">&#215;</button>
     <h4 id="pinSetupTitle">Set PIN</h4>
     <p id="pinSetupDesc" style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Choose a 4-digit PIN to protect your data.</p>
     <div class="pin-dots" id="setupDots">
@@ -66,23 +64,23 @@
       <div class="pin-dot" id="sd3"></div>
     </div>
     <div class="pin-pad" style="margin-top:10px;">
-      <button class="pin-key" onclick="setupKeyPress('1')">1</button>
-      <button class="pin-key" onclick="setupKeyPress('2')">2</button>
-      <button class="pin-key" onclick="setupKeyPress('3')">3</button>
-      <button class="pin-key" onclick="setupKeyPress('4')">4</button>
-      <button class="pin-key" onclick="setupKeyPress('5')">5</button>
-      <button class="pin-key" onclick="setupKeyPress('6')">6</button>
-      <button class="pin-key" onclick="setupKeyPress('7')">7</button>
-      <button class="pin-key" onclick="setupKeyPress('8')">8</button>
-      <button class="pin-key" onclick="setupKeyPress('9')">9</button>
+      <button class="pin-key" data-action="setupKeyPress" data-arg="1">1</button>
+      <button class="pin-key" data-action="setupKeyPress" data-arg="2">2</button>
+      <button class="pin-key" data-action="setupKeyPress" data-arg="3">3</button>
+      <button class="pin-key" data-action="setupKeyPress" data-arg="4">4</button>
+      <button class="pin-key" data-action="setupKeyPress" data-arg="5">5</button>
+      <button class="pin-key" data-action="setupKeyPress" data-arg="6">6</button>
+      <button class="pin-key" data-action="setupKeyPress" data-arg="7">7</button>
+      <button class="pin-key" data-action="setupKeyPress" data-arg="8">8</button>
+      <button class="pin-key" data-action="setupKeyPress" data-arg="9">9</button>
       <button class="pin-key del" style="visibility:hidden"></button>
-      <button class="pin-key" onclick="setupKeyPress('0')">0</button>
-      <button class="pin-key del" onclick="setupKeyPress('del')" aria-label="Delete digit">⌫</button>
+      <button class="pin-key" data-action="setupKeyPress" data-arg="0">0</button>
+      <button class="pin-key del" data-action="setupKeyPress" data-arg="del" aria-label="Delete digit">⌫</button>
     </div>
     <div class="lock-error" id="setupError"></div>
     <div class="btn-row" style="margin-top:10px;">
-      <button class="btn-s" onclick="closePinSetup()">Cancel</button>
-      <button class="btn-d" id="pinRemoveBtn" onclick="removePin()" style="display:none;color:var(--danger);">Remove PIN</button>
+      <button class="btn-s" data-action="closePinSetup">Cancel</button>
+      <button class="btn-d" id="pinRemoveBtn" data-action="removePin" style="display:none;color:var(--danger);">Remove PIN</button>
     </div>
   </div>
 </div>
@@ -106,7 +104,7 @@
     <div id="obStep0">
       <div class="ob-h" id="obHeading">Welcome to FinFlow</div>
       <div class="ob-sub">Your personal finance dashboard — track bills, income, loans, and savings. Everything lives privately in your browser.</div>
-      <button class="ob-btn-primary" onclick="obGoTo(1)">Get Started &rarr;</button>
+      <button class="ob-btn-primary" data-action="obGoTo" data-arg="1">Get Started &rarr;</button>
     </div>
 
     <!-- Step 1: Name + Currency -->
@@ -119,11 +117,11 @@
       </div>
       <div class="ob-row">
         <div class="ob-label">Currency</div>
-        <select class="ob-select" id="obCurrency" onchange="obUpdateAmtPrefix()"></select>
+        <select class="ob-select" id="obCurrency" data-change="obUpdateAmtPrefix"></select>
       </div>
       <div class="ob-nav">
-        <button class="ob-back" onclick="obGoTo(0)">&#8592; Back</button>
-        <button class="ob-btn-primary" onclick="obGoTo(2)">Next &rarr;</button>
+        <button class="ob-back" data-action="obGoTo" data-arg="0">&#8592; Back</button>
+        <button class="ob-btn-primary" data-action="obGoTo" data-arg="2">Next &rarr;</button>
       </div>
     </div>
 
@@ -133,21 +131,21 @@
       <div class="ob-sub">Add each income source — salary, freelance, benefits, anything received monthly. Press + or Enter after each one.</div>
       <div class="ob-add-row">
         <input class="ob-input" id="obIncName" type="text" placeholder="Source (e.g. Salary, Freelance)" maxlength="60"
-          onkeydown="if(event.key==='Enter'){event.preventDefault();obAddIncome();}">
+          data-enter="obAddIncome">
         <div class="ob-amount-wrap" style="flex:0 0 110px;">
           <span class="ob-amount-prefix" id="obAmtPrefix">$</span>
           <input class="ob-amount-input" id="obIncAmt" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();obAddIncome();}">
+            data-enter="obAddIncome">
         </div>
-        <button class="ob-add-btn" onclick="obAddIncome()" title="Add income source" aria-label="Add income source">+</button>
+        <button class="ob-add-btn" data-action="obAddIncome" title="Add income source" aria-label="Add income source">+</button>
       </div>
       <div class="ob-err" id="obIncomeErr"></div>
       <div id="obIncList" class="ob-item-list ob-list-empty"></div>
       <div class="ob-nav" style="margin-top:14px;">
-        <button class="ob-back" onclick="obGoTo(1)">&#8592; Back</button>
-        <button class="ob-btn-primary" onclick="obSaveIncome()">Next &rarr;</button>
+        <button class="ob-back" data-action="obGoTo" data-arg="1">&#8592; Back</button>
+        <button class="ob-btn-primary" data-action="obSaveIncome">Next &rarr;</button>
       </div>
-      <button class="ob-btn-sec" onclick="obGoTo(3)">Skip — I'll add income later</button>
+      <button class="ob-btn-sec" data-action="obGoTo" data-arg="3">Skip — I'll add income later</button>
     </div>
 
     <!-- Step 3: Expenses -->
@@ -158,19 +156,19 @@
         <div style="grid-column:1/-1;">
           <div class="ob-label">Expense name</div>
           <input class="ob-input" id="obExpName" type="text" placeholder="e.g. Rent, Netflix" maxlength="60"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('obExpAmt').focus();}">
+            data-enter-focus="obExpAmt">
         </div>
         <div>
           <div class="ob-label">Amount</div>
           <div class="ob-amount-wrap">
             <span class="ob-amount-prefix" id="obExpPrefix">$</span>
             <input class="ob-amount-input" id="obExpAmt" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"
-              onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('obExpWeek').focus();}">
+              data-enter-focus="obExpWeek">
           </div>
         </div>
         <div>
           <div class="ob-label">Frequency</div>
-          <select class="ob-select" id="obExpFreq" onchange="obFreqChange()">
+          <select class="ob-select" id="obExpFreq" data-change="obFreqChange">
             <option value="monthly">Monthly</option>
             <option value="weekly">Weekly (×4 per month)</option>
             <option value="biweekly">Bi-weekly (×2 per month)</option>
@@ -180,7 +178,7 @@
         </div>
         <div>
           <div class="ob-label">Due day (optional)</div>
-          <input class="ob-input" id="obExpDue" type="number" min="1" max="31" placeholder="e.g. 15" inputmode="numeric" oninput="obDueDayChange()">
+          <input class="ob-input" id="obExpDue" type="number" min="1" max="31" placeholder="e.g. 15" inputmode="numeric" data-input="obDueDayChange">
         </div>
         <div id="obExpWeekRow">
           <div class="ob-label">Week <span id="obWeekHint" style="font-size:9px;color:var(--sage);font-weight:400;"></span></div>
@@ -203,24 +201,24 @@
         <div>
           <div class="ob-label">Note (optional)</div>
           <input class="ob-input" id="obExpNote" type="text" placeholder="e.g. Annual plan" maxlength="120"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();obAddExpense();}">
+            data-enter="obAddExpense">
         </div>
       </div>
       <div style="margin-bottom:8px;">
         <div class="ob-label">Receipt photo (optional)</div>
         <label class="receipt-upload-zone" style="padding:10px 14px;font-size:12px;cursor:pointer;" id="obExpReceiptZone">
           <span id="obExpReceiptLabel">&#128248; Tap to attach image</span>
-          <input type="file" id="obExpReceipt" accept="image/*" style="display:none;" onchange="obHandleReceiptFile(this)">
+          <input type="file" id="obExpReceipt" accept="image/*" style="display:none;" data-change="obHandleReceiptFileFromEl">
         </label>
       </div>
       <div class="ob-err" id="obExpErr"></div>
-      <button class="ob-add-btn full" onclick="obAddExpense()">+ Add Expense</button>
+      <button class="ob-add-btn full" data-action="obAddExpense">+ Add Expense</button>
       <div id="obExpList" class="ob-item-list ob-list-empty"></div>
       <div class="ob-nav" style="margin-top:14px;">
-        <button class="ob-back" onclick="obGoTo(2)">&#8592; Back</button>
-        <button class="ob-btn-primary" onclick="obGoTo(4)">Next &rarr;</button>
+        <button class="ob-back" data-action="obGoTo" data-arg="2">&#8592; Back</button>
+        <button class="ob-btn-primary" data-action="obGoTo" data-arg="4">Next &rarr;</button>
       </div>
-      <button class="ob-btn-sec" onclick="obGoTo(4)">Skip — I'll add expenses later</button>
+      <button class="ob-btn-sec" data-action="obGoTo" data-arg="4">Skip — I'll add expenses later</button>
     </div>
 
     <!-- Step 4: Loans -->
@@ -231,7 +229,7 @@
         <div class="ob-loan-full">
           <div class="ob-label">Loan / debt name</div>
           <input class="ob-input" id="obLoanName" type="text" placeholder="e.g. Visa Card, Car Loan" maxlength="60"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();obAddLoan();}">
+            data-enter="obAddLoan">
         </div>
         <div>
           <div class="ob-label">Current balance</div>
@@ -249,18 +247,18 @@
           <div class="ob-amount-wrap">
             <span class="ob-amount-prefix" id="obLoanMinPrefix">$</span>
             <input class="ob-amount-input" id="obLoanMin" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"
-              onkeydown="if(event.key==='Enter'){event.preventDefault();obAddLoan();}">
+              data-enter="obAddLoan">
           </div>
         </div>
       </div>
       <div class="ob-err" id="obLoanErr"></div>
-      <button class="ob-add-btn full" onclick="obAddLoan()">+ Add Loan</button>
+      <button class="ob-add-btn full" data-action="obAddLoan">+ Add Loan</button>
       <div id="obLoanList" class="ob-item-list ob-list-empty"></div>
       <div class="ob-nav" style="margin-top:14px;">
-        <button class="ob-back" onclick="obGoTo(3)">&#8592; Back</button>
-        <button class="ob-btn-primary" onclick="obGoTo(5)">Next &rarr;</button>
+        <button class="ob-back" data-action="obGoTo" data-arg="3">&#8592; Back</button>
+        <button class="ob-btn-primary" data-action="obGoTo" data-arg="5">Next &rarr;</button>
       </div>
-      <button class="ob-btn-sec" onclick="obGoTo(5)">Skip — no loans to add</button>
+      <button class="ob-btn-sec" data-action="obGoTo" data-arg="5">Skip — no loans to add</button>
     </div>
 
     <!-- Step 5: Savings goals -->
@@ -269,7 +267,7 @@
       <div class="ob-sub">Set up goals like an Emergency Fund or Vacation. Press + to add each one.</div>
       <div class="ob-add-row" style="flex-wrap:wrap;gap:6px;">
         <input class="ob-input" id="obSavName" type="text" placeholder="Goal name (e.g. Emergency Fund)" maxlength="60"
-          style="flex:1 1 160px;" onkeydown="if(event.key==='Enter'){event.preventDefault();obAddSaving();}">
+          style="flex:1 1 160px;" data-enter="obAddSaving">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;margin-bottom:6px;">
         <div>
@@ -291,7 +289,7 @@
           <div class="ob-amount-wrap">
             <span class="ob-amount-prefix" id="obSavContribPrefix">$</span>
             <input class="ob-amount-input" id="obSavContrib" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"
-              onkeydown="if(event.key==='Enter'){event.preventDefault();obAddSaving();}">
+              data-enter="obAddSaving">
           </div>
         </div>
         <div>
@@ -300,13 +298,13 @@
         </div>
       </div>
       <div class="ob-err" id="obSavErr"></div>
-      <button class="ob-add-btn full" onclick="obAddSaving()">+ Add Goal</button>
+      <button class="ob-add-btn full" data-action="obAddSaving">+ Add Goal</button>
       <div id="obSavList" class="ob-item-list ob-list-empty"></div>
       <div class="ob-nav" style="margin-top:14px;">
-        <button class="ob-back" onclick="obGoTo(4)">&#8592; Back</button>
-        <button class="ob-btn-primary" onclick="obGoTo(6)">Next &rarr;</button>
+        <button class="ob-back" data-action="obGoTo" data-arg="4">&#8592; Back</button>
+        <button class="ob-btn-primary" data-action="obGoTo" data-arg="6">Next &rarr;</button>
       </div>
-      <button class="ob-btn-sec" onclick="obGoTo(6)">Skip — no savings goals yet</button>
+      <button class="ob-btn-sec" data-action="obGoTo" data-arg="6">Skip — no savings goals yet</button>
     </div>
 
     <!-- Step 6: PIN (optional) -->
@@ -321,24 +319,24 @@
         <div class="pin-dot" id="opd3"></div>
       </div>
       <div class="ob-pin-pad">
-        <button class="pin-key" onclick="obPinKey('1')">1</button>
-        <button class="pin-key" onclick="obPinKey('2')">2</button>
-        <button class="pin-key" onclick="obPinKey('3')">3</button>
-        <button class="pin-key" onclick="obPinKey('4')">4</button>
-        <button class="pin-key" onclick="obPinKey('5')">5</button>
-        <button class="pin-key" onclick="obPinKey('6')">6</button>
-        <button class="pin-key" onclick="obPinKey('7')">7</button>
-        <button class="pin-key" onclick="obPinKey('8')">8</button>
-        <button class="pin-key" onclick="obPinKey('9')">9</button>
+        <button class="pin-key" data-action="obPinKey" data-arg="1">1</button>
+        <button class="pin-key" data-action="obPinKey" data-arg="2">2</button>
+        <button class="pin-key" data-action="obPinKey" data-arg="3">3</button>
+        <button class="pin-key" data-action="obPinKey" data-arg="4">4</button>
+        <button class="pin-key" data-action="obPinKey" data-arg="5">5</button>
+        <button class="pin-key" data-action="obPinKey" data-arg="6">6</button>
+        <button class="pin-key" data-action="obPinKey" data-arg="7">7</button>
+        <button class="pin-key" data-action="obPinKey" data-arg="8">8</button>
+        <button class="pin-key" data-action="obPinKey" data-arg="9">9</button>
         <button class="pin-key del" style="visibility:hidden;"></button>
-        <button class="pin-key" onclick="obPinKey('0')">0</button>
-        <button class="pin-key del" onclick="obPinKey('del')" aria-label="Delete digit">&#9003;</button>
+        <button class="pin-key" data-action="obPinKey" data-arg="0">0</button>
+        <button class="pin-key del" data-action="obPinKey" data-arg="del" aria-label="Delete digit">&#9003;</button>
       </div>
       <div class="ob-err" id="obPinErr" style="text-align:center;margin-top:8px;"></div>
       <div class="ob-nav" style="margin-top:16px;">
-        <button class="ob-back" onclick="obGoTo(5)">&#8592; Back</button>
+        <button class="ob-back" data-action="obGoTo" data-arg="5">&#8592; Back</button>
       </div>
-      <button class="ob-btn-sec" onclick="obGoTo(7)">Skip — no PIN needed</button>
+      <button class="ob-btn-sec" data-action="obGoTo" data-arg="7">Skip — no PIN needed</button>
     </div>
 
     <!-- Step 7: Done -->
@@ -346,7 +344,7 @@
       <div class="ob-success-icon">&#9989;</div>
       <div class="ob-h">You're all set!</div>
       <div class="ob-sub" id="obDoneMsg">Your dashboard is ready with your data loaded in.</div>
-      <button class="ob-btn-primary" onclick="obFinish()">Open Dashboard</button>
+      <button class="ob-btn-primary" data-action="obFinish">Open Dashboard</button>
     </div>
   </div>
 </div>
@@ -359,63 +357,63 @@
   <div class="logo">Finte<span>One</span></div>
   <div class="topbar-center">
     <div class="month-nav">
-      <button onclick="changeMonth(-1)" title="Previous month" aria-label="Previous month">&#8249;</button>
+      <button data-action="changeMonth" data-arg="-1" title="Previous month" aria-label="Previous month">&#8249;</button>
       <span class="month-label" id="monthLabel"></span>
-      <button onclick="changeMonth(1)" title="Next month" aria-label="Next month">&#8250;</button>
+      <button data-action="changeMonth" data-arg="1" title="Next month" aria-label="Next month">&#8250;</button>
     </div>
   </div>
   <div class="topbar-right">
-    <div class="health-badge" onclick="openHealthModal()" title="Financial Health Score">
+    <div class="health-badge" data-action="openHealthModal" title="Financial Health Score">
       <span class="score" id="healthScore">—</span>
       <span class="hlabel">/ 100</span>
     </div>
-    <button class="dk-btn" onclick="openPinSetup()" id="pinBtn" aria-label="PIN / lock screen" title="Set PIN protection" style="font-size:13px;">🔒</button>
-    <button class="dk-btn" onclick="toggleDark()" id="dkBtn" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
-    <button class="tbtn hide-mobile no-print" onclick="toggleNotifications()" id="notifBtn" title="Bill reminders">&#128276;</button>
-    <button class="tbtn hide-mobile no-print" onclick="openCurrencyModal()" title="Currency settings">&#127759;</button>
-    <button class="tbtn hide-mobile no-print" onclick="openCompareModal()" title="Compare two months">&#9878; Compare</button>
-    <button class="tbtn hide-mobile no-print" onclick="exportData()">&#128190; Export</button>
-    <button class="tbtn hide-mobile no-print" onclick="openImport()">&#128228; Import</button>
-    <button class="tbtn hide-mobile no-print" onclick="window.print()">&#128438; Print</button>
-    <button class="dk-btn hide-mobile no-print" onclick="openSettings()" title="Settings" aria-label="Settings" style="font-size:15px;">&#9881;</button>
-    <button class="dk-btn show-mobile no-print" onclick="toggleMobileMenu()" id="mobileMenuBtn" aria-label="More actions" title="More actions" style="font-size:18px;font-weight:600;letter-spacing:1px;">&#8943;</button>
+    <button class="dk-btn" data-action="openPinSetup" id="pinBtn" aria-label="PIN / lock screen" title="Set PIN protection" style="font-size:13px;">🔒</button>
+    <button class="dk-btn" data-action="toggleDark" id="dkBtn" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
+    <button class="tbtn hide-mobile no-print" data-action="toggleNotifications" id="notifBtn" title="Bill reminders">&#128276;</button>
+    <button class="tbtn hide-mobile no-print" data-action="openCurrencyModal" title="Currency settings">&#127759;</button>
+    <button class="tbtn hide-mobile no-print" data-action="openCompareModal" title="Compare two months">&#9878; Compare</button>
+    <button class="tbtn hide-mobile no-print" data-action="exportData">&#128190; Export</button>
+    <button class="tbtn hide-mobile no-print" data-action="openImport">&#128228; Import</button>
+    <button class="tbtn hide-mobile no-print" data-action="print">&#128438; Print</button>
+    <button class="dk-btn hide-mobile no-print" data-action="openSettings" title="Settings" aria-label="Settings" style="font-size:15px;">&#9881;</button>
+    <button class="dk-btn show-mobile no-print" data-action="toggleMobileMenu" id="mobileMenuBtn" aria-label="More actions" title="More actions" style="font-size:18px;font-weight:600;letter-spacing:1px;">&#8943;</button>
   </div>
 </div>
 
 <!-- ── DEMO DATA BANNER ── -->
 <div id="demoBanner" style="display:none;" class="demo-banner no-print" role="alert" aria-live="polite">
   <span class="demo-banner-text">&#9888; Demo data is active — this is not your real financial data.</span>
-  <button class="demo-banner-btn" onclick="showOnboarding()" title="Go back to setup">Resume Setup</button>
-  <button class="demo-banner-btn primary" onclick="confirmDemoReset()" title="Wipe demo data and start fresh">Start Fresh</button>
-  <button class="demo-banner-close" onclick="this.parentElement.style.display='none'" aria-label="Dismiss banner">&#215;</button>
+  <button class="demo-banner-btn" data-action="showOnboarding" title="Go back to setup">Resume Setup</button>
+  <button class="demo-banner-btn primary" data-action="confirmDemoReset" title="Wipe demo data and start fresh">Start Fresh</button>
+  <button class="demo-banner-close" data-action="dismissDemoBanner" aria-label="Dismiss banner">&#215;</button>
 </div>
 
 <!-- MOBILE ACTION SHEET -->
 <div id="mobileMenuSheet" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:500;background:var(--white);border-top:1px solid var(--border);border-radius:16px 16px 0 0;padding:16px;box-shadow:0 -4px 20px rgba(0,0,0,.12);">
   <div style="width:36px;height:4px;background:var(--border-strong);border-radius:2px;margin:0 auto 16px;"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-    <button class="mbtn" onclick="toggleNotifications();toggleMobileMenu();" id="mobileNotifBtn">&#128276; Reminders</button>
-    <button class="mbtn" onclick="openCurrencyModal();toggleMobileMenu();">&#127759; Currency</button>
-    <button class="mbtn" onclick="openCompareModal();toggleMobileMenu();">&#9878; Compare</button>
-    <button class="mbtn" onclick="exportData();toggleMobileMenu();">&#128190; Export</button>
-    <button class="mbtn" onclick="openImport();toggleMobileMenu();">&#128228; Import</button>
-    <button class="mbtn" onclick="window.print();toggleMobileMenu();">&#128438; Print</button>
-    <button class="mbtn" onclick="openSettings();toggleMobileMenu();" style="grid-column:1/-1;">&#9881; Settings &amp; Danger Zone</button>
+    <button class="mbtn" data-action="notifAndCloseMenu" id="mobileNotifBtn">&#128276; Reminders</button>
+    <button class="mbtn" data-action="currencyAndCloseMenu">&#127759; Currency</button>
+    <button class="mbtn" data-action="compareAndCloseMenu">&#9878; Compare</button>
+    <button class="mbtn" data-action="exportAndCloseMenu">&#128190; Export</button>
+    <button class="mbtn" data-action="importAndCloseMenu">&#128228; Import</button>
+    <button class="mbtn" data-action="printAndCloseMenu">&#128438; Print</button>
+    <button class="mbtn" data-action="settingsAndCloseMenu" style="grid-column:1/-1;">&#9881; Settings &amp; Danger Zone</button>
   </div>
-  <button onclick="toggleMobileMenu()" style="width:100%;margin-top:12px;padding:12px;border:none;background:var(--slate-light);border-radius:var(--radius-xs);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;">Cancel</button>
+  <button data-action="toggleMobileMenu" style="width:100%;margin-top:12px;padding:12px;border:none;background:var(--slate-light);border-radius:var(--radius-xs);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;">Cancel</button>
 </div>
-<div id="mobileMenuOverlay" style="display:none;position:fixed;inset:0;z-index:499;background:rgba(0,0,0,.3);" onclick="toggleMobileMenu()"></div>
+<div id="mobileMenuOverlay" style="display:none;position:fixed;inset:0;z-index:499;background:rgba(0,0,0,.3);" data-action="toggleMobileMenu"></div>
 
 <!-- TABS -->
 <div class="tab-bar no-print">
-  <button class="tab active" id="tab-dashboard"  onclick="switchTab('dashboard',this)"><span class="ti">&#127974;</span><span class="tl"> Dashboard</span></button>
-  <button class="tab" id="tab-expenses"           onclick="switchTab('expenses',this)"><span class="ti">&#128179;</span><span class="tl"> Expenses</span></button>
-  <button class="tab" id="tab-revenue"            onclick="switchTab('revenue',this)"><span class="ti">&#128200;</span><span class="tl"> Revenue</span></button>
-  <button class="tab" id="tab-loans"              onclick="switchTab('loans',this)"><span class="ti">&#127968;</span><span class="tl"> Loans</span> <span class="tbadge" id="loanBadge">5</span></button>
-  <button class="tab" id="tab-savings"            onclick="switchTab('savings',this)"><span class="ti">&#127381;</span><span class="tl"> Savings</span></button>
-  <button class="tab" id="tab-calendar"           onclick="switchTab('calendar',this)"><span class="ti">&#128197;</span><span class="tl"> Calendar</span></button>
-  <button class="tab" id="tab-analytics"          onclick="switchTab('analytics',this)"><span class="ti">&#128202;</span><span class="tl"> Analytics</span></button>
-  <button class="tab" id="tab-archive"            onclick="switchTab('archive',this)"><span class="ti">&#128230;</span><span class="tl"> Archive</span> <span class="tbadge" id="archiveBadge">0</span></button>
+  <button class="tab active" id="tab-dashboard"  data-action="switchTab" data-arg="dashboard" data-arg-self="true"><span class="ti">&#127974;</span><span class="tl"> Dashboard</span></button>
+  <button class="tab" id="tab-expenses"           data-action="switchTab" data-arg="expenses"  data-arg-self="true"><span class="ti">&#128179;</span><span class="tl"> Expenses</span></button>
+  <button class="tab" id="tab-revenue"            data-action="switchTab" data-arg="revenue"   data-arg-self="true"><span class="ti">&#128200;</span><span class="tl"> Revenue</span></button>
+  <button class="tab" id="tab-loans"              data-action="switchTab" data-arg="loans"     data-arg-self="true"><span class="ti">&#127968;</span><span class="tl"> Loans</span> <span class="tbadge" id="loanBadge">5</span></button>
+  <button class="tab" id="tab-savings"            data-action="switchTab" data-arg="savings"   data-arg-self="true"><span class="ti">&#127381;</span><span class="tl"> Savings</span></button>
+  <button class="tab" id="tab-calendar"           data-action="switchTab" data-arg="calendar"  data-arg-self="true"><span class="ti">&#128197;</span><span class="tl"> Calendar</span></button>
+  <button class="tab" id="tab-analytics"          data-action="switchTab" data-arg="analytics" data-arg-self="true"><span class="ti">&#128202;</span><span class="tl"> Analytics</span></button>
+  <button class="tab" id="tab-archive"            data-action="switchTab" data-arg="archive"   data-arg-self="true"><span class="ti">&#128230;</span><span class="tl"> Archive</span> <span class="tbadge" id="archiveBadge">0</span></button>
 </div>
 
 <div class="main" id="main-content">
@@ -579,14 +577,14 @@
       <div id="monthTags" role="list" aria-label="Active months" style="display:flex;flex-wrap:nowrap;gap:5px;overflow-x:auto;max-width:100%;padding-bottom:2px;"></div>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="clone-btn" onclick="openCloneModal()">&#128260; Clone Month</button>
-      <button class="tbtn no-print" onclick="openCsvModal()" style="color:var(--blue);border-color:var(--blue-mid);">&#128229; Import CSV</button>
-      <button class="nm-btn" onclick="openNewMonthModal()">+ New Month</button>
+      <button class="clone-btn" data-action="openCloneModal">&#128260; Clone Month</button>
+      <button class="tbtn no-print" data-action="openCsvModal" style="color:var(--blue);border-color:var(--blue-mid);">&#128229; Import CSV</button>
+      <button class="nm-btn" data-action="openNewMonthModal">+ New Month</button>
     </div>
   </div>
   <div class="stor-alert" id="storAlert">
     <span>&#9888;</span><span id="storMsg">Storage is nearly full.</span>
-    <button class="tbtn" style="margin-left:auto;" onclick="exportData()">Export Backup</button>
+    <button class="tbtn" style="margin-left:auto;" data-action="exportData">Export Backup</button>
   </div>
 
   <!-- Budget Envelopes -->
@@ -603,8 +601,8 @@
   <div class="section-hdr" style="margin-bottom:10px;">
     <div style="font-weight:600;font-size:14px;" id="expMonthHdr">Expenses</div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-      <button class="tbtn no-print" id="recurAutoFillBtn" onclick="recurringAutoFill()" style="color:var(--blue);border-color:var(--blue-mid);font-size:11px;display:none;">&#8635; Auto-fill Recurring</button>
-      <button class="reset-btn no-print" onclick="openResetModal('expenses')" title="Clear all expense items for this month">&#128465; Reset Expenses</button>
+      <button class="tbtn no-print" id="recurAutoFillBtn" data-action="recurringAutoFill" style="color:var(--blue);border-color:var(--blue-mid);font-size:11px;display:none;">&#8635; Auto-fill Recurring</button>
+      <button class="reset-btn no-print" data-action="openResetModal" data-arg="expenses" title="Clear all expense items for this month">&#128465; Reset Expenses</button>
     </div>
   </div>
 
@@ -635,8 +633,8 @@
     <div class="card-header">
       <div class="card-title">&#128197; Monthly Revenue &amp; Expense Tracker</div>
       <div style="display:flex;gap:5px;" class="no-print">
-        <button class="rev-toggle-btn active" id="revT12" onclick="setRevWin(12,this)">Last 12</button>
-        <button class="rev-toggle-btn" id="revTAll" onclick="setRevWin(999,this)">All</button>
+        <button class="rev-toggle-btn active" id="revT12" data-action="setRevWin" data-arg="12" data-arg-self="true">Last 12</button>
+        <button class="rev-toggle-btn" id="revTAll" data-action="setRevWin" data-arg="999" data-arg-self="true">All</button>
       </div>
     </div>
     <div style="overflow-x:auto;"><table><thead id="revTHead"></thead><tbody id="revTBody"></tbody></table></div>
@@ -646,8 +644,8 @@
       <div class="card-header">
         <div class="card-title">Income Sources — <span id="revMonHdr" style="color:var(--sage);"></span></div>
         <div style="display:flex;gap:6px;">
-          <button class="reset-btn no-print" onclick="openResetModal('revenue')" title="Clear all income sources for this month">&#128465; Reset</button>
-          <button class="nm-btn no-print" onclick="openRevModal(-1)">+ Add Income</button>
+          <button class="reset-btn no-print" data-action="openResetModal" data-arg="revenue" title="Clear all income sources for this month">&#128465; Reset</button>
+          <button class="nm-btn no-print" data-action="openRevModal" data-arg="-1">+ Add Income</button>
         </div>
       </div>
       <table>
@@ -681,11 +679,11 @@
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         <span style="font-size:11px;color:var(--text-muted);">Strategy:</span>
-        <button class="strat-btn" id="btn-avalanche" onclick="setStrategy('avalanche')">&#9650; Avalanche</button>
-        <button class="strat-btn" id="btn-snowball" onclick="setStrategy('snowball')">&#9731; Snowball</button>
+        <button class="strat-btn" id="btn-avalanche" data-action="setStrategy" data-arg="avalanche">&#9650; Avalanche</button>
+        <button class="strat-btn" id="btn-snowball" data-action="setStrategy" data-arg="snowball">&#9731; Snowball</button>
       </div>
-      <button class="reset-btn no-print" onclick="openResetModal('loans')" title="Clear all loan payment history for this month">&#128465; Reset Pmts</button>
-      <button class="nm-btn no-print" onclick="openLoanModal(-1)">+ Add Loan</button>
+      <button class="reset-btn no-print" data-action="openResetModal" data-arg="loans" title="Clear all loan payment history for this month">&#128465; Reset Pmts</button>
+      <button class="nm-btn no-print" data-action="openLoanModal" data-arg="-1">+ Add Loan</button>
     </div>
   </div>
   <div id="strategyTip" class="strategy-tip"></div>
@@ -699,7 +697,7 @@
     <div style="font-weight:600;font-size:12px;color:var(--sage);margin-bottom:8px;">&#127381; Extra Payment Simulator</div>
     <div class="slider-row">
       <span style="font-size:12px;color:var(--text-secondary);min-width:110px;">Extra monthly $</span>
-      <input type="range" id="bonusSlider" aria-label="Extra monthly payment amount" min="0" max="2000" step="50" value="0" oninput="updateBonus(this.value)">
+      <input type="range" id="bonusSlider" aria-label="Extra monthly payment amount" min="0" max="2000" step="50" value="0" data-input="updateBonus" data-input-val="true">
       <span class="sv" id="bonusVal">$0</span>
     </div>
     <div id="bonusResult" style="font-size:12px;color:var(--text-secondary);margin-top:4px;min-height:16px;"></div>
@@ -714,18 +712,18 @@
       <div class="loan-grid">
         <div style="display:grid;gap:9px;">
           <div class="fr">
-            <div class="fg"><label for="calcSel" class="fl">Select Loan</label><select class="fi" id="calcSel" onchange="calcFromLoan()"><option value="custom">Custom</option></select></div>
-            <div class="fg"><label for="calcP" class="fl">Principal ($)</label><input class="fi" type="number" id="calcP" aria-label="Principal balance" placeholder="e.g. 10000" oninput="runCalc()"></div>
+            <div class="fg"><label for="calcSel" class="fl">Select Loan</label><select class="fi" id="calcSel" data-change="calcFromLoan"><option value="custom">Custom</option></select></div>
+            <div class="fg"><label for="calcP" class="fl">Principal ($)</label><input class="fi" type="number" id="calcP" aria-label="Principal balance" placeholder="e.g. 10000" data-input="runCalc"></div>
           </div>
           <div class="fr">
-            <div class="fg"><label for="calcR" class="fl">Interest Rate (%)</label><input class="fi" type="number" id="calcR" aria-label="Annual interest rate" placeholder="e.g. 19.99" step="0.01" oninput="runCalc()"></div>
-            <div class="fg"><label for="calcMin" class="fl">Min. Payment ($)</label><input class="fi" type="number" id="calcMin" aria-label="Minimum monthly payment" placeholder="e.g. 250" oninput="runCalc()"></div>
+            <div class="fg"><label for="calcR" class="fl">Interest Rate (%)</label><input class="fi" type="number" id="calcR" aria-label="Annual interest rate" placeholder="e.g. 19.99" step="0.01" data-input="runCalc"></div>
+            <div class="fg"><label for="calcMin" class="fl">Min. Payment ($)</label><input class="fi" type="number" id="calcMin" aria-label="Minimum monthly payment" placeholder="e.g. 250" data-input="runCalc"></div>
           </div>
           <div class="fr">
-            <div class="fg"><label for="calcT" class="fl">Target Payoff</label><input class="fi" type="number" id="calcT" aria-label="Target payoff months" placeholder="e.g. 36" inputmode="numeric" oninput="runCalc()"></div>
-            <div class="fg"><label for="calcPT" class="fl">Period</label><select class="fi" id="calcPT" onchange="runCalc()"><option value="months">Months</option><option value="years">Years</option></select></div>
+            <div class="fg"><label for="calcT" class="fl">Target Payoff</label><input class="fi" type="number" id="calcT" aria-label="Target payoff months" placeholder="e.g. 36" inputmode="numeric" data-input="runCalc"></div>
+            <div class="fg"><label for="calcPT" class="fl">Period</label><select class="fi" id="calcPT" data-change="runCalc"><option value="months">Months</option><option value="years">Years</option></select></div>
           </div>
-          <div class="fg"><label for="calcE" class="fl">Extra Monthly ($)</label><input class="fi" type="number" id="calcE" aria-label="Extra monthly payment" placeholder="0" inputmode="decimal" oninput="runCalc()"></div>
+          <div class="fg"><label for="calcE" class="fl">Extra Monthly ($)</label><input class="fi" type="number" id="calcE" aria-label="Extra monthly payment" placeholder="0" inputmode="decimal" data-input="runCalc"></div>
         </div>
         <div class="calc-result">
           <div class="rr"><span class="rl">Monthly Payment</span><span class="rv big" id="calcMonthly">$0</span></div>
@@ -755,8 +753,8 @@
   <div class="section-hdr">
     <div class="section-title">Savings Goals</div>
     <div style="display:flex;gap:8px;align-items:center;">
-      <button class="reset-btn no-print" onclick="openResetModal('savings')" title="Clear all savings goals and balances">&#128465; Reset Savings</button>
-      <button class="nm-btn" onclick="openSavModal(-1)">+ Add Goal</button>
+      <button class="reset-btn no-print" data-action="openResetModal" data-arg="savings" title="Clear all savings goals and balances">&#128465; Reset Savings</button>
+      <button class="nm-btn" data-action="openSavModal" data-arg="-1">+ Add Goal</button>
     </div>
   </div>
   <div class="metrics-row">
@@ -779,7 +777,7 @@
   <div class="card" style="margin-top:14px;">
     <div class="card-header">
       <div class="card-title">&#127919; Financial Goals</div>
-      <button class="nm-btn" onclick="openGoalModal(-1)" style="font-size:11px;padding:4px 9px;">+ Add Goal</button>
+      <button class="nm-btn" data-action="openGoalModal" data-arg="-1" style="font-size:11px;padding:4px 9px;">+ Add Goal</button>
     </div>
     <div style="padding:12px;">
       <div class="goals-grid" id="goalsGrid"></div>
@@ -798,7 +796,7 @@
     <div class="section-title">Bill Calendar — <span id="calMonthTitle" style="color:var(--sage);"></span></div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <span style="font-size:12px;color:var(--text-muted);display:none;" class="show-desktop">Bills appear when you set a due day on an expense item.</span>
-      <button class="tbtn no-print" onclick="switchTab('expenses',document.getElementById('tab-expenses'))" style="font-size:11px;color:var(--sage);border-color:var(--sage-mid);">&#128197; Go to Expenses to set due dates</button>
+      <button class="tbtn no-print" data-action="switchToExpensesTab" style="font-size:11px;color:var(--sage);border-color:var(--sage-mid);">&#128197; Go to Expenses to set due dates</button>
     </div>
   </div>
   <div class="card">
@@ -822,7 +820,7 @@
 
 <!-- ═══ ANALYTICS ═══ -->
 <div class="section" id="section-analytics">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;"><div class="section-title" style="margin-bottom:0;">Analytics &amp; Insights</div><button class="tbtn no-print" onclick="openCatManager()" style="font-size:11px;">&#127991; Manage Categories</button></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;"><div class="section-title" style="margin-bottom:0;">Analytics &amp; Insights</div><button class="tbtn no-print" data-action="openCatManager" style="font-size:11px;">&#127991; Manage Categories</button></div>
   <div class="metrics-row">
     <div class="mc al-sage"><div class="ml">Avg Monthly Income</div><div class="mv" id="an-avginc">$0</div><div class="ms">All months</div></div>
     <div class="mc al-danger"><div class="ml">Avg Monthly Expenses</div><div class="mv" id="an-avgexp">$0</div><div class="ms">All months</div></div>
@@ -853,8 +851,8 @@
         <div class="card-header">
           <div class="card-title">&#128161; Smart Insights</div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <button class="tbtn no-print" id="aiInsightBtn" onclick="runAiInsights()" style="font-size:11px;">&#128279; Connect AI</button>
-            <button class="tbtn no-print" id="aiManageBtn" onclick="openClaudeManage()" title="AI settings" style="font-size:11px;display:none;">&#9881; API</button>
+            <button class="tbtn no-print" id="aiInsightBtn" data-action="runAiInsights" style="font-size:11px;">&#128279; Connect AI</button>
+            <button class="tbtn no-print" id="aiManageBtn" data-action="openClaudeManage" title="AI settings" style="font-size:11px;display:none;">&#9881; API</button>
           </div>
         </div>
 
@@ -865,16 +863,16 @@
         <div id="aiActionGrid" style="display:none;" class="ai-section-pad">
           <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin-bottom:8px;">AI Analysis</div>
           <div class="ai-action-grid">
-            <button class="ai-mode-btn" id="modeBtn-general"  onclick="runInsightMode('general')">&#129302; General Insights</button>
-            <button class="ai-mode-btn" id="modeBtn-debt"     onclick="runInsightMode('debt')">&#128179; Debt Optimizer</button>
-            <button class="ai-mode-btn" id="modeBtn-anomaly"  onclick="runInsightMode('anomaly')">&#128269; Spending Anomalies</button>
-            <button class="ai-mode-btn" id="modeBtn-budget"   onclick="runInsightMode('budget')">&#128200; Budget Recommender</button>
-            <button class="ai-mode-btn" id="modeBtn-summary"  onclick="runInsightMode('summary')">&#128197; Monthly Summary</button>
-            <button class="ai-mode-btn" id="modeBtn-forecast" onclick="runInsightMode('forecast')">&#128302; Cash Flow Forecast</button>
+            <button class="ai-mode-btn" id="modeBtn-general"  data-action="runInsightMode" data-arg="general">&#129302; General Insights</button>
+            <button class="ai-mode-btn" id="modeBtn-debt"     data-action="runInsightMode" data-arg="debt">&#128179; Debt Optimizer</button>
+            <button class="ai-mode-btn" id="modeBtn-anomaly"  data-action="runInsightMode" data-arg="anomaly">&#128269; Spending Anomalies</button>
+            <button class="ai-mode-btn" id="modeBtn-budget"   data-action="runInsightMode" data-arg="budget">&#128200; Budget Recommender</button>
+            <button class="ai-mode-btn" id="modeBtn-summary"  data-action="runInsightMode" data-arg="summary">&#128197; Monthly Summary</button>
+            <button class="ai-mode-btn" id="modeBtn-forecast" data-action="runInsightMode" data-arg="forecast">&#128302; Cash Flow Forecast</button>
           </div>
           <div class="ai-qa-row">
-            <input type="text" id="aiQuestion" class="fi" placeholder="Ask anything… e.g. Should I pay off MBNA or CL first?" style="font-size:12px;" onkeydown="if(event.key==='Enter')runInsightMode('qa')">
-            <button class="btn-p" onclick="runInsightMode('qa')" style="padding:8px 14px;font-size:12px;white-space:nowrap;">&#128172; Ask</button>
+            <input type="text" id="aiQuestion" class="fi" placeholder="Ask anything… e.g. Should I pay off MBNA or CL first?" style="font-size:12px;" data-enter="runInsightModeQa">
+            <button class="btn-p" data-action="runInsightMode" data-arg="qa" style="padding:8px 14px;font-size:12px;white-space:nowrap;">&#128172; Ask</button>
           </div>
         </div>
 
@@ -893,7 +891,7 @@
       <span style="font-size:12px;color:var(--text-muted);" id="archiveThresholdLabel">Auto-archives months older than 6 months</span>
       <div style="display:flex;align-items:center;gap:6px;">
         <label for="archiveThreshold" style="font-size:11px;color:var(--text-secondary);">Threshold:</label>
-        <select id="archiveThreshold" class="fi" style="width:auto;padding:4px 8px;font-size:12px;" onchange="updateArchiveThreshold(this.value)">
+        <select id="archiveThreshold" class="fi" style="width:auto;padding:4px 8px;font-size:12px;" data-change="updateArchiveThreshold" data-change-val="true">
           <option value="3">3 months</option>
           <option value="6" selected>6 months</option>
           <option value="9">9 months</option>
@@ -912,7 +910,7 @@
   <div class="archive-readonly-banner" id="archiveBanner" style="display:none;">
     <span>&#128274;</span>
     <span id="archiveBannerMsg">This month is archived.</span>
-    <button class="restore-btn" style="margin-left:auto;" id="archiveBannerRestoreBtn" onclick="openRestoreModal(this.dataset.key)">Restore</button>
+    <button class="restore-btn" style="margin-left:auto;" id="archiveBannerRestoreBtn" data-action="openRestoreModal" data-arg-from="key">Restore</button>
   </div>
 
   <div id="archiveList"></div>
@@ -922,9 +920,9 @@
 
 <!-- MODALS -->
 <!-- Health -->
-<div class="modal-overlay" id="healthModal" onclick="if(event.target===this)closeHealthModal()">
+<div class="modal-overlay" id="healthModal" data-self-close="closeHealthModal">
   <div class="modal">
-    <button class="close-btn" onclick="closeHealthModal()" title="Close health score" aria-label="Close health score">&#215;</button>
+    <button class="close-btn" data-action="closeHealthModal" title="Close health score" aria-label="Close health score">&#215;</button>
     <h3>Financial Health Score</h3>
     <p style="font-size:12px;color:var(--text-secondary);margin-top:3px;">Scored across 6 financial pillars</p>
     <div class="score-ring">
@@ -936,9 +934,9 @@
   </div>
 </div>
 <!-- New Month -->
-<div class="modal-overlay" id="newMonthModal" onclick="if(event.target===this)closeNewMonthModal()">
+<div class="modal-overlay" id="newMonthModal" data-self-close="closeNewMonthModal">
   <div class="pmodal">
-    <button class="close-btn" onclick="closeNewMonthModal()" title="Close new month" aria-label="Close new month">&#215;</button>
+    <button class="close-btn" data-action="closeNewMonthModal" title="Close new month" aria-label="Close new month">&#215;</button>
     <h4>Add New Month</h4>
     <div class="fl" style="display:block;margin-bottom:4px;">Month &amp; Year</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:9px;">
@@ -948,15 +946,15 @@
     <label for="cloneFromSel" class="fl" style="display:block;margin-bottom:4px;">Start with data from</label>
     <select id="cloneFromSel"><option value="blank">Blank (empty)</option></select>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeNewMonthModal()">Cancel</button>
-      <button class="btn-p" onclick="createNewMonth()">Create Month</button>
+      <button class="btn-s" data-action="closeNewMonthModal">Cancel</button>
+      <button class="btn-p" data-action="createNewMonth">Create Month</button>
     </div>
   </div>
 </div>
 <!-- Savings Goal -->
-<div class="modal-overlay" id="savModal" onclick="if(event.target===this)closeSavModal()">
+<div class="modal-overlay" id="savModal" data-self-close="closeSavModal">
   <div class="pmodal">
-    <button class="close-btn" onclick="closeSavModal()" title="Close savings goal" aria-label="Close savings goal">&#215;</button>
+    <button class="close-btn" data-action="closeSavModal" title="Close savings goal" aria-label="Close savings goal">&#215;</button>
     <h4 id="savModalTitle">Add Savings Goal</h4>
     <div class="fg" style="margin-bottom:9px;"><label for="savName" class="fl">Goal Name</label><input id="savName" aria-label="Goal name" placeholder="e.g. Emergency Fund"></div>
     <div class="fr" style="margin-bottom:9px;">
@@ -971,15 +969,15 @@
       &#128161; Monthly contribution will auto-appear as a Savings expense in your expense tracker.
     </div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeSavModal()">Cancel</button>
-      <button class="btn-p" onclick="saveSavGoal()">Save Goal</button>
+      <button class="btn-s" data-action="closeSavModal">Cancel</button>
+      <button class="btn-p" data-action="saveSavGoal">Save Goal</button>
     </div>
   </div>
 </div>
 <!-- Deposit / Withdraw -->
-<div class="modal-overlay" id="txnModal" onclick="if(event.target===this)closeTxnModal()">
+<div class="modal-overlay" id="txnModal" data-self-close="closeTxnModal">
   <div class="pmodal">
-    <button class="close-btn" onclick="closeTxnModal()" title="Close transaction" aria-label="Close transaction">&#215;</button>
+    <button class="close-btn" data-action="closeTxnModal" title="Close transaction" aria-label="Close transaction">&#215;</button>
     <h4 id="txnTitle">Deposit to Savings</h4>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;" id="txnGoalName"></p>
     <div class="fg" style="margin-bottom:9px;"><label for="txnAmount" class="fl">Amount ($)</label><input id="txnAmount" type="number" placeholder="0" min="0"></div>
@@ -988,75 +986,75 @@
       &#9888; Withdrawing more than current balance will set balance to $0.
     </div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeTxnModal()">Cancel</button>
-      <button class="btn-p" id="txnConfirmBtn" onclick="confirmTxn()">Confirm Deposit</button>
+      <button class="btn-s" data-action="closeTxnModal">Cancel</button>
+      <button class="btn-p" id="txnConfirmBtn" data-action="confirmTxn">Confirm Deposit</button>
     </div>
   </div>
 </div>
 <!-- Due Date picker (inline click on calendar day) -->
-<div class="modal-overlay" id="dueDateModal" onclick="if(event.target===this)closeDueDateModal()">
+<div class="modal-overlay" id="dueDateModal" data-self-close="closeDueDateModal">
   <div class="pmodal">
-    <button class="close-btn" onclick="closeDueDateModal()" title="Close due date picker" aria-label="Close due date picker">&#215;</button>
+    <button class="close-btn" data-action="closeDueDateModal" title="Close due date picker" aria-label="Close due date picker">&#215;</button>
     <h4>Set Due Date</h4>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;" id="dueDateItemName"></p>
     <div class="fg" style="margin-bottom:9px;"><label for="dueDayInput" class="fl">Day of month (1–31)</label><input id="dueDayInput" aria-label="Due day of month" type="number" min="1" max="31" placeholder="e.g. 15"></div>
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:9px;">This day will show as a bill on the Calendar every month for this expense.</div>
     <div class="btn-row">
-      <button class="btn-s" onclick="clearDueDate()">Clear Due Date</button>
-      <button class="btn-p" onclick="saveDueDate()">Set Date</button>
+      <button class="btn-s" data-action="clearDueDate">Clear Due Date</button>
+      <button class="btn-p" data-action="saveDueDate">Set Date</button>
     </div>
   </div>
 </div>
 <!-- Delete savings confirm -->
-<div class="modal-overlay" id="delSavModal" onclick="if(event.target===this)closeDelSav()">
+<div class="modal-overlay" id="delSavModal" data-self-close="closeDelSav">
   <div class="pmodal">
-    <button class="close-btn" onclick="closeDelSav()" title="Close delete confirmation" aria-label="Close delete confirmation">&#215;</button>
+    <button class="close-btn" data-action="closeDelSav" title="Close delete confirmation" aria-label="Close delete confirmation">&#215;</button>
     <h4>Delete Savings Goal?</h4>
     <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;" id="delSavName"></p>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeDelSav()">Cancel</button>
-      <button class="btn-d" onclick="confirmDelSav()">Delete</button>
+      <button class="btn-s" data-action="closeDelSav">Cancel</button>
+      <button class="btn-d" data-action="confirmDelSav">Delete</button>
     </div>
   </div>
 </div>
 <!-- Import -->
-<div class="modal-overlay" id="importModal" onclick="if(event.target===this)closeImport()">
+<div class="modal-overlay" id="importModal" data-self-close="closeImport">
   <div class="pmodal">
-    <button class="close-btn" onclick="closeImport()" title="Close import" aria-label="Close import">&#215;</button>
+    <button class="close-btn" data-action="closeImport" title="Close import" aria-label="Close import">&#215;</button>
     <h4>Import Backup</h4>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">Paste a previously exported JSON backup. This will overwrite all current data.</p>
     <textarea id="importJson" rows="6" style="resize:vertical;" placeholder="Paste JSON here..."></textarea>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeImport()">Cancel</button>
-      <button class="btn-d" onclick="doImport()">Import &amp; Overwrite</button>
+      <button class="btn-s" data-action="closeImport">Cancel</button>
+      <button class="btn-d" data-action="doImport">Import &amp; Overwrite</button>
     </div>
   </div>
 </div>
 <!-- Envelope edit -->
-<div class="modal-overlay" id="envModal" onclick="if(event.target===this)closeEnvModal()">
+<div class="modal-overlay" id="envModal" data-self-close="closeEnvModal">
   <div class="pmodal">
-    <button class="close-btn" onclick="closeEnvModal()" title="Close budget envelope" aria-label="Close budget envelope">&#215;</button>
+    <button class="close-btn" data-action="closeEnvModal" title="Close budget envelope" aria-label="Close budget envelope">&#215;</button>
     <h4>Edit Budget Cap</h4>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;" id="envCatName"></p>
     <div class="fg" style="margin-bottom:9px;"><label for="envCapInput" class="fl">Monthly Cap ($)</label><input id="envCapInput" type="number" min="0"></div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeEnvModal()">Cancel</button>
-      <button class="btn-p" onclick="saveEnvCap()">Save Cap</button>
+      <button class="btn-s" data-action="closeEnvModal">Cancel</button>
+      <button class="btn-p" data-action="saveEnvCap">Save Cap</button>
     </div>
   </div>
 </div>
 <!-- ══════════════════════════════════════════════════
      MODALS — Add / Edit Expense Item
      ══════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="itemModal" onclick="if(event.target===this)closeItemModal()">
+<div class="modal-overlay" id="itemModal" data-self-close="closeItemModal">
   <div class="pmodal" style="max-width:480px;">
-    <button class="close-btn" onclick="closeItemModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeItemModal" title="Close" aria-label="Close">&#215;</button>
     <h4 id="itemModalTitle">Add Expense</h4>
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;" id="itemModalWeekLabel"></div>
     <div class="fr" style="margin-bottom:9px;">
       <div class="fg" style="flex:2;">
         <label for="iName" class="fl">Item Name</label>
-        <input class="fi" id="iName" type="text" placeholder="e.g. Rent, Netflix" maxlength="60" oninput="itemNameAutoTag(this.value)" autocomplete="off">
+        <input class="fi" id="iName" type="text" placeholder="e.g. Rent, Netflix" maxlength="60" data-input="itemNameAutoTag" data-input-val="true" autocomplete="off">
       </div>
       <div class="fg">
         <label for="iAmount" class="fl">Amount ($)</label>
@@ -1066,8 +1064,8 @@
     <div style="margin-bottom:9px;">
       <div class="fl" style="margin-bottom:6px;">Status</div>
       <div style="display:flex;gap:8px;">
-        <button class="status-opt opt-pending sel" id="iStatusPending" onclick="setItemStatus('pending')">&#9203; Pending</button>
-        <button class="status-opt opt-paid" id="iStatusPaid" onclick="setItemStatus('paid')">&#9989; Paid</button>
+        <button class="status-opt opt-pending sel" id="iStatusPending" data-action="setItemStatus" data-arg="pending">&#9203; Pending</button>
+        <button class="status-opt opt-paid" id="iStatusPaid" data-action="setItemStatus" data-arg="paid">&#9989; Paid</button>
       </div>
     </div>
     <div style="margin-bottom:9px;">
@@ -1082,11 +1080,11 @@
       <label for="iDueDay" class="fl">Due day of month (optional)</label>
       <input class="fi" id="iDueDay" type="number" min="1" max="31" placeholder="e.g. 15" inputmode="numeric">
       <div class="due-day-grid" id="dueDayGrid"></div>
-      <button class="tbtn" style="margin-top:4px;font-size:10px;" onclick="clearItemDueDay()">Clear due date</button>
+      <button class="tbtn" style="margin-top:4px;font-size:10px;" data-action="clearItemDueDay">Clear due date</button>
     </div>
     <div style="margin-bottom:9px;">
       <label for="iFrequency" class="fl">Frequency</label>
-      <select class="fi" id="iFrequency" onchange="itemFreqChange()">
+      <select class="fi" id="iFrequency" data-change="itemFreqChange">
         <option value="monthly">Monthly (standard)</option>
         <option value="weekly">Weekly — adds to all 4 weeks</option>
         <option value="biweekly">Bi-weekly — adds to Week 1 &amp; 3</option>
@@ -1108,29 +1106,29 @@
       <div class="fl" style="margin-bottom:4px;">Receipt (optional, max 200KB)</div>
       <label class="receipt-upload-zone" id="iReceiptZone" style="padding:10px 14px;font-size:12px;cursor:pointer;display:block;">
         <span>&#128248; Tap to attach image</span>
-        <input type="file" id="iReceiptInput" accept="image/*" style="display:none;" onchange="handleItemReceipt(this.files[0])">
+        <input type="file" id="iReceiptInput" accept="image/*" style="display:none;" data-change="handleItemReceiptFromEl">
       </label>
       <div id="iReceiptPreview"></div>
     </div>
     <div id="iDeleteConfirm" class="quick-confirm">
       <div class="quick-confirm-msg">Delete this expense item?</div>
       <div class="quick-confirm-btns">
-        <button class="btn-s" onclick="hideItemDeleteConfirm()">Cancel</button>
-        <button class="btn-d" onclick="confirmDeleteItem()">Delete</button>
+        <button class="btn-s" data-action="hideItemDeleteConfirm">Cancel</button>
+        <button class="btn-d" data-action="confirmDeleteItem">Delete</button>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeItemModal()">Cancel</button>
-      <button class="btn-d" id="iDeleteBtn" onclick="deleteItemFromModal()" style="display:none;">&#128465; Delete</button>
-      <button class="btn-p" onclick="saveItemModal()">Save</button>
+      <button class="btn-s" data-action="closeItemModal">Cancel</button>
+      <button class="btn-d" id="iDeleteBtn" data-action="deleteItemFromModal" style="display:none;">&#128465; Delete</button>
+      <button class="btn-p" data-action="saveItemModal">Save</button>
     </div>
   </div>
 </div>
 
 <!-- ── LOAN MODAL ── -->
-<div class="modal-overlay" id="loanModal" onclick="if(event.target===this)closeLoanModal()">
+<div class="modal-overlay" id="loanModal" data-self-close="closeLoanModal">
   <div class="pmodal">
-    <button class="close-btn" onclick="closeLoanModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeLoanModal" title="Close" aria-label="Close">&#215;</button>
     <h4 id="loanModalTitle">Add Loan</h4>
     <div class="fg" style="margin-bottom:9px;"><label for="lName" class="fl">Loan / Debt Name</label><input class="fi" id="lName" type="text" placeholder="e.g. Visa Card, Car Loan" maxlength="60"></div>
     <div class="fr" style="margin-bottom:9px;">
@@ -1144,84 +1142,84 @@
     <div id="loanDeleteConfirm" class="quick-confirm">
       <div class="quick-confirm-msg">Delete this loan permanently?</div>
       <div class="quick-confirm-btns">
-        <button class="btn-s" onclick="hideLoanDeleteConfirm()">Cancel</button>
-        <button class="btn-d" onclick="confirmDeleteLoan()">Delete</button>
+        <button class="btn-s" data-action="hideLoanDeleteConfirm">Cancel</button>
+        <button class="btn-d" data-action="confirmDeleteLoan">Delete</button>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeLoanModal()">Cancel</button>
-      <button class="btn-d" id="lDeleteBtn" onclick="showLoanDeleteConfirm()" style="display:none;">&#128465; Delete</button>
-      <button class="btn-p" onclick="saveLoanModal()">Save Loan</button>
+      <button class="btn-s" data-action="closeLoanModal">Cancel</button>
+      <button class="btn-d" id="lDeleteBtn" data-action="showLoanDeleteConfirm" style="display:none;">&#128465; Delete</button>
+      <button class="btn-p" data-action="saveLoanModal">Save Loan</button>
     </div>
   </div>
 </div>
 
 <!-- ── REVENUE MODAL ── -->
-<div class="modal-overlay" id="revModal" onclick="if(event.target===this)closeRevModal()">
+<div class="modal-overlay" id="revModal" data-self-close="closeRevModal">
   <div class="pmodal">
-    <button class="close-btn" onclick="closeRevModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeRevModal" title="Close" aria-label="Close">&#215;</button>
     <h4 id="revModalTitle">Add Income Source</h4>
     <div class="fg" style="margin-bottom:9px;"><label for="rName" class="fl">Source Name</label><input class="fi" id="rName" type="text" placeholder="e.g. Salary, Freelance" maxlength="60"></div>
     <div class="fg" style="margin-bottom:9px;"><label for="rAmount" class="fl">Amount ($)</label><input class="fi" id="rAmount" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"></div>
     <div style="margin-bottom:9px;">
       <div class="fl" style="margin-bottom:6px;">Status</div>
       <div style="display:flex;gap:8px;">
-        <button class="status-opt opt-pending sel" id="rStatusPending" onclick="setRevStatus('pending')">&#9203; Pending</button>
-        <button class="status-opt opt-paid" id="rStatusReceived" onclick="setRevStatus('received')">&#9989; Received</button>
+        <button class="status-opt opt-pending sel" id="rStatusPending" data-action="setRevStatus" data-arg="pending">&#9203; Pending</button>
+        <button class="status-opt opt-paid" id="rStatusReceived" data-action="setRevStatus" data-arg="received">&#9989; Received</button>
       </div>
     </div>
     <div class="fg" style="margin-bottom:9px;"><label for="rNote" class="fl">Note (optional)</label><input class="fi" id="rNote" type="text" placeholder="Optional note" maxlength="120"></div>
     <div id="revDeleteConfirm" class="quick-confirm">
       <div class="quick-confirm-msg">Delete this income source?</div>
       <div class="quick-confirm-btns">
-        <button class="btn-s" onclick="hideRevDeleteConfirm()">Cancel</button>
-        <button class="btn-d" onclick="confirmDeleteRev()">Delete</button>
+        <button class="btn-s" data-action="hideRevDeleteConfirm">Cancel</button>
+        <button class="btn-d" data-action="confirmDeleteRev">Delete</button>
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeRevModal()">Cancel</button>
-      <button class="btn-d" id="rDeleteBtn" onclick="showRevDeleteConfirm()" style="display:none;">&#128465; Delete</button>
-      <button class="btn-p" onclick="saveRevModal()">Save</button>
+      <button class="btn-s" data-action="closeRevModal">Cancel</button>
+      <button class="btn-d" id="rDeleteBtn" data-action="showRevDeleteConfirm" style="display:none;">&#128465; Delete</button>
+      <button class="btn-p" data-action="saveRevModal">Save</button>
     </div>
   </div>
 </div>
 
 <!-- ── RECEIPT MODAL ── -->
-<div class="modal-overlay" id="receiptModal" onclick="if(event.target===this)closeReceiptModal()">
+<div class="modal-overlay" id="receiptModal" data-self-close="closeReceiptModal">
   <div class="pmodal" style="max-width:360px;">
-    <button class="close-btn" onclick="closeReceiptModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeReceiptModal" title="Close" aria-label="Close">&#215;</button>
     <h4>&#128248; Receipt</h4>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;" id="receiptModalItemName"></p>
     <div id="receiptImgWrap" style="text-align:center;margin-bottom:10px;"></div>
     <label class="receipt-upload-zone" style="padding:10px 14px;font-size:12px;cursor:pointer;display:block;margin-bottom:9px;">
       <span>&#128248; Attach / replace image</span>
-      <input type="file" id="receiptFileInput" accept="image/*" style="display:none;" onchange="handleReceiptFile(this.files[0])">
+      <input type="file" id="receiptFileInput" accept="image/*" style="display:none;" data-change="handleReceiptFileFromEl">
     </label>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeReceiptModal()">Cancel</button>
-      <button class="btn-d" onclick="clearReceipt()">&#128465; Remove</button>
+      <button class="btn-s" data-action="closeReceiptModal">Cancel</button>
+      <button class="btn-d" data-action="clearReceipt">&#128465; Remove</button>
     </div>
   </div>
 </div>
 
 <!-- ── COMPARE MODAL ── -->
-<div class="modal-overlay" id="compareModal" onclick="if(event.target===this)closeCompareModal()">
+<div class="modal-overlay" id="compareModal" data-self-close="closeCompareModal">
   <div class="pmodal" style="max-width:580px;">
-    <button class="close-btn" onclick="closeCompareModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeCompareModal" title="Close" aria-label="Close">&#215;</button>
     <h4>&#9878; Compare Two Months</h4>
     <div class="fr" style="margin-bottom:12px;">
-      <div class="fg"><label for="compareA" class="fl">Month A</label><select class="fi" id="compareA" onchange="renderComparison()"></select></div>
-      <div class="fg"><label for="compareB" class="fl">Month B</label><select class="fi" id="compareB" onchange="renderComparison()"></select></div>
+      <div class="fg"><label for="compareA" class="fl">Month A</label><select class="fi" id="compareA" data-change="renderComparison"></select></div>
+      <div class="fg"><label for="compareB" class="fl">Month B</label><select class="fi" id="compareB" data-change="renderComparison"></select></div>
     </div>
     <div id="compareResult" style="overflow-x:auto;max-height:52vh;overflow-y:auto;"></div>
-    <div class="btn-row" style="margin-top:12px;"><button class="btn-p" onclick="closeCompareModal()">Done</button></div>
+    <div class="btn-row" style="margin-top:12px;"><button class="btn-p" data-action="closeCompareModal">Done</button></div>
   </div>
 </div>
 
 <!-- ── CATEGORY MANAGER MODAL ── -->
-<div class="modal-overlay" id="catManagerModal" onclick="if(event.target===this)closeCatManager()">
+<div class="modal-overlay" id="catManagerModal" data-self-close="closeCatManager">
   <div class="pmodal" style="max-width:480px;">
-    <button class="close-btn" onclick="closeCatManager()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeCatManager" title="Close" aria-label="Close">&#215;</button>
     <h4>&#127991; Manage Custom Categories</h4>
     <div id="customCatList" style="margin-bottom:14px;min-height:30px;"></div>
     <div style="border-top:1px solid var(--border);padding-top:12px;">
@@ -1229,34 +1227,34 @@
       <div class="fg" style="margin-bottom:7px;"><label for="newCatName" class="fl">Name</label><input class="fi" id="newCatName" type="text" placeholder="e.g. Entertainment" maxlength="30"></div>
       <div class="fg" style="margin-bottom:7px;"><label for="newCatKeywords" class="fl">Keywords (comma-separated)</label><input class="fi" id="newCatKeywords" type="text" placeholder="e.g. netflix, spotify, cinema"></div>
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
-        <div class="fg"><label for="newCatBg" class="fl">Background</label><input type="color" id="newCatBg" value="#EBF4FF" style="width:100%;height:32px;border:1px solid var(--border);border-radius:var(--radius-xs);cursor:pointer;" onchange="updateCatPreview()"></div>
-        <div class="fg"><label for="newCatColor" class="fl">Text Color</label><input type="color" id="newCatColor" value="#2B6CB0" style="width:100%;height:32px;border:1px solid var(--border);border-radius:var(--radius-xs);cursor:pointer;" onchange="updateCatPreview()"></div>
+        <div class="fg"><label for="newCatBg" class="fl">Background</label><input type="color" id="newCatBg" value="#EBF4FF" style="width:100%;height:32px;border:1px solid var(--border);border-radius:var(--radius-xs);cursor:pointer;" data-change="updateCatPreview"></div>
+        <div class="fg"><label for="newCatColor" class="fl">Text Color</label><input type="color" id="newCatColor" value="#2B6CB0" style="width:100%;height:32px;border:1px solid var(--border);border-radius:var(--radius-xs);cursor:pointer;" data-change="updateCatPreview"></div>
         <div><div class="fl" style="margin-bottom:6px;">Preview</div><span id="catColorPreview" class="cat-badge" style="background:#EBF4FF;color:#2B6CB0;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:500;">Category</span></div>
       </div>
-      <button class="btn-p" onclick="addCustomCategory()" style="width:100%;margin-bottom:4px;">+ Add Category</button>
+      <button class="btn-p" data-action="addCustomCategory" style="width:100%;margin-bottom:4px;">+ Add Category</button>
     </div>
-    <div class="btn-row" style="margin-top:10px;"><button class="btn-p" onclick="closeCatManager()">Done</button></div>
+    <div class="btn-row" style="margin-top:10px;"><button class="btn-p" data-action="closeCatManager">Done</button></div>
   </div>
 </div>
 
 <!-- ── CSV IMPORT MODAL ── -->
-<div class="modal-overlay" id="csvModal" onclick="if(event.target===this)closeCsvModal()">
+<div class="modal-overlay" id="csvModal" data-self-close="closeCsvModal">
   <div class="pmodal" style="max-width:540px;">
-    <button class="close-btn" onclick="closeCsvModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeCsvModal" title="Close" aria-label="Close">&#215;</button>
     <h4>&#128229; Import CSV</h4>
     <label class="receipt-upload-zone" id="csvDropZone" style="padding:20px;display:block;text-align:center;cursor:pointer;margin-bottom:12px;">
       <div style="font-size:24px;margin-bottom:6px;">&#128229;</div>
       <div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Drop a CSV file here or click to browse</div>
       <div style="font-size:11px;color:var(--text-muted);">Supports exports from most banks</div>
-      <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none;" onchange="handleCsvFile(this.files[0])">
+      <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none;" data-change="handleCsvFileFromEl">
     </label>
     <div id="csvColMap" style="display:none;margin-bottom:10px;">
       <div style="font-weight:600;font-size:12px;margin-bottom:8px;">Map Columns</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-        <div><label for="csvColDate" class="fl">Date column</label><select class="fi" id="csvColDate" onchange="renderCsvPreview()"></select></div>
-        <div><label for="csvColDesc" class="fl">Description column</label><select class="fi" id="csvColDesc" onchange="renderCsvPreview()"></select></div>
-        <div><label for="csvColAmt" class="fl">Amount column</label><select class="fi" id="csvColAmt" onchange="renderCsvPreview()"></select></div>
-        <div><label for="csvColType" class="fl">Dr/Cr column</label><select class="fi" id="csvColType" onchange="renderCsvPreview()"></select></div>
+        <div><label for="csvColDate" class="fl">Date column</label><select class="fi" id="csvColDate" data-change="renderCsvPreview"></select></div>
+        <div><label for="csvColDesc" class="fl">Description column</label><select class="fi" id="csvColDesc" data-change="renderCsvPreview"></select></div>
+        <div><label for="csvColAmt" class="fl">Amount column</label><select class="fi" id="csvColAmt" data-change="renderCsvPreview"></select></div>
+        <div><label for="csvColType" class="fl">Dr/Cr column</label><select class="fi" id="csvColType" data-change="renderCsvPreview"></select></div>
       </div>
       <div><label for="csvImportTarget" class="fl">Import as</label>
         <select class="fi" id="csvImportTarget">
@@ -1267,20 +1265,20 @@
     </div>
     <div id="csvPreview" style="overflow-x:auto;max-height:200px;overflow-y:auto;margin-bottom:10px;"></div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeCsvModal()">Cancel</button>
-      <div id="csvBtnRow" style="display:none;flex:1;"><button class="btn-p" style="width:100%;" onclick="executeCsvImport()">Import <span id="csvImportCount">0</span> transactions</button></div>
+      <button class="btn-s" data-action="closeCsvModal">Cancel</button>
+      <div id="csvBtnRow" style="display:none;flex:1;"><button class="btn-p" style="width:100%;" data-action="executeCsvImport">Import <span id="csvImportCount">0</span> transactions</button></div>
     </div>
   </div>
 </div>
 
 <!-- ── CURRENCY MODAL ── -->
-<div class="modal-overlay" id="currencyModal" onclick="if(event.target===this)closeCurrencyModal()">
+<div class="modal-overlay" id="currencyModal" data-self-close="closeCurrencyModal">
   <div class="pmodal" style="max-width:380px;">
-    <button class="close-btn" onclick="closeCurrencyModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeCurrencyModal" title="Close" aria-label="Close">&#215;</button>
     <h4>&#127759; Currency Settings</h4>
     <div class="fg" style="margin-bottom:9px;">
       <label for="currencySelect" class="fl">Currency</label>
-      <select class="fi" id="currencySelect" onchange="updateCurrencyPreview(this.value)">
+      <select class="fi" id="currencySelect" data-change="updateCurrencyPreview" data-change-val="true">
         <option value="CAD">CAD — Canadian Dollar</option>
         <option value="USD">USD — US Dollar</option>
         <option value="GBP">GBP — British Pound</option>
@@ -1300,54 +1298,54 @@
     </div>
     <div id="customCurrRow" style="display:none;margin-bottom:9px;">
       <div class="fr" style="gap:8px;">
-        <div class="fg"><label for="customSymbol" class="fl">Symbol</label><input class="fi" id="customSymbol" type="text" placeholder="e.g. $" maxlength="6" oninput="updateCurrencyPreview('CUSTOM')"></div>
-        <div class="fg"><label for="customLocale" class="fl">Locale</label><input class="fi" id="customLocale" type="text" placeholder="e.g. en-CA" oninput="updateCurrencyPreview('CUSTOM')"></div>
+        <div class="fg"><label for="customSymbol" class="fl">Symbol</label><input class="fi" id="customSymbol" type="text" placeholder="e.g. $" maxlength="6" data-input="updateCurrencyPreview" data-input-arg="CUSTOM"></div>
+        <div class="fg"><label for="customLocale" class="fl">Locale</label><input class="fi" id="customLocale" type="text" placeholder="e.g. en-CA" data-input="updateCurrencyPreview" data-input-arg="CUSTOM"></div>
       </div>
     </div>
     <div style="background:var(--sage-light);border-radius:var(--radius-xs);padding:8px 12px;font-size:13px;color:var(--sage);margin-bottom:12px;font-family:'DM Mono',monospace;font-weight:600;" id="currPreview">$1,234.56</div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeCurrencyModal()">Cancel</button>
-      <button class="btn-p" onclick="saveCurrency()">Save Currency</button>
+      <button class="btn-s" data-action="closeCurrencyModal">Cancel</button>
+      <button class="btn-p" data-action="saveCurrency">Save Currency</button>
     </div>
   </div>
 </div>
 
 <!-- ── AI SETUP MODAL ── -->
-<div class="modal-overlay" id="claudeSetupModal" onclick="if(event.target===this)closeClaudeSetup()">
+<div class="modal-overlay" id="claudeSetupModal" data-self-close="closeClaudeSetup">
   <div class="pmodal" style="max-width:420px;">
-    <button class="close-btn" onclick="closeClaudeSetup()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeClaudeSetup" title="Close" aria-label="Close">&#215;</button>
     <h4>&#128279; Connect AI</h4>
     <div class="ai-tab-bar" style="margin-bottom:14px;">
-      <button class="ai-tab-btn ai-tab-active" id="setupTabClaude" onclick="switchSetupTab('claude')">&#129302; Claude</button>
-      <button class="ai-tab-btn" id="setupTabOpenai" onclick="switchSetupTab('openai')">&#9889; GPT-4o</button>
+      <button class="ai-tab-btn ai-tab-active" id="setupTabClaude" data-action="switchSetupTab" data-arg="claude">&#129302; Claude</button>
+      <button class="ai-tab-btn" id="setupTabOpenai" data-action="switchSetupTab" data-arg="openai">&#9889; GPT-4o</button>
     </div>
     <div id="setupPanelClaude">
       <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">Enter your Anthropic API key. Get one at <a href="https://console.anthropic.com" target="_blank" rel="noopener" style="color:var(--sage);">console.anthropic.com</a></p>
       <div style="display:flex;gap:6px;margin-bottom:4px;">
         <input class="fi" id="claudeKeyInput" type="password" placeholder="sk-ant-&#8230;" style="flex:1;margin-bottom:0;" autocomplete="off">
-        <button class="tbtn" id="claudeKeyToggle" onclick="toggleClaudeKeyVis()" style="white-space:nowrap;font-size:11px;">Show</button>
+        <button class="tbtn" id="claudeKeyToggle" data-action="toggleClaudeKeyVis" style="white-space:nowrap;font-size:11px;">Show</button>
       </div>
     </div>
     <div id="setupPanelOpenai" style="display:none;">
       <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">Enter your OpenAI API key. Get one at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" style="color:var(--blue);">platform.openai.com</a></p>
       <div style="display:flex;gap:6px;margin-bottom:4px;">
         <input class="fi" id="openaiKeyInput" type="password" placeholder="sk-&#8230;" style="flex:1;margin-bottom:0;" autocomplete="off">
-        <button class="tbtn" id="openaiKeyToggle" onclick="toggleOpenAIKeyVis()" style="white-space:nowrap;font-size:11px;">Show</button>
+        <button class="tbtn" id="openaiKeyToggle" data-action="toggleOpenAIKeyVis" style="white-space:nowrap;font-size:11px;">Show</button>
       </div>
     </div>
     <div id="claudeSetupError" style="display:none;background:var(--danger-light);color:var(--danger);font-size:11px;padding:7px 10px;border-radius:var(--radius-xs);margin:8px 0;"></div>
     <p style="font-size:10px;color:var(--text-muted);margin:8px 0 10px;">Keys are stored locally in your browser only.</p>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeClaudeSetup()">Cancel</button>
-      <button class="btn-p" id="claudeConnectBtn" onclick="connectAI()">Connect</button>
+      <button class="btn-s" data-action="closeClaudeSetup">Cancel</button>
+      <button class="btn-p" id="claudeConnectBtn" data-action="connectAI">Connect</button>
     </div>
   </div>
 </div>
 
 <!-- ── AI MANAGE MODAL ── -->
-<div class="modal-overlay" id="claudeManageModal" onclick="if(event.target===this)closeClaudeManage()">
+<div class="modal-overlay" id="claudeManageModal" data-self-close="closeClaudeManage">
   <div class="pmodal" style="max-width:400px;">
-    <button class="close-btn" onclick="closeClaudeManage()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeClaudeManage" title="Close" aria-label="Close">&#215;</button>
     <h4>&#9881; AI Provider Settings</h4>
     <div style="margin-bottom:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
@@ -1366,7 +1364,7 @@
       </div>
       <div id="aiDefaultRow" style="display:none;padding:8px 0;align-items:center;gap:8px;">
         <label for="aiProviderSelect" style="font-size:12px;color:var(--text-secondary);white-space:nowrap;">Default provider:</label>
-        <select class="fi" id="aiProviderSelect" onchange="setAIProvider(this.value)" style="margin-bottom:0;">
+        <select class="fi" id="aiProviderSelect" data-change="setAIProvider" data-change-val="true" style="margin-bottom:0;">
           <option value="claude">Claude</option>
           <option value="openai">GPT-4o</option>
         </select>
@@ -1375,18 +1373,18 @@
     <div id="claudeRemoveConfirm" style="display:none;background:var(--danger-light);border:1px solid var(--danger-mid);border-radius:var(--radius-xs);padding:10px;margin-bottom:9px;">
       <p id="claudeRemoveMsg" style="font-size:12px;color:var(--danger);margin-bottom:8px;"></p>
       <div class="btn-row">
-        <button class="btn-s" onclick="document.getElementById('claudeRemoveConfirm').style.display='none'">Cancel</button>
-        <button class="btn-d" onclick="claudeConfirmRemove()">Remove Key</button>
+        <button class="btn-s" data-action="hideclaudeRemoveConfirm">Cancel</button>
+        <button class="btn-d" data-action="claudeConfirmRemove">Remove Key</button>
       </div>
     </div>
-    <div class="btn-row"><button class="btn-p" onclick="closeClaudeManage()">Done</button></div>
+    <div class="btn-row"><button class="btn-p" data-action="closeClaudeManage">Done</button></div>
   </div>
 </div>
 
 <!-- ── CLONE MONTH MODAL ── -->
-<div class="modal-overlay" id="cloneModal" onclick="if(event.target===this)closeCloneModal()">
+<div class="modal-overlay" id="cloneModal" data-self-close="closeCloneModal">
   <div class="pmodal" style="max-width:360px;">
-    <button class="close-btn" onclick="closeCloneModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeCloneModal" title="Close" aria-label="Close">&#215;</button>
     <h4>&#128260; Clone Month</h4>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Creates a copy of the current month into the next month.</p>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
@@ -1401,16 +1399,16 @@
       </label>
     </div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeCloneModal()">Cancel</button>
-      <button class="btn-p" onclick="executeClone()">Clone Month</button>
+      <button class="btn-s" data-action="closeCloneModal">Cancel</button>
+      <button class="btn-p" data-action="executeClone">Clone Month</button>
     </div>
   </div>
 </div>
 
 <!-- ── DELETE MONTH MODAL ── -->
-<div class="modal-overlay" id="deleteMonthModal" onclick="if(event.target===this)closeDeleteMonthModal()">
+<div class="modal-overlay" id="deleteMonthModal" data-self-close="closeDeleteMonthModal">
   <div class="pmodal" style="max-width:360px;">
-    <button class="close-btn" onclick="closeDeleteMonthModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeDeleteMonthModal" title="Close" aria-label="Close">&#215;</button>
     <h4>Delete Month?</h4>
     <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">Permanently delete <strong id="deleteMonthKey"></strong>? This cannot be undone.</p>
     <div id="deleteMonthArchiveRow" style="display:none;margin-bottom:12px;">
@@ -1419,100 +1417,100 @@
       </label>
     </div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeDeleteMonthModal()">Cancel</button>
-      <button class="btn-d" onclick="executeDeleteMonth()">Delete</button>
+      <button class="btn-s" data-action="closeDeleteMonthModal">Cancel</button>
+      <button class="btn-d" data-action="executeDeleteMonth">Delete</button>
     </div>
   </div>
 </div>
 
 <!-- ── RESTORE ARCHIVE MODAL ── -->
-<div class="modal-overlay" id="restoreModal" onclick="if(event.target===this)closeRestoreModal()">
+<div class="modal-overlay" id="restoreModal" data-self-close="closeRestoreModal">
   <div class="pmodal" style="max-width:360px;">
-    <button class="close-btn" onclick="closeRestoreModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeRestoreModal" title="Close" aria-label="Close">&#215;</button>
     <h4>&#128260; Restore Month?</h4>
     <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;" id="restoreModalDesc"></p>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeRestoreModal()">Cancel</button>
-      <button class="btn-p" onclick="executeRestore()">Restore</button>
+      <button class="btn-s" data-action="closeRestoreModal">Cancel</button>
+      <button class="btn-p" data-action="executeRestore">Restore</button>
     </div>
   </div>
 </div>
 
 <!-- ── RESET DATA MODAL ── -->
-<div class="modal-overlay" id="resetModal" onclick="if(event.target===this)closeResetModal()">
+<div class="modal-overlay" id="resetModal" data-self-close="closeResetModal">
   <div class="pmodal" style="max-width:380px;">
-    <button class="close-btn" onclick="closeResetModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeResetModal" title="Close" aria-label="Close">&#215;</button>
     <h4 id="resetModalTitle">Reset Data?</h4>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;" id="resetModalDesc"></p>
     <div style="background:var(--danger-light);border:1px solid var(--danger-mid);border-radius:var(--radius-xs);padding:10px;margin-bottom:12px;">
       <div style="font-size:12px;color:var(--danger);margin-bottom:6px;">Type <strong id="resetConfirmWord"></strong> to confirm:</div>
-      <input class="fi" id="resetConfirmInput" type="text" placeholder="Type here&#8230;" oninput="checkResetConfirm(this.value)" autocomplete="off" style="text-transform:uppercase;">
+      <input class="fi" id="resetConfirmInput" type="text" placeholder="Type here&#8230;" data-input="checkResetConfirm" data-input-val="true" autocomplete="off" style="text-transform:uppercase;">
     </div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeResetModal()">Cancel</button>
-      <button class="btn-d" id="resetConfirmBtn" onclick="executeReset()" disabled style="opacity:.4;cursor:not-allowed;">Reset</button>
+      <button class="btn-s" data-action="closeResetModal">Cancel</button>
+      <button class="btn-d" id="resetConfirmBtn" data-action="executeReset" disabled style="opacity:.4;cursor:not-allowed;">Reset</button>
     </div>
   </div>
 </div>
 
 <!-- ── FULL RESET MODAL ── -->
-<div class="modal-overlay" id="fullResetModal" onclick="if(event.target===this)closeFullResetConfirm()">
+<div class="modal-overlay" id="fullResetModal" data-self-close="closeFullResetConfirm">
   <div class="pmodal" style="max-width:380px;">
-    <button class="close-btn" onclick="closeFullResetConfirm()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeFullResetConfirm" title="Close" aria-label="Close">&#215;</button>
     <h4>&#9888; Full Data Reset</h4>
     <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Permanently deletes <strong>all</strong> your data — months, loans, savings, and settings. Cannot be undone.</p>
     <div style="background:var(--danger-light);border:1px solid var(--danger-mid);border-radius:var(--radius-xs);padding:10px;margin-bottom:12px;">
       <div style="font-size:12px;color:var(--danger);margin-bottom:6px;">Type <strong>RESET</strong> to confirm:</div>
-      <input class="fi" id="fullResetInput" type="text" placeholder="RESET" oninput="checkResetWord()" autocomplete="off" style="text-transform:uppercase;">
+      <input class="fi" id="fullResetInput" type="text" placeholder="RESET" data-input="checkResetWord" autocomplete="off" style="text-transform:uppercase;">
     </div>
     <div class="btn-row">
-      <button class="btn-s" onclick="closeFullResetConfirm()">Cancel</button>
-      <button class="btn-d" id="fullResetBtn" onclick="executeFullReset()" disabled style="opacity:.4;cursor:not-allowed;">Delete Everything</button>
+      <button class="btn-s" data-action="closeFullResetConfirm">Cancel</button>
+      <button class="btn-d" id="fullResetBtn" data-action="executeFullReset" disabled style="opacity:.4;cursor:not-allowed;">Delete Everything</button>
     </div>
   </div>
 </div>
 
 <!-- ── SETTINGS MODAL ── -->
-<div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+<div class="modal-overlay" id="settingsModal" data-self-close="closeSettings">
   <div class="pmodal" style="max-width:440px;max-height:80vh;overflow-y:auto;">
-    <button class="close-btn" onclick="closeSettings()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeSettings" title="Close" aria-label="Close">&#215;</button>
     <h4>&#9881; Settings &amp; Danger Zone</h4>
     <div style="margin-bottom:14px;">
       <div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px;">Data &amp; Backup</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <button class="mbtn" onclick="exportData();closeSettings();">&#128190; Export Backup</button>
-        <button class="mbtn" onclick="openImport();closeSettings();">&#128228; Import Backup</button>
-        <button class="mbtn" onclick="openCurrencyModal();closeSettings();">&#127759; Currency</button>
-        <button class="mbtn" onclick="openCompareModal();closeSettings();">&#9878; Compare Months</button>
+        <button class="mbtn" data-action="exportFromSettings">&#128190; Export Backup</button>
+        <button class="mbtn" data-action="importFromSettings">&#128228; Import Backup</button>
+        <button class="mbtn" data-action="currencyFromSettings">&#127759; Currency</button>
+        <button class="mbtn" data-action="compareFromSettings">&#9878; Compare Months</button>
       </div>
     </div>
     <div style="margin-bottom:14px;">
       <div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px;">Reset by Section</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <button class="reset-btn" onclick="closeSettings();openResetModal('expenses');">&#128465; Reset Expenses</button>
-        <button class="reset-btn" onclick="closeSettings();openResetModal('revenue');">&#128465; Reset Revenue</button>
-        <button class="reset-btn" onclick="closeSettings();openResetModal('loans');">&#128465; Reset Loans</button>
-        <button class="reset-btn" onclick="closeSettings();openResetModal('savings');">&#128465; Reset Savings</button>
+        <button class="reset-btn" data-action="resetExpensesFromSettings">&#128465; Reset Expenses</button>
+        <button class="reset-btn" data-action="resetRevenueFromSettings">&#128465; Reset Revenue</button>
+        <button class="reset-btn" data-action="resetLoansFromSettings">&#128465; Reset Loans</button>
+        <button class="reset-btn" data-action="resetSavingsFromSettings">&#128465; Reset Savings</button>
       </div>
     </div>
     <div style="background:var(--danger-light);border:1px solid var(--danger-mid);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;">
       <div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--danger);margin-bottom:8px;">&#9888; Danger Zone</div>
       <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">Full reset permanently deletes all data and cannot be undone.</p>
-      <button class="btn-d" onclick="openResetConfirm()" style="width:100%;">&#9888; Full Data Reset</button>
+      <button class="btn-d" data-action="openResetConfirm" style="width:100%;">&#9888; Full Data Reset</button>
     </div>
-    <div class="btn-row"><button class="btn-p" onclick="closeSettings()">Close</button></div>
+    <div class="btn-row"><button class="btn-p" data-action="closeSettings">Close</button></div>
   </div>
 </div>
 
 <!-- ── FINANCIAL GOAL MODAL ── -->
-<div class="modal-overlay" id="goalModal" onclick="if(event.target===this)closeGoalModal()">
+<div class="modal-overlay" id="goalModal" data-self-close="closeGoalModal">
   <div class="pmodal" style="max-width:440px;">
-    <button class="close-btn" onclick="closeGoalModal()" title="Close" aria-label="Close">&#215;</button>
+    <button class="close-btn" data-action="closeGoalModal" title="Close" aria-label="Close">&#215;</button>
     <h4 id="goalModalTitle">Add Financial Goal</h4>
     <div class="fr" style="margin-bottom:9px;">
       <div class="fg" style="flex:2;"><label for="goalName" class="fl">Goal Name</label><input class="fi" id="goalName" type="text" placeholder="e.g. Pay off Visa" maxlength="60"></div>
       <div class="fg"><label for="goalType" class="fl">Type</label>
-        <select class="fi" id="goalType" onchange="updateGoalTypeUI()">
+        <select class="fi" id="goalType" data-change="updateGoalTypeUI">
           <option value="payoff">Debt Payoff</option>
           <option value="spend">Spending Cap</option>
           <option value="save">Save Consistently</option>
@@ -1522,8 +1520,8 @@
     </div>
     <div id="goalTypeFields"></div>
     <div class="btn-row" style="margin-top:4px;">
-      <button class="btn-s" onclick="closeGoalModal()">Cancel</button>
-      <button class="btn-p" onclick="saveGoal()">Save Goal</button>
+      <button class="btn-s" data-action="closeGoalModal">Cancel</button>
+      <button class="btn-p" data-action="saveGoal">Save Goal</button>
     </div>
   </div>
 </div>
@@ -1543,4 +1541,5 @@
 <script src="js/settings.js"></script>
 <script src="js/onboarding.js"></script>
 <script src="js/boot.js"></script>
+<script src="js/events.js"></script>
 </body></html>

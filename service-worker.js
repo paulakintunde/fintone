@@ -1,4 +1,4 @@
-const CACHE = 'finflow-v3';
+const CACHE = 'finflow-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -21,7 +21,9 @@ const ASSETS = [
   './js/archive.js',
   './js/settings.js',
   './js/onboarding.js',
-  './js/boot.js'
+  './js/boot.js',
+  './js/darkmode.js',
+  './js/events.js'
 ];
 
 self.addEventListener('install', function (e) {
