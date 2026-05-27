@@ -7,6 +7,7 @@ const ASSETS = [
   './styles/layout.css',
   './styles/components.css',
   './styles/dark.css',
+  './js/vendor/chart.min.js',
   './js/constants.js',
   './js/state.js',
   './js/health.js',

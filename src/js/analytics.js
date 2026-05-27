@@ -293,8 +293,7 @@ function renderDash(){
 
   // Category donut
   const catT={};cw().forEach(w=>w.items.forEach(i=>{const c=getCatLabel(getCat(i.name));catT[c]=(catT[c]||0)+i.amount;}));
-  // Category chart colours — intentionally hardcoded for consistent chart rendering
-const catColors={'Banking':'#2B6CB0','Telecom':'#6B46C1','Auto':'#B7791F','Utilities':'#276749','Health':'#9D174D','Loan Pmt':'#718096','Savings':'#2B6CB0','Other':'#A0AEC0'};
+
   const dark=document.body.classList.contains('dark');
   const catKeys=Object.keys(catT).filter(k=>catT[k]>0);
   const catVals=catKeys.map(k=>catT[k]);

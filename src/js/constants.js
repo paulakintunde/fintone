@@ -49,4 +49,3 @@ const CAT_ALL=[
   {cls:'cat-other',  lbl:'Other',     icon:'📦'},
 ];
 
-export {};

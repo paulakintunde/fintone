@@ -186,10 +186,6 @@ function totalDebt(){return Math.round(S.loans.reduce((s,l)=>s+amt(l.amount),0)*
 function minPmts(){return Math.round(S.loans.reduce((s,l)=>s+amt(l.minPayment),0)*100)/100;}
 function totalSav(){return Math.round((S.savings||[]).reduce((s,g)=>s+amt(g.balance),0)*100)/100;}
 
-// ── MONTH NAV HELPERS ──
-const MS_IDX={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-function keyToYM(k){const p=k.split(' ');return parseInt(p[1])*12+MS_IDX[p[0]];}
-function currentRealYM(){const n=new Date();return n.getFullYear()*12+n.getMonth();}
 
 function isCents(x){ return Number.isInteger(x) && x > 100; } // heuristic: >100 = likely cents
 function storeCents(dollars){
@@ -274,6 +270,51 @@ let _lockBuffer = '';
 let _setupBuffer = '';
 let _setupStage = 'enter'; // 'enter' | 'confirm'
 let _setupFirst = '';
+
+async function hashPin(pin){
+  const enc = new TextEncoder().encode(pin + 'finflow_salt_v1');
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function getPinHash(){
+  try{
+    if(location.protocol==='file:')return localStorage.getItem(PIN_IDB_KEY)||null;
+    if(!_idb)_idb=await openIDB().catch(()=>null);
+    if(!_idb)return localStorage.getItem(PIN_IDB_KEY)||null;
+    return new Promise((res)=>{
+      const tx=_idb.transaction(IDB_PIN_STORE,'readonly');
+      const req=tx.objectStore(IDB_PIN_STORE).get(PIN_IDB_KEY);
+      req.onsuccess=e=>res(e.target.result||null);
+      req.onerror=()=>res(null);
+    });
+  }catch(e){return null;}
+}
+
+async function checkLock(){
+  const hash = await getPinHash();
+  if(!hash) return;
+  document.getElementById('lockScreen').style.display='flex';
+  document.body.style.overflow='hidden';
+  const btn=document.getElementById('pinBtn');
+  if(btn) btn.textContent='🔓';
+}
+
+async function verifyPin(){
+  const hash = await hashPin(_lockBuffer);
+  const stored = await getPinHash();
+  if(hash===stored){
+    document.getElementById('lockScreen').style.display='none';
+    document.body.style.overflow='';
+    _lockBuffer='';
+    updateLockDots();
+  } else {
+    document.getElementById('lockError').textContent='Incorrect PIN — try again';
+    document.getElementById('lockScreen').classList.add('pin-shake');
+    setTimeout(()=>{document.getElementById('lockScreen').classList.remove('pin-shake');},400);
+    _lockBuffer=''; updateLockDots();
+  }
+}
 
 function lockKeyPress(key){
   const errEl=document.getElementById('lockError');
