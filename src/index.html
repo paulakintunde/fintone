@@ -169,7 +169,21 @@
           </div>
         </div>
         <div>
-          <div class="ob-label">Week</div>
+          <div class="ob-label">Frequency</div>
+          <select class="ob-select" id="obExpFreq" onchange="obFreqChange()">
+            <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly (×4 per month)</option>
+            <option value="biweekly">Bi-weekly (×2 per month)</option>
+            <option value="quarterly">Quarterly (Jan/Apr/Jul/Oct)</option>
+            <option value="yearly">Yearly (one month/year)</option>
+          </select>
+        </div>
+        <div>
+          <div class="ob-label">Due day (optional)</div>
+          <input class="ob-input" id="obExpDue" type="number" min="1" max="31" placeholder="e.g. 15" inputmode="numeric" oninput="obDueDayChange()">
+        </div>
+        <div id="obExpWeekRow">
+          <div class="ob-label">Week <span id="obWeekHint" style="font-size:9px;color:var(--sage);font-weight:400;"></span></div>
           <select class="ob-select" id="obExpWeek">
             <option value="0">Week 1</option>
             <option value="1">Week 2</option>
@@ -177,9 +191,14 @@
             <option value="3">Week 4</option>
           </select>
         </div>
-        <div>
-          <div class="ob-label">Due day (optional)</div>
-          <input class="ob-input" id="obExpDue" type="number" min="1" max="31" placeholder="e.g. 15" inputmode="numeric">
+        <div id="obExpYearlyMonthRow" style="display:none;">
+          <div class="ob-label">Appears in month</div>
+          <select class="ob-select" id="obExpYearlyMonth">
+            <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+            <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+            <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+            <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+          </select>
         </div>
         <div>
           <div class="ob-label">Note (optional)</div>
@@ -341,7 +360,7 @@
   <div class="topbar-center">
     <div class="month-nav">
       <button onclick="changeMonth(-1)" title="Previous month" aria-label="Previous month">&#8249;</button>
-      <span class="month-label" id="monthLabel">May 2026</span>
+      <span class="month-label" id="monthLabel"></span>
       <button onclick="changeMonth(1)" title="Next month" aria-label="Next month">&#8250;</button>
     </div>
   </div>
@@ -406,7 +425,7 @@
   <!-- ── HERO STRIP ── -->
   <div class="dash-hero">
     <div class="hero-left">
-      <div class="hero-month-lbl" id="d-hero-month">May 2026</div>
+      <div class="hero-month-lbl" id="d-hero-month"></div>
       <div class="hero-net pos" id="d-cashflow">—</div>
       <div class="hero-sub" id="d-hero-sub">Income $0 &nbsp;·&nbsp; Expenses $0 &nbsp;·&nbsp; Pending $0</div>
     </div>
@@ -582,7 +601,7 @@
   <div class="tag-filter-bar" id="tagFilterBar"></div>
 
   <div class="section-hdr" style="margin-bottom:10px;">
-    <div style="font-weight:600;font-size:14px;" id="expMonthHdr">May 2026 Expenses</div>
+    <div style="font-weight:600;font-size:14px;" id="expMonthHdr">Expenses</div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
       <button class="tbtn no-print" id="recurAutoFillBtn" onclick="recurringAutoFill()" style="color:var(--blue);border-color:var(--blue-mid);font-size:11px;display:none;">&#8635; Auto-fill Recurring</button>
       <button class="reset-btn no-print" onclick="openResetModal('expenses')" title="Clear all expense items for this month">&#128465; Reset Expenses</button>
@@ -1064,6 +1083,26 @@
       <input class="fi" id="iDueDay" type="number" min="1" max="31" placeholder="e.g. 15" inputmode="numeric">
       <div class="due-day-grid" id="dueDayGrid"></div>
       <button class="tbtn" style="margin-top:4px;font-size:10px;" onclick="clearItemDueDay()">Clear due date</button>
+    </div>
+    <div style="margin-bottom:9px;">
+      <label for="iFrequency" class="fl">Frequency</label>
+      <select class="fi" id="iFrequency" onchange="itemFreqChange()">
+        <option value="monthly">Monthly (standard)</option>
+        <option value="weekly">Weekly — adds to all 4 weeks</option>
+        <option value="biweekly">Bi-weekly — adds to Week 1 &amp; 3</option>
+        <option value="quarterly">Quarterly — auto Jan / Apr / Jul / Oct</option>
+        <option value="yearly">Yearly — one month per year</option>
+      </select>
+      <div id="iYearlyMonthRow" style="display:none;margin-top:6px;">
+        <label for="iYearlyMonth" class="fl">Appears in month</label>
+        <select class="fi" id="iYearlyMonth">
+          <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+          <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+          <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+          <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+        </select>
+      </div>
+      <div id="iFreqHint" style="font-size:10px;color:var(--sage);margin-top:4px;"></div>
     </div>
     <div style="margin-bottom:9px;">
       <div class="fl" style="margin-bottom:4px;">Receipt (optional, max 200KB)</div>

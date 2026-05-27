@@ -29,9 +29,17 @@ const DW=[
   {items:[{name:'Demo Streaming',amount:18,paid:true,dueDay:27},{name:'Demo Gym',amount:45,paid:false,dueDay:28}]}
 ];
 const DR=[{name:'Demo Primary Income',amount:3200,received:true},{name:'Demo Side Income',amount:750,received:false}];
+// Generate demo payment history relative to today — last 4 months paid, current month pending
+function _makeDemoPayments(){
+  var now=new Date();
+  return Array.from({length:5},function(_,i){
+    var d=new Date(now.getFullYear(),now.getMonth()-(4-i),1);
+    return{month:MS[d.getMonth()]+' '+d.getFullYear(),paid:i<4};
+  });
+}
 const DL=[
-  {name:'Demo Credit Card',amount:4800,originalAmount:6000,rate:19.99,minPayment:120,payments:[{month:'Jan 2026',paid:true},{month:'Feb 2026',paid:true},{month:'Mar 2026',paid:true},{month:'Apr 2026',paid:true},{month:'May 2026',paid:false}]},
-  {name:'Demo Personal Loan',amount:8500,originalAmount:10000,rate:8.5,minPayment:210,payments:[{month:'Jan 2026',paid:true},{month:'Feb 2026',paid:true},{month:'Mar 2026',paid:true},{month:'Apr 2026',paid:true},{month:'May 2026',paid:false}]}
+  {name:'Demo Credit Card',amount:4800,originalAmount:6000,rate:19.99,minPayment:120,payments:_makeDemoPayments()},
+  {name:'Demo Personal Loan',amount:8500,originalAmount:10000,rate:8.5,minPayment:210,payments:_makeDemoPayments()}
 ];
 const DSV=[{name:'Demo Emergency Fund',target:8000,balance:2100,contribution:250,rate:2.5},{name:'Demo Vacation Fund',target:2500,balance:640,contribution:100,rate:1.5}];
 
@@ -49,3 +57,29 @@ const CAT_ALL=[
   {cls:'cat-other',  lbl:'Other',     icon:'📦'},
 ];
 
+// ══════════════════════════════════════════════
+// WEEK AUTO-DETECTION
+// Returns 0-based week index (0=Week1) for a due day within a month.
+// Aligns weeks with the calendar — the week a day physically falls in.
+// e.g. if May 1 is a Thursday, days 1-3 are Week 1, days 4-10 are Week 2, etc.
+// ══════════════════════════════════════════════
+function getWeekForDay(day,monthKey){
+  if(!day||day<1||day>31)return 0;
+  var key=monthKey||(typeof CMK!=='undefined'?CMK:'');
+  if(!key)return 0;
+  var parts=key.split(' ');
+  var mo=MS.indexOf(parts[0]);
+  var yr=parseInt(parts[1]);
+  if(mo<0||isNaN(yr))return 0;
+  var firstDayOfMonth=new Date(yr,mo,1).getDay(); // 0=Sun … 6=Sat
+  return Math.min(3,Math.floor((day-1+firstDayOfMonth)/7));
+}
+
+// Frequency labels used across the app
+const FREQ_LABELS={
+  monthly:  'Monthly',
+  weekly:   'Weekly',
+  biweekly: 'Bi-weekly',
+  quarterly:'Quarterly',
+  yearly:   'Yearly'
+};

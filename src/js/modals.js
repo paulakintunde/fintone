@@ -52,6 +52,13 @@ function openItemModal(wi, ii){
   _iModalReceipt = isEdit ? (item.receipt||null) : null;
   renderItemReceiptPreview();
 
+  // Frequency
+  const freqEl=document.getElementById('iFrequency');
+  if(freqEl) freqEl.value = isEdit ? (item.frequency||'monthly') : 'monthly';
+  const ymEl=document.getElementById('iYearlyMonth');
+  if(ymEl) ymEl.value = isEdit ? (item._scheduledYearMonth||0) : 0;
+  itemFreqChange();
+
   // Reset custom categories — add them to pills
   renderCatPills(_iModalCat);
 
@@ -110,6 +117,33 @@ function renderDueDayGrid(selectedDay){
 function pickDueDay(d){
   document.getElementById('iDueDay').value = d;
   renderDueDayGrid(d);
+  // Auto-show which week this day falls in (monthly only)
+  const freqEl=document.getElementById('iFrequency');
+  const freq=freqEl?freqEl.value:'monthly';
+  const hint=document.getElementById('iFreqHint');
+  if(hint&&freq==='monthly'){
+    const wk=getWeekForDay(d,CMK);
+    hint.textContent='Day '+d+' falls in Week '+(wk+1)+' of '+CMK;
+  }
+}
+
+// Show/hide yearly-month row and update frequency hint text
+function itemFreqChange(){
+  const freqEl=document.getElementById('iFrequency');
+  const freq=freqEl?freqEl.value:'monthly';
+  const yearlyRow=document.getElementById('iYearlyMonthRow');
+  const hint=document.getElementById('iFreqHint');
+  if(yearlyRow)yearlyRow.style.display=freq==='yearly'?'block':'none';
+  if(hint){
+    const msgs={
+      monthly:'',
+      weekly:'4 line items will be created — one per week.',
+      biweekly:'2 line items created for Week 1 and Week 3.',
+      quarterly:'Auto-added to January, April, July, and October.',
+      yearly:'Auto-added once per year in the selected month.'
+    };
+    hint.textContent=msgs[freq]||'';
+  }
 }
 
 function clearItemDueDay(){
@@ -161,27 +195,79 @@ function saveItemModal(){
   const note = document.getElementById('iNote').value.trim();
   const dueDayRaw = parseInt(document.getElementById('iDueDay').value);
   const dueDay = (!isNaN(dueDayRaw)&&dueDayRaw>=1&&dueDayRaw<=31) ? dueDayRaw : null;
+  const freq = (document.getElementById('iFrequency')||{}).value || 'monthly';
+  const yearlyMonth = parseInt((document.getElementById('iYearlyMonth')||{}).value)||0;
 
   if(!name){ showToast('Please enter an item name','warn-t'); document.getElementById('iName').focus(); return; }
 
+  // ── QUARTERLY / YEARLY → scheduled template ──
+  if(freq==='quarterly'||freq==='yearly'){
+    if(!S.scheduledExpenses)S.scheduledExpenses=[];
+    const isEditingSched = _iModalIi>=0 && cw()[_iModalWi]&&cw()[_iModalWi].items[_iModalIi]&&cw()[_iModalWi].items[_iModalIi]._scheduledId;
+    const existingId = isEditingSched ? cw()[_iModalWi].items[_iModalIi]._scheduledId : ('se'+Date.now());
+    const se={id:existingId,name,amount,frequency:freq,dueDay,note,week:_iModalWi,yearMonth:yearlyMonth};
+    if(isEditingSched){
+      const idx=S.scheduledExpenses.findIndex(s=>s.id===existingId);
+      if(idx>=0)S.scheduledExpenses[idx]=se; else S.scheduledExpenses.push(se);
+      cw()[_iModalWi].items[_iModalIi]=Object.assign({},cw()[_iModalWi].items[_iModalIi],{name,amount,dueDay,note,frequency:freq,_scheduledId:existingId,_scheduledYearMonth:yearlyMonth});
+    } else {
+      S.scheduledExpenses.push(se);
+      expandScheduledExpenses(CMK); // inject into current month if it qualifies
+    }
+    try{persist();}catch(e){showToast('✗ Could not save','err-t');return;}
+    closeItemModal(); renderExpenses(); updateHealth();
+    const lbl=freq.charAt(0).toUpperCase()+freq.slice(1);
+    showToast('✓ '+lbl+' expense saved — auto-appears in qualifying months');
+    return;
+  }
+
+  // ── WEEKLY → 4 items, one per week ──
+  if(freq==='weekly'){
+    if(_iModalIi>=0){
+      // Edit: update just this occurrence
+      cw()[_iModalWi].items[_iModalIi]=Object.assign({},cw()[_iModalWi].items[_iModalIi],{name,amount,dueDay,note,frequency:'weekly'});
+    } else {
+      cw().forEach(w=>{
+        w.items.push({name,amount,paid:false,dueDay,note,receipt:null,frequency:'weekly',currency:getCurrency().code,_savingsItem:false});
+      });
+    }
+    try{persist();}catch(e){showToast('✗ Could not save','err-t');return;}
+    closeItemModal(); renderExpenses(); updateHealth();
+    showToast(_iModalIi>=0?'✓ Item updated':'✓ Weekly expense added to all 4 weeks');
+    return;
+  }
+
+  // ── BI-WEEKLY → Week 1 (idx 0) and Week 3 (idx 2) ──
+  if(freq==='biweekly'){
+    if(_iModalIi>=0){
+      cw()[_iModalWi].items[_iModalIi]=Object.assign({},cw()[_iModalWi].items[_iModalIi],{name,amount,dueDay,note,frequency:'biweekly'});
+    } else {
+      [0,2].forEach(wi=>{
+        if(cw()[wi])cw()[wi].items.push({name,amount,paid:false,dueDay,note,receipt:null,frequency:'biweekly',currency:getCurrency().code,_savingsItem:false});
+      });
+    }
+    try{persist();}catch(e){showToast('✗ Could not save','err-t');return;}
+    closeItemModal(); renderExpenses(); updateHealth();
+    showToast(_iModalIi>=0?'✓ Item updated':'✓ Bi-weekly expense added to Week 1 & Week 3');
+    return;
+  }
+
+  // ── MONTHLY (default) — standard single item ──
   const newItem = {
-    name,
-    amount,
+    name, amount,
     paid: _iModalStatus==='paid',
-    dueDay,
-    note,
+    dueDay, note,
     receipt: _iModalReceipt,
     currency: getCurrency().code,
+    frequency: 'monthly',
     _savingsItem: false
   };
 
   if(_iModalIi>=0){
-    // Edit existing — preserve _savingsItem flag
     const existing = cw()[_iModalWi].items[_iModalIi];
     newItem._savingsItem = existing._savingsItem||false;
     cw()[_iModalWi].items[_iModalIi] = newItem;
   } else {
-    // Add new
     cw()[_iModalWi].items.push(newItem);
   }
 

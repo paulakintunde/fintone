@@ -112,6 +112,7 @@ function changeMonth(dir){
     const nextMo=nextYM%12;const nextYr=Math.floor(nextYM/12);
     const nextKey=MS[nextMo]+' '+nextYr;
     if(!S.months[nextKey])S.months[nextKey]={weeks:[{items:[]},{items:[]},{items:[]},{items:[]}],revenue:[]};
+    expandScheduledExpenses(nextKey);
     CMK=nextKey;S.currentMonthKey=CMK;
     persist();updateMonthLabel();tagFilter='';
     renderSection(getTab());updateHealth();renderMonthTags();
@@ -195,6 +196,7 @@ function cloneCurrentMonth(doExp=true,doRev=true,keepPaid=false){
   const newRev=doRev?deepClone(cr()).map(r=>({...r,received:keepPaid?r.received:false})):[];
   S.months[nk]={weeks:newWeeks,revenue:newRev};
   applyBudgetRollovers(CMK,nk);
+  expandScheduledExpenses(nk);
   CMK=nk;S.currentMonthKey=nk;persist();updateMonthLabel();renderExpenses();updateHealth();showToast('✓ Cloned to '+nk);
 }
 function openNewMonthModal(){
@@ -240,7 +242,8 @@ function createNewMonth(){
   if(keyToYM(key)>currentRealYM()+6){showToast('Cannot plan more than 6 months ahead','warn-t');return;}
   if(S.months[key]){showToast(key+' already exists','warn-t');closeNewMonthModal();return;}
   if(from==='blank'){S.months[key]={weeks:[{items:[]},{items:[]},{items:[]},{items:[]}],revenue:[]};}
-  else{const src=S.months[from];S.months[key]={weeks:deepClone(src.weeks).map(w=>({items:w.items.map(i=>({...i,paid:false}))})),revenue:deepClone(src.revenue).map(r=>({...r,received:false}))};}
+  else{const src=S.months[from];S.months[key]={weeks:deepClone(src.weeks).map(w=>({items:w.items.map(i=>({...i,paid:false}))})),revenue:deepClone(src.revenue).map(r=>({...r,received:false}));};}
+  expandScheduledExpenses(key);
   CMK=key;S.currentMonthKey=key;persist();updateMonthLabel();closeNewMonthModal();renderExpenses();updateHealth();showToast('✓ Created '+key);
 }
 
@@ -400,7 +403,7 @@ async function resetAllData(){
   const blankWeeks=[{items:[]},{items:[]},{items:[]},{items:[]}];
   S={
     loans:[],strategy:'avalanche',savings:[],
-    budgets:{...BDFT},budgetRollover:{},financialGoals:[],customCategories:[],
+    budgets:{...BDFT},budgetRollover:{},financialGoals:[],customCategories:[],scheduledExpenses:[],
     darkMode:S?S.darkMode:false,archiveThreshold:6,archivedMonths:{},
     currency:{symbol:'$',code:'CAD',locale:'en-CA'},
     fxRates:{rates:{},fetchedAt:0,base:'CAD'},
@@ -429,6 +432,8 @@ async function resetAllData(){
   await checkLock();
   migrateAmountsToCents();
   runAutoArchive();
+  // Expand any quarterly/yearly scheduled expenses into current month
+  expandScheduledExpenses(CMK);
   applyDark();
   updateMonthLabel();
 // Set strategy buttons correctly

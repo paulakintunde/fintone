@@ -18,6 +18,8 @@ function showOnboarding(){
   document.getElementById('obExpNote').value='';
   document.getElementById('obExpDue').value='';
   document.getElementById('obExpWeek').value='0';
+  const freqEl=document.getElementById('obExpFreq');
+  if(freqEl){freqEl.value='monthly';obFreqChange();}
   obGoTo(0);
   document.getElementById('onboardOverlay').style.display='flex';
   document.body.style.overflow='hidden';
@@ -63,6 +65,35 @@ function obSyncPrefixes(){
 
 function obUpdateAmtPrefix(){
   obSyncPrefixes();
+}
+
+// Auto-detect which week a due day falls in and pre-select it
+function obDueDayChange(){
+  const day=parseInt(document.getElementById('obExpDue').value);
+  const freqEl=document.getElementById('obExpFreq');
+  const freq=freqEl?freqEl.value:'monthly';
+  if(freq==='monthly'&&day>=1&&day<=31){
+    const wk=getWeekForDay(day,CMK);
+    document.getElementById('obExpWeek').value=wk;
+    const hint=document.getElementById('obWeekHint');
+    if(hint)hint.textContent='→ auto Week '+(wk+1);
+  }
+}
+
+// Show/hide week row and yearly-month row based on chosen frequency
+function obFreqChange(){
+  const freq=(document.getElementById('obExpFreq')||{}).value||'monthly';
+  const weekRow=document.getElementById('obExpWeekRow');
+  const yearlyRow=document.getElementById('obExpYearlyMonthRow');
+  const hint=document.getElementById('obWeekHint');
+  if(freq==='quarterly'||freq==='yearly'){
+    if(weekRow)weekRow.style.display='none';
+    if(yearlyRow)yearlyRow.style.display=freq==='yearly'?'':'none';
+  } else {
+    if(weekRow)weekRow.style.display='';
+    if(yearlyRow)yearlyRow.style.display='none';
+  }
+  if(hint)hint.textContent='';
 }
 
 function obSaveIncome(){
@@ -131,13 +162,19 @@ function obAddExpense(){
   errEl.textContent='';
   if(!name){errEl.textContent='Enter an expense name.';nameEl.focus();return;}
   if(isNaN(val)||val<=0){errEl.textContent='Enter a valid amount greater than 0.';amtEl.focus();return;}
+  const freq=(document.getElementById('obExpFreq')||{}).value||'monthly';
   const week=parseInt(document.getElementById('obExpWeek').value)||0;
   const dueRaw=parseInt(document.getElementById('obExpDue').value);
   const dueDay=(dueRaw>=1&&dueRaw<=31)?dueRaw:null;
   const note=document.getElementById('obExpNote').value.trim();
-  _obExpenses.push({name,amount:Math.round(val*100)/100,week,dueDay,note,receipt:_obReceiptData});
+  const yearlyMonth=parseInt((document.getElementById('obExpYearlyMonth')||{}).value)||0;
+  _obExpenses.push({name,amount:Math.round(val*100)/100,week,dueDay,note,receipt:_obReceiptData,frequency:freq,yearlyMonth});
   nameEl.value=''; amtEl.value=''; document.getElementById('obExpNote').value='';
   document.getElementById('obExpDue').value=''; document.getElementById('obExpWeek').value='0';
+  const freqEl=document.getElementById('obExpFreq');
+  if(freqEl){freqEl.value='monthly';obFreqChange();}
+  const hint=document.getElementById('obWeekHint');
+  if(hint)hint.textContent='';
   document.getElementById('obExpReceiptLabel').textContent='📷 Tap to attach image';
   document.getElementById('obExpReceipt').value=''; _obReceiptData=null;
   obRenderExpenses();
@@ -159,13 +196,18 @@ function obRenderExpenses(){
     return;
   }
   list.classList.remove('ob-list-empty');
-  list.innerHTML=_obExpenses.map((e,i)=>`
-    <div class="ob-item-row">
-      <span class="ob-item-name">${e.name.replace(/</g,'&lt;')}${e.dueDay?` <span style="font-size:9px;color:var(--text-muted);">due ${e.dueDay}</span>`:''}${e.note?` <span style="font-size:9px;color:var(--text-muted);">&#128203;</span>`:''}</span>
-      <span class="ob-item-amt" style="font-size:10px;color:var(--text-muted);margin-right:4px;">Wk${e.week+1}</span>
+  const freqBadge={monthly:'',weekly:'🔁 Weekly',biweekly:'🔁 Bi-wk',quarterly:'📅 Qtly',yearly:'📅 Yearly'};
+  list.innerHTML=_obExpenses.map((e,i)=>{
+    const freq=e.frequency||'monthly';
+    const fb=freqBadge[freq]?` <span style="font-size:9px;background:var(--sage-light);color:var(--sage);padding:1px 4px;border-radius:3px;">${freqBadge[freq]}</span>`:'';
+    const wkLabel=(freq==='monthly')?` <span style="font-size:10px;color:var(--text-muted);margin-right:4px;">Wk${e.week+1}</span>`:'';
+    return`<div class="ob-item-row">
+      <span class="ob-item-name">${e.name.replace(/</g,'&lt;')}${fb}${e.dueDay?` <span style="font-size:9px;color:var(--text-muted);">due ${e.dueDay}</span>`:''}${e.note?` <span style="font-size:9px;color:var(--text-muted);">&#128203;</span>`:''}</span>
+      ${wkLabel}
       <span class="ob-item-amt">${sym}${e.amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}${e.receipt?` <span style="font-size:9px;">&#128248;</span>`:''}</span>
       <button class="ob-item-del" onclick="obRemoveExpense(${i})" title="Remove" aria-label="Remove ${e.name.replace(/"/g,'')}">&times;</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ── Savings ──
@@ -328,9 +370,35 @@ function obFinish(){
   // Always replace expenses — use user entries or empty (clears demo)
   if(md){
     md.weeks.forEach(w=>{w.items=[];});
+    if(!S.scheduledExpenses)S.scheduledExpenses=[];
     _obExpenses.forEach(e=>{
-      const wk=Math.min(3,Math.max(0,e.week||0));
-      md.weeks[wk].items.push({name:e.name,amount:e.amount,paid:false,dueDay:e.dueDay||null,note:e.note||'',receipt:e.receipt||null});
+      const freq=e.frequency||'monthly';
+      if(freq==='quarterly'||freq==='yearly'){
+        // Store as a scheduled template — auto-expands into qualifying months
+        const se={
+          id:'se'+Date.now()+Math.random().toString(36).slice(2),
+          name:e.name,amount:e.amount,frequency:freq,
+          dueDay:e.dueDay||null,note:e.note||'',
+          week:e.week||0,yearMonth:e.yearlyMonth||0
+        };
+        S.scheduledExpenses.push(se);
+        // Also inject into current month right away if it qualifies
+        expandScheduledExpenses(CMK);
+      } else if(freq==='weekly'){
+        // Add one item per week (all 4)
+        md.weeks.forEach(w=>{
+          w.items.push({name:e.name,amount:e.amount,paid:false,dueDay:e.dueDay||null,note:e.note||'',receipt:e.receipt||null,frequency:'weekly'});
+        });
+      } else if(freq==='biweekly'){
+        // Add to Week 1 and Week 3 (indices 0 and 2)
+        [0,2].forEach(wi=>{
+          if(md.weeks[wi])md.weeks[wi].items.push({name:e.name,amount:e.amount,paid:false,dueDay:e.dueDay||null,note:e.note||'',receipt:e.receipt||null,frequency:'biweekly'});
+        });
+      } else {
+        // Monthly — place in the chosen week
+        const wk=Math.min(3,Math.max(0,e.week||0));
+        md.weeks[wk].items.push({name:e.name,amount:e.amount,paid:false,dueDay:e.dueDay||null,note:e.note||'',receipt:e.receipt||null,frequency:'monthly'});
+      }
     });
   }
 

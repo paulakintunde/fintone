@@ -249,15 +249,60 @@ async function initState(){
       if(!S.budgetRollover) S.budgetRollover={};
       if(!S.financialGoals) S.financialGoals=[];
       if(!S.customCategories) S.customCategories=[];
+      if(!S.scheduledExpenses) S.scheduledExpenses=[];
       CMK=S.currentMonthKey||Object.keys(S.months)[0];
       return;
     }catch(e){}
   }
-  S={loans:DL.map(l=>JSON.parse(JSON.stringify(l))),strategy:'avalanche',savings:JSON.parse(JSON.stringify(DSV)),budgets:{...BDFT},budgetRollover:{},financialGoals:[],customCategories:[],darkMode:false,archiveThreshold:6,archivedMonths:{},currency:{symbol:'$',code:'CAD',locale:'en-CA'},fxRates:{rates:{},fetchedAt:0,base:'CAD'},months:{'May 2026':{weeks:DW.map(w=>JSON.parse(JSON.stringify(w))),revenue:JSON.parse(JSON.stringify(DR))}},currentMonthKey:'May 2026'};
-  CMK='May 2026';
+  // Seed month = actual current month, not a hardcoded date
+  const _seedNow=new Date();
+  const _seedKey=mk(_seedNow.getMonth(),_seedNow.getFullYear());
+  S={loans:DL.map(l=>JSON.parse(JSON.stringify(l))),strategy:'avalanche',savings:JSON.parse(JSON.stringify(DSV)),budgets:{...BDFT},budgetRollover:{},financialGoals:[],customCategories:[],scheduledExpenses:[],darkMode:false,archiveThreshold:6,archivedMonths:{},currency:{symbol:'$',code:'CAD',locale:'en-CA'},fxRates:{rates:{},fetchedAt:0,base:'CAD'},months:{[_seedKey]:{weeks:DW.map(w=>JSON.parse(JSON.stringify(w))),revenue:JSON.parse(JSON.stringify(DR))}},currentMonthKey:_seedKey};
+  CMK=_seedKey;
   // Sync savings contributions as expense items in seed month
   syncSavingsExpenses();
   persist(false);
+}
+
+// ══════════════════════════════════════════════════════════════
+// SCHEDULED EXPENSES  (quarterly / yearly auto-expansion)
+// Stored in S.scheduledExpenses[].  Each entry:
+//   { id, name, amount, frequency:'quarterly'|'yearly',
+//     dueDay, week, note, yearMonth (0-11, yearly only) }
+// Called whenever a new month is created or on boot.
+// ══════════════════════════════════════════════════════════════
+function expandScheduledExpenses(monthKey){
+  if(!S||!S.scheduledExpenses||!S.scheduledExpenses.length)return 0;
+  const parts=monthKey.split(' ');
+  const mo=MS.indexOf(parts[0]);
+  const yr=parseInt(parts[1]);
+  const md=S.months[monthKey];
+  if(!md||mo<0||isNaN(yr))return 0;
+  let added=0;
+  S.scheduledExpenses.forEach(se=>{
+    // Does this month qualify?
+    let applies=false;
+    if(se.frequency==='quarterly') applies=(mo%3===0); // Jan/Apr/Jul/Oct
+    else if(se.frequency==='yearly') applies=(mo===(se.yearMonth||0));
+    if(!applies)return;
+    // Already expanded into this month?
+    const already=md.weeks.some(w=>w.items.some(i=>i._scheduledId===se.id));
+    if(already)return;
+    // Place in the right week: stored week preference, or auto-detect from due day
+    const wk=se.week!==undefined?Math.min(3,Math.max(0,se.week)):getWeekForDay(se.dueDay,monthKey);
+    const freqTag=se.frequency==='quarterly'?'[quarterly]':'[yearly]';
+    md.weeks[wk].items.push({
+      name:se.name,amount:se.amount,paid:false,
+      dueDay:se.dueDay||null,
+      note:(se.note?se.note+' ':'')+freqTag,
+      receipt:null,
+      frequency:se.frequency,
+      _scheduledId:se.id
+    });
+    added++;
+  });
+  if(added>0)persist(false);
+  return added;
 }
 
 // ══════════════════════════════════════════════════════════════
