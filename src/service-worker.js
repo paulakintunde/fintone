@@ -1,4 +1,4 @@
-const CACHE = 'finflow-v2';
+const CACHE = 'finflow-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -43,7 +43,29 @@ self.addEventListener('activate', function (e) {
 });
 
 self.addEventListener('fetch', function (e) {
-  if (e.request.url.indexOf('chrome-extension') > -1 || e.request.url.indexOf('api.anthropic') > -1) return;
+  var url = e.request.url;
+  if (url.indexOf('chrome-extension') > -1 || url.indexOf('api.anthropic') > -1 ||
+      url.indexOf('api.openai') > -1 || url.indexOf('open.er-api') > -1) return;
+
+  // Network-first for JS files — prevents stale code bugs after deploys
+  var isJS = url.indexOf('/js/') > -1 && url.indexOf('.js') > -1 &&
+             url.indexOf('vendor') === -1; // vendor (chart.min.js) can stay cache-first
+  if (isJS) {
+    e.respondWith(
+      fetch(e.request).then(function (response) {
+        var clone = response.clone();
+        caches.open(CACHE).then(function (c) { c.put(e.request, clone); });
+        return response;
+      }).catch(function () {
+        return caches.match(e.request).then(function (r) {
+          return r || new Response('// offline', { status: 503, headers: { 'Content-Type': 'application/javascript' } });
+        });
+      })
+    );
+    return;
+  }
+
+  // Cache-first for everything else (HTML, CSS, fonts, vendor JS)
   e.respondWith(
     caches.match(e.request).then(function (r) {
       return r || fetch(e.request).catch(function () {

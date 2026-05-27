@@ -1026,6 +1026,469 @@
     </div>
   </div>
 </div>
+<!-- ══════════════════════════════════════════════════
+     MODALS — Add / Edit Expense Item
+     ══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="itemModal" onclick="if(event.target===this)closeItemModal()">
+  <div class="pmodal" style="max-width:480px;">
+    <button class="close-btn" onclick="closeItemModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4 id="itemModalTitle">Add Expense</h4>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;" id="itemModalWeekLabel"></div>
+    <div class="fr" style="margin-bottom:9px;">
+      <div class="fg" style="flex:2;">
+        <label for="iName" class="fl">Item Name</label>
+        <input class="fi" id="iName" type="text" placeholder="e.g. Rent, Netflix" maxlength="60" oninput="itemNameAutoTag(this.value)" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label for="iAmount" class="fl">Amount ($)</label>
+        <input class="fi" id="iAmount" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal">
+      </div>
+    </div>
+    <div style="margin-bottom:9px;">
+      <div class="fl" style="margin-bottom:6px;">Status</div>
+      <div style="display:flex;gap:8px;">
+        <button class="status-opt opt-pending sel" id="iStatusPending" onclick="setItemStatus('pending')">&#9203; Pending</button>
+        <button class="status-opt opt-paid" id="iStatusPaid" onclick="setItemStatus('paid')">&#9989; Paid</button>
+      </div>
+    </div>
+    <div style="margin-bottom:9px;">
+      <div class="fl" style="margin-bottom:6px;">Category</div>
+      <div class="cat-pill-grid" id="catPillGrid"></div>
+    </div>
+    <div class="fg" style="margin-bottom:9px;">
+      <label for="iNote" class="fl">Note (optional)</label>
+      <input class="fi" id="iNote" type="text" placeholder="e.g. Annual plan" maxlength="120">
+    </div>
+    <div style="margin-bottom:9px;">
+      <label for="iDueDay" class="fl">Due day of month (optional)</label>
+      <input class="fi" id="iDueDay" type="number" min="1" max="31" placeholder="e.g. 15" inputmode="numeric">
+      <div class="due-day-grid" id="dueDayGrid"></div>
+      <button class="tbtn" style="margin-top:4px;font-size:10px;" onclick="clearItemDueDay()">Clear due date</button>
+    </div>
+    <div style="margin-bottom:9px;">
+      <div class="fl" style="margin-bottom:4px;">Receipt (optional, max 200KB)</div>
+      <label class="receipt-upload-zone" id="iReceiptZone" style="padding:10px 14px;font-size:12px;cursor:pointer;display:block;">
+        <span>&#128248; Tap to attach image</span>
+        <input type="file" id="iReceiptInput" accept="image/*" style="display:none;" onchange="handleItemReceipt(this.files[0])">
+      </label>
+      <div id="iReceiptPreview"></div>
+    </div>
+    <div id="iDeleteConfirm" class="quick-confirm">
+      <div class="quick-confirm-msg">Delete this expense item?</div>
+      <div class="quick-confirm-btns">
+        <button class="btn-s" onclick="hideItemDeleteConfirm()">Cancel</button>
+        <button class="btn-d" onclick="confirmDeleteItem()">Delete</button>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeItemModal()">Cancel</button>
+      <button class="btn-d" id="iDeleteBtn" onclick="deleteItemFromModal()" style="display:none;">&#128465; Delete</button>
+      <button class="btn-p" onclick="saveItemModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LOAN MODAL ── -->
+<div class="modal-overlay" id="loanModal" onclick="if(event.target===this)closeLoanModal()">
+  <div class="pmodal">
+    <button class="close-btn" onclick="closeLoanModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4 id="loanModalTitle">Add Loan</h4>
+    <div class="fg" style="margin-bottom:9px;"><label for="lName" class="fl">Loan / Debt Name</label><input class="fi" id="lName" type="text" placeholder="e.g. Visa Card, Car Loan" maxlength="60"></div>
+    <div class="fr" style="margin-bottom:9px;">
+      <div class="fg"><label for="lBalance" class="fl">Current Balance ($)</label><input class="fi" id="lBalance" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"></div>
+      <div class="fg"><label for="lOriginal" class="fl">Original Amount ($)</label><input class="fi" id="lOriginal" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"></div>
+    </div>
+    <div class="fr" style="margin-bottom:9px;">
+      <div class="fg"><label for="lRate" class="fl">Interest Rate (%)</label><input class="fi" id="lRate" type="number" min="0" max="100" step="0.01" placeholder="e.g. 19.99" inputmode="decimal"></div>
+      <div class="fg"><label for="lMinPmt" class="fl">Min. Monthly Payment ($)</label><input class="fi" id="lMinPmt" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"></div>
+    </div>
+    <div id="loanDeleteConfirm" class="quick-confirm">
+      <div class="quick-confirm-msg">Delete this loan permanently?</div>
+      <div class="quick-confirm-btns">
+        <button class="btn-s" onclick="hideLoanDeleteConfirm()">Cancel</button>
+        <button class="btn-d" onclick="confirmDeleteLoan()">Delete</button>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeLoanModal()">Cancel</button>
+      <button class="btn-d" id="lDeleteBtn" onclick="showLoanDeleteConfirm()" style="display:none;">&#128465; Delete</button>
+      <button class="btn-p" onclick="saveLoanModal()">Save Loan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── REVENUE MODAL ── -->
+<div class="modal-overlay" id="revModal" onclick="if(event.target===this)closeRevModal()">
+  <div class="pmodal">
+    <button class="close-btn" onclick="closeRevModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4 id="revModalTitle">Add Income Source</h4>
+    <div class="fg" style="margin-bottom:9px;"><label for="rName" class="fl">Source Name</label><input class="fi" id="rName" type="text" placeholder="e.g. Salary, Freelance" maxlength="60"></div>
+    <div class="fg" style="margin-bottom:9px;"><label for="rAmount" class="fl">Amount ($)</label><input class="fi" id="rAmount" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"></div>
+    <div style="margin-bottom:9px;">
+      <div class="fl" style="margin-bottom:6px;">Status</div>
+      <div style="display:flex;gap:8px;">
+        <button class="status-opt opt-pending sel" id="rStatusPending" onclick="setRevStatus('pending')">&#9203; Pending</button>
+        <button class="status-opt opt-paid" id="rStatusReceived" onclick="setRevStatus('received')">&#9989; Received</button>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:9px;"><label for="rNote" class="fl">Note (optional)</label><input class="fi" id="rNote" type="text" placeholder="Optional note" maxlength="120"></div>
+    <div id="revDeleteConfirm" class="quick-confirm">
+      <div class="quick-confirm-msg">Delete this income source?</div>
+      <div class="quick-confirm-btns">
+        <button class="btn-s" onclick="hideRevDeleteConfirm()">Cancel</button>
+        <button class="btn-d" onclick="confirmDeleteRev()">Delete</button>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeRevModal()">Cancel</button>
+      <button class="btn-d" id="rDeleteBtn" onclick="showRevDeleteConfirm()" style="display:none;">&#128465; Delete</button>
+      <button class="btn-p" onclick="saveRevModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── RECEIPT MODAL ── -->
+<div class="modal-overlay" id="receiptModal" onclick="if(event.target===this)closeReceiptModal()">
+  <div class="pmodal" style="max-width:360px;">
+    <button class="close-btn" onclick="closeReceiptModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#128248; Receipt</h4>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;" id="receiptModalItemName"></p>
+    <div id="receiptImgWrap" style="text-align:center;margin-bottom:10px;"></div>
+    <label class="receipt-upload-zone" style="padding:10px 14px;font-size:12px;cursor:pointer;display:block;margin-bottom:9px;">
+      <span>&#128248; Attach / replace image</span>
+      <input type="file" id="receiptFileInput" accept="image/*" style="display:none;" onchange="handleReceiptFile(this.files[0])">
+    </label>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeReceiptModal()">Cancel</button>
+      <button class="btn-d" onclick="clearReceipt()">&#128465; Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── COMPARE MODAL ── -->
+<div class="modal-overlay" id="compareModal" onclick="if(event.target===this)closeCompareModal()">
+  <div class="pmodal" style="max-width:580px;">
+    <button class="close-btn" onclick="closeCompareModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#9878; Compare Two Months</h4>
+    <div class="fr" style="margin-bottom:12px;">
+      <div class="fg"><label for="compareA" class="fl">Month A</label><select class="fi" id="compareA" onchange="renderComparison()"></select></div>
+      <div class="fg"><label for="compareB" class="fl">Month B</label><select class="fi" id="compareB" onchange="renderComparison()"></select></div>
+    </div>
+    <div id="compareResult" style="overflow-x:auto;max-height:52vh;overflow-y:auto;"></div>
+    <div class="btn-row" style="margin-top:12px;"><button class="btn-p" onclick="closeCompareModal()">Done</button></div>
+  </div>
+</div>
+
+<!-- ── CATEGORY MANAGER MODAL ── -->
+<div class="modal-overlay" id="catManagerModal" onclick="if(event.target===this)closeCatManager()">
+  <div class="pmodal" style="max-width:480px;">
+    <button class="close-btn" onclick="closeCatManager()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#127991; Manage Custom Categories</h4>
+    <div id="customCatList" style="margin-bottom:14px;min-height:30px;"></div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-weight:600;font-size:12px;margin-bottom:8px;">Add New Category</div>
+      <div class="fg" style="margin-bottom:7px;"><label for="newCatName" class="fl">Name</label><input class="fi" id="newCatName" type="text" placeholder="e.g. Entertainment" maxlength="30"></div>
+      <div class="fg" style="margin-bottom:7px;"><label for="newCatKeywords" class="fl">Keywords (comma-separated)</label><input class="fi" id="newCatKeywords" type="text" placeholder="e.g. netflix, spotify, cinema"></div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
+        <div class="fg"><label for="newCatBg" class="fl">Background</label><input type="color" id="newCatBg" value="#EBF4FF" style="width:100%;height:32px;border:1px solid var(--border);border-radius:var(--radius-xs);cursor:pointer;" onchange="updateCatPreview()"></div>
+        <div class="fg"><label for="newCatColor" class="fl">Text Color</label><input type="color" id="newCatColor" value="#2B6CB0" style="width:100%;height:32px;border:1px solid var(--border);border-radius:var(--radius-xs);cursor:pointer;" onchange="updateCatPreview()"></div>
+        <div><div class="fl" style="margin-bottom:6px;">Preview</div><span id="catColorPreview" class="cat-badge" style="background:#EBF4FF;color:#2B6CB0;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:500;">Category</span></div>
+      </div>
+      <button class="btn-p" onclick="addCustomCategory()" style="width:100%;margin-bottom:4px;">+ Add Category</button>
+    </div>
+    <div class="btn-row" style="margin-top:10px;"><button class="btn-p" onclick="closeCatManager()">Done</button></div>
+  </div>
+</div>
+
+<!-- ── CSV IMPORT MODAL ── -->
+<div class="modal-overlay" id="csvModal" onclick="if(event.target===this)closeCsvModal()">
+  <div class="pmodal" style="max-width:540px;">
+    <button class="close-btn" onclick="closeCsvModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#128229; Import CSV</h4>
+    <label class="receipt-upload-zone" id="csvDropZone" style="padding:20px;display:block;text-align:center;cursor:pointer;margin-bottom:12px;">
+      <div style="font-size:24px;margin-bottom:6px;">&#128229;</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:3px;">Drop a CSV file here or click to browse</div>
+      <div style="font-size:11px;color:var(--text-muted);">Supports exports from most banks</div>
+      <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none;" onchange="handleCsvFile(this.files[0])">
+    </label>
+    <div id="csvColMap" style="display:none;margin-bottom:10px;">
+      <div style="font-weight:600;font-size:12px;margin-bottom:8px;">Map Columns</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div><label for="csvColDate" class="fl">Date column</label><select class="fi" id="csvColDate" onchange="renderCsvPreview()"></select></div>
+        <div><label for="csvColDesc" class="fl">Description column</label><select class="fi" id="csvColDesc" onchange="renderCsvPreview()"></select></div>
+        <div><label for="csvColAmt" class="fl">Amount column</label><select class="fi" id="csvColAmt" onchange="renderCsvPreview()"></select></div>
+        <div><label for="csvColType" class="fl">Dr/Cr column</label><select class="fi" id="csvColType" onchange="renderCsvPreview()"></select></div>
+      </div>
+      <div><label for="csvImportTarget" class="fl">Import as</label>
+        <select class="fi" id="csvImportTarget">
+          <option value="expenses">Expenses</option>
+          <option value="revenue">Revenue</option>
+        </select>
+      </div>
+    </div>
+    <div id="csvPreview" style="overflow-x:auto;max-height:200px;overflow-y:auto;margin-bottom:10px;"></div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeCsvModal()">Cancel</button>
+      <div id="csvBtnRow" style="display:none;flex:1;"><button class="btn-p" style="width:100%;" onclick="executeCsvImport()">Import <span id="csvImportCount">0</span> transactions</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CURRENCY MODAL ── -->
+<div class="modal-overlay" id="currencyModal" onclick="if(event.target===this)closeCurrencyModal()">
+  <div class="pmodal" style="max-width:380px;">
+    <button class="close-btn" onclick="closeCurrencyModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#127759; Currency Settings</h4>
+    <div class="fg" style="margin-bottom:9px;">
+      <label for="currencySelect" class="fl">Currency</label>
+      <select class="fi" id="currencySelect" onchange="updateCurrencyPreview(this.value)">
+        <option value="CAD">CAD — Canadian Dollar</option>
+        <option value="USD">USD — US Dollar</option>
+        <option value="GBP">GBP — British Pound</option>
+        <option value="EUR">EUR — Euro</option>
+        <option value="AUD">AUD — Australian Dollar</option>
+        <option value="NZD">NZD — New Zealand Dollar</option>
+        <option value="CHF">CHF — Swiss Franc</option>
+        <option value="JPY">JPY — Japanese Yen</option>
+        <option value="INR">INR — Indian Rupee</option>
+        <option value="MXN">MXN — Mexican Peso</option>
+        <option value="ZAR">ZAR — South African Rand</option>
+        <option value="NGN">NGN — Nigerian Naira</option>
+        <option value="KES">KES — Kenyan Shilling</option>
+        <option value="GHS">GHS — Ghanaian Cedi</option>
+        <option value="CUSTOM">Custom&#8230;</option>
+      </select>
+    </div>
+    <div id="customCurrRow" style="display:none;margin-bottom:9px;">
+      <div class="fr" style="gap:8px;">
+        <div class="fg"><label for="customSymbol" class="fl">Symbol</label><input class="fi" id="customSymbol" type="text" placeholder="e.g. $" maxlength="6" oninput="updateCurrencyPreview('CUSTOM')"></div>
+        <div class="fg"><label for="customLocale" class="fl">Locale</label><input class="fi" id="customLocale" type="text" placeholder="e.g. en-CA" oninput="updateCurrencyPreview('CUSTOM')"></div>
+      </div>
+    </div>
+    <div style="background:var(--sage-light);border-radius:var(--radius-xs);padding:8px 12px;font-size:13px;color:var(--sage);margin-bottom:12px;font-family:'DM Mono',monospace;font-weight:600;" id="currPreview">$1,234.56</div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeCurrencyModal()">Cancel</button>
+      <button class="btn-p" onclick="saveCurrency()">Save Currency</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── AI SETUP MODAL ── -->
+<div class="modal-overlay" id="claudeSetupModal" onclick="if(event.target===this)closeClaudeSetup()">
+  <div class="pmodal" style="max-width:420px;">
+    <button class="close-btn" onclick="closeClaudeSetup()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#128279; Connect AI</h4>
+    <div class="ai-tab-bar" style="margin-bottom:14px;">
+      <button class="ai-tab-btn ai-tab-active" id="setupTabClaude" onclick="switchSetupTab('claude')">&#129302; Claude</button>
+      <button class="ai-tab-btn" id="setupTabOpenai" onclick="switchSetupTab('openai')">&#9889; GPT-4o</button>
+    </div>
+    <div id="setupPanelClaude">
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">Enter your Anthropic API key. Get one at <a href="https://console.anthropic.com" target="_blank" rel="noopener" style="color:var(--sage);">console.anthropic.com</a></p>
+      <div style="display:flex;gap:6px;margin-bottom:4px;">
+        <input class="fi" id="claudeKeyInput" type="password" placeholder="sk-ant-&#8230;" style="flex:1;margin-bottom:0;" autocomplete="off">
+        <button class="tbtn" id="claudeKeyToggle" onclick="toggleClaudeKeyVis()" style="white-space:nowrap;font-size:11px;">Show</button>
+      </div>
+    </div>
+    <div id="setupPanelOpenai" style="display:none;">
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">Enter your OpenAI API key. Get one at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" style="color:var(--blue);">platform.openai.com</a></p>
+      <div style="display:flex;gap:6px;margin-bottom:4px;">
+        <input class="fi" id="openaiKeyInput" type="password" placeholder="sk-&#8230;" style="flex:1;margin-bottom:0;" autocomplete="off">
+        <button class="tbtn" id="openaiKeyToggle" onclick="toggleOpenAIKeyVis()" style="white-space:nowrap;font-size:11px;">Show</button>
+      </div>
+    </div>
+    <div id="claudeSetupError" style="display:none;background:var(--danger-light);color:var(--danger);font-size:11px;padding:7px 10px;border-radius:var(--radius-xs);margin:8px 0;"></div>
+    <p style="font-size:10px;color:var(--text-muted);margin:8px 0 10px;">Keys are stored locally in your browser only.</p>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeClaudeSetup()">Cancel</button>
+      <button class="btn-p" id="claudeConnectBtn" onclick="connectAI()">Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── AI MANAGE MODAL ── -->
+<div class="modal-overlay" id="claudeManageModal" onclick="if(event.target===this)closeClaudeManage()">
+  <div class="pmodal" style="max-width:400px;">
+    <button class="close-btn" onclick="closeClaudeManage()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#9881; AI Provider Settings</h4>
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-weight:600;font-size:12px;">&#129302; Claude (Anthropic)</div>
+          <div id="mgr-claude-status" class="ai-provider-status disconnected"></div>
+        </div>
+        <div id="mgr-claude-actions" style="display:flex;gap:6px;"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-weight:600;font-size:12px;">&#9889; GPT-4o (OpenAI)</div>
+          <div id="mgr-openai-status" class="ai-provider-status disconnected"></div>
+        </div>
+        <div id="mgr-openai-actions" style="display:flex;gap:6px;"></div>
+      </div>
+      <div id="aiDefaultRow" style="display:none;padding:8px 0;align-items:center;gap:8px;">
+        <label for="aiProviderSelect" style="font-size:12px;color:var(--text-secondary);white-space:nowrap;">Default provider:</label>
+        <select class="fi" id="aiProviderSelect" onchange="setAIProvider(this.value)" style="margin-bottom:0;">
+          <option value="claude">Claude</option>
+          <option value="openai">GPT-4o</option>
+        </select>
+      </div>
+    </div>
+    <div id="claudeRemoveConfirm" style="display:none;background:var(--danger-light);border:1px solid var(--danger-mid);border-radius:var(--radius-xs);padding:10px;margin-bottom:9px;">
+      <p id="claudeRemoveMsg" style="font-size:12px;color:var(--danger);margin-bottom:8px;"></p>
+      <div class="btn-row">
+        <button class="btn-s" onclick="document.getElementById('claudeRemoveConfirm').style.display='none'">Cancel</button>
+        <button class="btn-d" onclick="claudeConfirmRemove()">Remove Key</button>
+      </div>
+    </div>
+    <div class="btn-row"><button class="btn-p" onclick="closeClaudeManage()">Done</button></div>
+  </div>
+</div>
+
+<!-- ── CLONE MONTH MODAL ── -->
+<div class="modal-overlay" id="cloneModal" onclick="if(event.target===this)closeCloneModal()">
+  <div class="pmodal" style="max-width:360px;">
+    <button class="close-btn" onclick="closeCloneModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#128260; Clone Month</h4>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Creates a copy of the current month into the next month.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="cloneExpenses" checked style="accent-color:var(--sage);width:15px;height:15px;"> Copy expenses
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="cloneRevenue" checked style="accent-color:var(--sage);width:15px;height:15px;"> Copy income sources
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="cloneKeepPaid" style="accent-color:var(--sage);width:15px;height:15px;"> Keep paid / received status
+      </label>
+    </div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeCloneModal()">Cancel</button>
+      <button class="btn-p" onclick="executeClone()">Clone Month</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DELETE MONTH MODAL ── -->
+<div class="modal-overlay" id="deleteMonthModal" onclick="if(event.target===this)closeDeleteMonthModal()">
+  <div class="pmodal" style="max-width:360px;">
+    <button class="close-btn" onclick="closeDeleteMonthModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4>Delete Month?</h4>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;">Permanently delete <strong id="deleteMonthKey"></strong>? This cannot be undone.</p>
+    <div id="deleteMonthArchiveRow" style="display:none;margin-bottom:12px;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;">
+        <input type="checkbox" id="deleteMonthAlsoArchive" style="accent-color:var(--danger);"> Also remove from archive
+      </label>
+    </div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeDeleteMonthModal()">Cancel</button>
+      <button class="btn-d" onclick="executeDeleteMonth()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESTORE ARCHIVE MODAL ── -->
+<div class="modal-overlay" id="restoreModal" onclick="if(event.target===this)closeRestoreModal()">
+  <div class="pmodal" style="max-width:360px;">
+    <button class="close-btn" onclick="closeRestoreModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#128260; Restore Month?</h4>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;" id="restoreModalDesc"></p>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeRestoreModal()">Cancel</button>
+      <button class="btn-p" onclick="executeRestore()">Restore</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESET DATA MODAL ── -->
+<div class="modal-overlay" id="resetModal" onclick="if(event.target===this)closeResetModal()">
+  <div class="pmodal" style="max-width:380px;">
+    <button class="close-btn" onclick="closeResetModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4 id="resetModalTitle">Reset Data?</h4>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;" id="resetModalDesc"></p>
+    <div style="background:var(--danger-light);border:1px solid var(--danger-mid);border-radius:var(--radius-xs);padding:10px;margin-bottom:12px;">
+      <div style="font-size:12px;color:var(--danger);margin-bottom:6px;">Type <strong id="resetConfirmWord"></strong> to confirm:</div>
+      <input class="fi" id="resetConfirmInput" type="text" placeholder="Type here&#8230;" oninput="checkResetConfirm(this.value)" autocomplete="off" style="text-transform:uppercase;">
+    </div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeResetModal()">Cancel</button>
+      <button class="btn-d" id="resetConfirmBtn" onclick="executeReset()" disabled style="opacity:.4;cursor:not-allowed;">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FULL RESET MODAL ── -->
+<div class="modal-overlay" id="fullResetModal" onclick="if(event.target===this)closeFullResetConfirm()">
+  <div class="pmodal" style="max-width:380px;">
+    <button class="close-btn" onclick="closeFullResetConfirm()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#9888; Full Data Reset</h4>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Permanently deletes <strong>all</strong> your data — months, loans, savings, and settings. Cannot be undone.</p>
+    <div style="background:var(--danger-light);border:1px solid var(--danger-mid);border-radius:var(--radius-xs);padding:10px;margin-bottom:12px;">
+      <div style="font-size:12px;color:var(--danger);margin-bottom:6px;">Type <strong>RESET</strong> to confirm:</div>
+      <input class="fi" id="fullResetInput" type="text" placeholder="RESET" oninput="checkResetWord()" autocomplete="off" style="text-transform:uppercase;">
+    </div>
+    <div class="btn-row">
+      <button class="btn-s" onclick="closeFullResetConfirm()">Cancel</button>
+      <button class="btn-d" id="fullResetBtn" onclick="executeFullReset()" disabled style="opacity:.4;cursor:not-allowed;">Delete Everything</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SETTINGS MODAL ── -->
+<div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+  <div class="pmodal" style="max-width:440px;max-height:80vh;overflow-y:auto;">
+    <button class="close-btn" onclick="closeSettings()" title="Close" aria-label="Close">&#215;</button>
+    <h4>&#9881; Settings &amp; Danger Zone</h4>
+    <div style="margin-bottom:14px;">
+      <div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px;">Data &amp; Backup</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button class="mbtn" onclick="exportData();closeSettings();">&#128190; Export Backup</button>
+        <button class="mbtn" onclick="openImport();closeSettings();">&#128228; Import Backup</button>
+        <button class="mbtn" onclick="openCurrencyModal();closeSettings();">&#127759; Currency</button>
+        <button class="mbtn" onclick="openCompareModal();closeSettings();">&#9878; Compare Months</button>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px;">Reset by Section</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button class="reset-btn" onclick="closeSettings();openResetModal('expenses');">&#128465; Reset Expenses</button>
+        <button class="reset-btn" onclick="closeSettings();openResetModal('revenue');">&#128465; Reset Revenue</button>
+        <button class="reset-btn" onclick="closeSettings();openResetModal('loans');">&#128465; Reset Loans</button>
+        <button class="reset-btn" onclick="closeSettings();openResetModal('savings');">&#128465; Reset Savings</button>
+      </div>
+    </div>
+    <div style="background:var(--danger-light);border:1px solid var(--danger-mid);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;">
+      <div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--danger);margin-bottom:8px;">&#9888; Danger Zone</div>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">Full reset permanently deletes all data and cannot be undone.</p>
+      <button class="btn-d" onclick="openResetConfirm()" style="width:100%;">&#9888; Full Data Reset</button>
+    </div>
+    <div class="btn-row"><button class="btn-p" onclick="closeSettings()">Close</button></div>
+  </div>
+</div>
+
+<!-- ── FINANCIAL GOAL MODAL ── -->
+<div class="modal-overlay" id="goalModal" onclick="if(event.target===this)closeGoalModal()">
+  <div class="pmodal" style="max-width:440px;">
+    <button class="close-btn" onclick="closeGoalModal()" title="Close" aria-label="Close">&#215;</button>
+    <h4 id="goalModalTitle">Add Financial Goal</h4>
+    <div class="fr" style="margin-bottom:9px;">
+      <div class="fg" style="flex:2;"><label for="goalName" class="fl">Goal Name</label><input class="fi" id="goalName" type="text" placeholder="e.g. Pay off Visa" maxlength="60"></div>
+      <div class="fg"><label for="goalType" class="fl">Type</label>
+        <select class="fi" id="goalType" onchange="updateGoalTypeUI()">
+          <option value="payoff">Debt Payoff</option>
+          <option value="spend">Spending Cap</option>
+          <option value="save">Save Consistently</option>
+          <option value="custom">Custom Goal</option>
+        </select>
+      </div>
+    </div>
+    <div id="goalTypeFields"></div>
+    <div class="btn-row" style="margin-top:4px;">
+      <button class="btn-s" onclick="closeGoalModal()">Cancel</button>
+      <button class="btn-p" onclick="saveGoal()">Save Goal</button>
+    </div>
+  </div>
+</div>
+
 <script src="js/vendor/chart.min.js"></script>
 <script src="js/constants.js"></script>
 <script src="js/state.js"></script>
