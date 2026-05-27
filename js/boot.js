@@ -241,8 +241,12 @@ function createNewMonth(){
   const key=mk(mo,yr);
   if(keyToYM(key)>currentRealYM()+6){showToast('Cannot plan more than 6 months ahead','warn-t');return;}
   if(S.months[key]){showToast(key+' already exists','warn-t');closeNewMonthModal();return;}
-  if(from==='blank'){S.months[key]={weeks:[{items:[]},{items:[]},{items:[]},{items:[]}],revenue:[]};}
-  else{const src=S.months[from];S.months[key]={weeks:deepClone(src.weeks).map(w=>({items:w.items.map(i=>({...i,paid:false}))})),revenue:deepClone(src.revenue).map(r=>({...r,received:false}));};}
+  if(from==='blank'){
+    S.months[key]={weeks:[{items:[]},{items:[]},{items:[]},{items:[]}],revenue:[]};
+  } else {
+    const src=S.months[from];
+    S.months[key]={weeks:deepClone(src.weeks).map(w=>({items:w.items.map(i=>({...i,paid:false}))})),revenue:deepClone(src.revenue).map(r=>({...r,received:false}))};
+  }
   expandScheduledExpenses(key);
   CMK=key;S.currentMonthKey=key;persist();updateMonthLabel();closeNewMonthModal();renderExpenses();updateHealth();showToast('✓ Created '+key);
 }
