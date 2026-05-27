@@ -283,7 +283,8 @@
 
 /* DEBT ITEMS */
 .debt-list{display:flex;flex-direction:column;gap:10px;}
-.debt-item{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;box-shadow:var(--shadow);}
+.debt-item{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:13px 15px;box-shadow:var(--shadow);transition:box-shadow .15s,transform .15s;}
+.debt-item:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
 .debt-item-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;gap:8px;}
 .debt-name{font-weight:700;font-size:13px;}
 .debt-bal{font-family:'DM Mono',monospace;font-weight:700;font-size:15px;}

@@ -55,7 +55,7 @@ function renderCalendar(){
           ${items.map(i=>`<div style="display:flex;justify-content:space-between;font-size:12px;"><span>${i.name}${i.paid?' <span style="color:var(--success);font-size:10px;">✓</span>':''}</span><span class="acol" style="font-size:12px;">${fmt(i.amount)}</span></div>`).join('')}
         </div>
       </div>`).join('')
-    :`<div style="padding:20px 16px;text-align:center;"><div style="font-size:28px;margin-bottom:8px;">📅</div><div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">No bills scheduled yet</div><div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">Open the <strong>Expenses</strong> tab, click any item, and set its <strong>Due Date</strong> — it will appear on the calendar automatically.</div><button class="nm-btn" onclick="switchTab('expenses')" style="font-size:12px;padding:7px 16px;">Go to Expenses →</button></div>`;
+    :`<div style="padding:20px 16px;text-align:center;"><div style="font-size:28px;margin-bottom:8px;">📅</div><div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">No bills scheduled yet</div><div style="font-size:12px;color:var(--text-muted);line-height:1.6;margin-bottom:12px;">Open the <strong>Expenses</strong> tab, click any item, and set its <strong>Due Date</strong> — it will appear on the calendar automatically.</div><button class="nm-btn" data-action="switchToExpensesTab" style="font-size:12px;padding:7px 16px;">Go to Expenses →</button></div>`;
 
   // Recurring
   const rec=detectRecurring();

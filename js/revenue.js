@@ -11,12 +11,12 @@ function renderRevenue(){
   revItems.forEach((item,i)=>{
     tot+=item.amount;if(item.received)rcvd+=item.amount;else pend+=item.amount;
     const tr=document.createElement('tr');
-    tr.setAttribute('onclick',`openRevModal(${i})`);
+    tr.dataset.action='openRevModal';tr.dataset.arg=i;
     tr.title='Click to edit';
     tr.innerHTML=`<td style="font-weight:500;">${esc(item.name)}${item.note?'<div style="font-size:10px;color:var(--text-muted);margin-top:1px;">'+esc(item.note)+'</div>':''}</td>
       <td class="acol" style="font-family:'DM Mono',monospace;font-weight:600;">${fmt(amt(item.amount))}</td>
-      <td class="scol"><button class="stog ${item.received?'paid':'pending'}" onclick="event.stopPropagation();toggleRev(${i})">${item.received?'✓':'○'}</button></td>
-      <td class="no-print"><button class="del-btn" onclick="event.stopPropagation();openRevModal(${i})" title="Edit income source" aria-label="Edit income source">&#9998;</button></td>`;
+      <td class="scol"><button class="stog ${item.received?'paid':'pending'}" data-action="toggleRev" data-arg="${i}" data-stop-prop>${item.received?'✓':'○'}</button></td>
+      <td class="no-print"><button class="del-btn" data-action="openRevModal" data-arg="${i}" data-stop-prop title="Edit income source" aria-label="Edit income source">&#9998;</button></td>`;
     tbody.appendChild(tr);
   });
   document.getElementById('revTableTotal').textContent=fmt(tot);
@@ -50,7 +50,7 @@ function renderRevTable(){
     const rTot=keys.reduce((s,k)=>{const r=S.months[k].revenue.find(r=>r.name===src);return s+(r?r.amount:0);},0);
     return`<tr><td style="font-weight:500;font-size:12px;white-space:nowrap;">${esc(src)}</td>
       ${keys.map(k=>{const r=S.months[k].revenue.find(r=>r.name===src);const amt=r?r.amount:0;const ri=r?S.months[k].revenue.indexOf(r):-1;
-        return`<td class="acol" style="${k===CMK?'background:var(--sage-light);':''}">${amt>0?`<span class="ea" onclick="editRevCell(this,'${k}',${ri})">${fmt(amt)}</span>`:'<span style="color:var(--text-muted);">—</span>'}</td>`;
+        return`<td class="acol" style="${k===CMK?'background:var(--sage-light);':''}">${amt>0?`<span class="ea" data-action="editRevCell" data-arg="${k}" data-arg2="${ri}">${fmt(amt)}</span>`:'<span style="color:var(--text-muted);">—</span>'}</td>`;
       }).join('')}
       <td class="acol" style="font-weight:600;color:var(--sage);">${fmt(rTot)}</td></tr>`;
   }).join('');
@@ -61,9 +61,26 @@ function renderRevTable(){
   rows+=`<tr style="background:var(--success-light);"><td style="font-weight:700;font-size:12px;color:var(--success);">Net</td>${keys.map((k,i)=>{const n=netTots[i];return`<td class="acol" style="font-weight:600;color:${n>=0?'var(--success)':'var(--danger)'};">${n<0?'-':''}${fmt(Math.abs(n))}</td>`;}).join('')}<td class="acol" style="font-weight:700;color:${netGrand>=0?'var(--success)':'var(--danger)'};">${netGrand<0?'-':''}${fmt(Math.abs(netGrand))}</td></tr>`;
   document.getElementById('revTBody').innerHTML=rows;
 }
-function editRevCell(el,k,ri){if(ri<0)return;const old=S.months[k].revenue[ri].amount;el.innerHTML=`<input class="ie" type="number" value="${old}" onblur="saveRevCell(this,'${k}',${ri})" onkeydown="if(event.key==='Enter')this.blur()" autofocus>`;el.querySelector('input').select();}
+function editRevCell(k,ri,el){
+  if(ri<0||!el)return;
+  const old=S.months[k].revenue[ri].amount;
+  const inp=document.createElement('input');
+  inp.className='ie';inp.type='number';inp.value=old;inp.setAttribute('autofocus','');
+  inp.addEventListener('blur',function(){saveRevCell(this,k,ri);});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')this.blur();if(e.key==='Escape'){this.value=old;this.blur();}});
+  el.textContent='';el.appendChild(inp);
+  inp.select();inp.focus();
+}
 function saveRevCell(inp,k,ri){S.months[k].revenue[ri].amount=storeCents(inp.value);persist();renderRevenue();}
-function editRevAmt(el,i){const old=cr()[i].amount;el.innerHTML=`<input class="ie" type="number" value="${old}" onblur="saveRevAmt(this,${i})" onkeydown="if(event.key==='Enter')this.blur()" autofocus>`;el.querySelector('input').select();}
+function editRevAmt(el,i){
+  const old=cr()[i].amount;
+  const inp=document.createElement('input');
+  inp.className='ie';inp.type='number';inp.value=old;inp.setAttribute('autofocus','');
+  inp.addEventListener('blur',function(){saveRevAmt(this,i);});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')this.blur();if(e.key==='Escape'){this.value=old;this.blur();}});
+  el.textContent='';el.appendChild(inp);
+  inp.select();inp.focus();
+}
 function saveRevAmt(inp,i){cr()[i].amount=storeCents(inp.value);persist();renderRevenue();updateHealth();}
 function toggleRev(i){
   const wasUnreceived=!cr()[i].received;

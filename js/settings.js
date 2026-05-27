@@ -120,20 +120,20 @@ function openClaudeManage(){
   var cs=document.getElementById('mgr-claude-status');
   if(hc){
     cs.textContent='● Connected (sk-ant-…'+getClaudeKey().slice(-4)+')';cs.className='ai-provider-status connected';
-    ca.innerHTML='<button class="tbtn" style="font-size:11px;" onclick="claudeUpdateKey()">&#9998; Update</button><button class="tbtn" style="font-size:11px;color:var(--danger);border-color:var(--danger-mid);" onclick="aiRemoveKey(\'claude\')">&#128465;</button>';
+    ca.innerHTML='<button class="tbtn" style="font-size:11px;" data-action="claudeUpdateKey">&#9998; Update</button><button class="tbtn" style="font-size:11px;color:var(--danger);border-color:var(--danger-mid);" data-action="aiRemoveKeyClaude">&#128465;</button>';
   }else{
     cs.textContent='Not connected';cs.className='ai-provider-status disconnected';
-    ca.innerHTML='<button class="tbtn" style="font-size:11px;color:var(--sage);border-color:var(--sage-mid);" onclick="openAISetup(\'claude\')">Connect</button>';
+    ca.innerHTML='<button class="tbtn" style="font-size:11px;color:var(--sage);border-color:var(--sage-mid);" data-action="openAISetupClaude">Connect</button>';
   }
   // Build OpenAI row actions
   var oa=document.getElementById('mgr-openai-actions');
   var os=document.getElementById('mgr-openai-status');
   if(ho){
     os.textContent='● Connected (sk-…'+getOpenAIKey().slice(-4)+')';os.className='ai-provider-status connected';
-    oa.innerHTML='<button class="tbtn" style="font-size:11px;" onclick="openaiUpdateKey()">&#9998; Update</button><button class="tbtn" style="font-size:11px;color:var(--danger);border-color:var(--danger-mid);" onclick="aiRemoveKey(\'openai\')">&#128465;</button>';
+    oa.innerHTML='<button class="tbtn" style="font-size:11px;" data-action="openaiUpdateKey">&#9998; Update</button><button class="tbtn" style="font-size:11px;color:var(--danger);border-color:var(--danger-mid);" data-action="aiRemoveKeyOpenai">&#128465;</button>';
   }else{
     os.textContent='Not connected';os.className='ai-provider-status disconnected';
-    oa.innerHTML='<button class="tbtn" style="font-size:11px;color:var(--blue);border-color:var(--blue-mid);" onclick="openAISetup(\'openai\')">Connect</button>';
+    oa.innerHTML='<button class="tbtn" style="font-size:11px;color:var(--blue);border-color:var(--blue-mid);" data-action="openAISetupOpenai">Connect</button>';
   }
   // Default row
   var dr=document.getElementById('aiDefaultRow');
@@ -249,7 +249,7 @@ async function callAI(prompt,label){
     if(!resp.ok){
       var ed=await resp.json().catch(function(){return{};});
       var em=(ed.error&&ed.error.message)||('Error '+resp.status);
-      if(resp.status===401)em='API key invalid or expired. <a href="#" onclick="openClaudeManage();return false;" style="color:var(--sage);">Update key &#8594;</a>';
+      if(resp.status===401)em='API key invalid or expired. <a href="#" data-action="openClaudeManageFromLink" style="color:var(--sage);">Update key &#8594;</a>';
       if(resp.status===429)em='Rate limit reached — wait a moment and try again.';
       card.innerHTML='<div class="ai-insight-header"><span style="font-size:16px;">'+providerIcon+'</span><span class="ai-badge">'+providerLabel+'</span></div><div style="font-size:12px;color:var(--danger);padding-top:6px;">'+em+'</div>';
       return null;

@@ -3,8 +3,8 @@
 function renderTagFilter(){
   const cats=[...new Set(cw().flatMap(w=>w.items.map(i=>CAT_LABELS[getCat(i.name)])))];
   document.getElementById('tagFilterBar').innerHTML=
-    `<span class="tag-pill${!tagFilter?' sel':''}" onclick="setTagFilter('')">All</span>`+
-    cats.map(c=>`<span class="tag-pill${tagFilter===c?' sel':''}" onclick="setTagFilter('${c}')">${c}</span>`).join('');
+    `<span class="tag-pill${!tagFilter?' sel':''}" data-action="setTagFilter" data-arg="">All</span>`+
+    cats.map(c=>`<span class="tag-pill${tagFilter===c?' sel':''}" data-action="setTagFilter" data-arg="${c}">${c}</span>`).join('');
 }
 function setTagFilter(f){tagFilter=f;renderExpenses();}
 
@@ -106,7 +106,7 @@ function renderExpenses(){
   document.getElementById('expMonthHdr').textContent=CMK+' Expenses';
   // Guard: if CMK is somehow in archivedMonths, warn and bail
   if(S.archivedMonths && S.archivedMonths[CMK]){
-    document.getElementById('weeksGrid').innerHTML=`<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">&#128274; ${CMK} is archived and read-only.<br><button class="btn-p" style="margin-top:12px;" onclick="openRestoreModal('${CMK}')">&#128260; Restore to edit</button></div>`;
+    document.getElementById('weeksGrid').innerHTML=`<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:13px;">&#128274; ${CMK} is archived and read-only.<br><button class="btn-p" style="margin-top:12px;" data-action="openRestoreModal" data-arg="${CMK}">&#128260; Restore to edit</button></div>`;
     return;
   }
   // Pre-compute cat totals once — shared with renderEnvelopes
@@ -152,24 +152,24 @@ function renderExpenses(){
         const metaParts=[];
         metaParts.push(`<span class="cat-badge ${catCls}" style="${catStyle}">${catLbl}</span>`);
         if(rec)metaParts.push(`<span class="recur-badge" title="Recurring">&#8635;</span>`);
-        if(dd)metaParts.push(`<span class="due-badge has-due${isOverdue?' overdue':''}" onclick="openDueDateModal(${wi},${ii})" title="Due day ${dd}">Due ${dd}</span>`);
+        if(dd)metaParts.push(`<span class="due-badge has-due${isOverdue?' overdue':''}" data-action="openDueDateModal" data-arg="${wi}" data-arg2="${ii}" title="Due day ${dd}">Due ${dd}</span>`);
         // 📋 only when has content; 📷 only when has receipt — shown as tiny icons
-        if(item.note)metaParts.push(`<button class="note-toggle has-note" onclick="openNoteModal(${wi},${ii})" title="${item.note.substring(0,40)}">&#128203;</button>`);
-        if(item.receipt)metaParts.push(`<button class="receipt-btn has-receipt" onclick="openReceiptModal(${wi},${ii})" title="View receipt">&#128248;</button>`);
+        if(item.note)metaParts.push(`<button class="note-toggle has-note" data-action="openNoteModal" data-arg="${wi}" data-arg2="${ii}" title="${item.note.substring(0,40)}">&#128203;</button>`);
+        if(item.receipt)metaParts.push(`<button class="receipt-btn has-receipt" data-action="openReceiptModal" data-arg="${wi}" data-arg2="${ii}" title="View receipt">&#128248;</button>`);
         const metaRow=metaParts.length?`<div class="item-meta">${metaParts.join('')}</div>`:'';
         const noteHtml=item.note?`<span class="item-note-inline">${item.note.replace(/</g,'&lt;').substring(0,60)}${item.note.length>60?'…':''}</span>`:'';
-        return`<tr draggable="true" data-wi="${wi}" data-ii="${ii}" ondragstart="dragStart(event,${wi},${ii})" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dragDrop(event,${wi},${ii})" ondragend="dragEnd(event)" style="position:relative;" class="${item.paid?'row-paid':''}">
+        return`<tr draggable="true" data-wi="${wi}" data-ii="${ii}" style="position:relative;" class="${item.paid?'row-paid':''}">
           <td class="item-col">
             <span class="drag-grab-zone" title="Drag to reorder"></span>
-            <span class="item-name" onclick="openItemModal(${wi},${ii})" title="Click to edit">${item.name}</span>
+            <span class="item-name" data-action="openItemModal" data-arg="${wi}" data-arg2="${ii}" title="Click to edit">${item.name}</span>
             ${metaRow}
             ${noteHtml}
           </td>
-          <td class="amt-col" onclick="openItemModal(${wi},${ii})" style="cursor:pointer;"><span class="ea">${fmt(amt(item.amount))}</span></td>
-          <td class="status-col"><button class="stog ${item.paid?'paid':'pending'}" onclick="toggleExp(${wi},${ii})" aria-label="${item.paid?'Mark as pending':'Mark as paid'}" title="${item.paid?'Mark as pending':'Mark as paid'}">${item.paid?'✓':'○'}</button></td>
+          <td class="amt-col" data-action="openItemModal" data-arg="${wi}" data-arg2="${ii}" style="cursor:pointer;"><span class="ea">${fmt(amt(item.amount))}</span></td>
+          <td class="status-col"><button class="stog ${item.paid?'paid':'pending'}" data-action="toggleExp" data-arg="${wi}" data-arg2="${ii}" aria-label="${item.paid?'Mark as pending':'Mark as paid'}" title="${item.paid?'Mark as pending':'Mark as paid'}">${item.paid?'✓':'○'}</button></td>
           <td class="action-col no-print">
-            <button class="del-btn" onclick="event.stopPropagation();openItemModal(${wi},${ii})" title="Edit item">&#9998;</button>
-            <button class="del-btn" onclick="event.stopPropagation();delExpItem(${wi},${ii})" aria-label="Delete item" title="Delete item">✕</button>
+            <button class="del-btn" data-action="openItemModal" data-arg="${wi}" data-arg2="${ii}" data-stop-prop title="Edit item">&#9998;</button>
+            <button class="del-btn" data-action="delExpItem" data-arg="${wi}" data-arg2="${ii}" data-stop-prop aria-label="Delete item" title="Delete item">✕</button>
           </td>
         </tr>`;
       }).join('');
@@ -178,7 +178,7 @@ function renderExpenses(){
         <div class="week-title-row">
           <span class="week-title">Week ${wi+1}</span>
           <div style="display:flex;align-items:center;gap:5px;">
-            <button class="no-print" onclick="bulkMarkPaid(${wi})" title="Mark all paid" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--sage);padding:1px 4px;border-radius:3px;border:1px solid var(--sage-mid);">✓ All</button>
+            <button class="no-print" data-action="bulkMarkPaid" data-arg="${wi}" title="Mark all paid" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--sage);padding:1px 4px;border-radius:3px;border:1px solid var(--sage-mid);">✓ All</button>
             <span class="week-grand">${fmt(wTotal)}</span>
           </div>
         </div>
@@ -186,7 +186,7 @@ function renderExpenses(){
       </div>
       ${allItemsPaid?'<div class="week-all-paid-banner"><span>🎉</span> All paid!</div>':''}
       <table class="week-table"><thead><tr><th>Item</th><th style="text-align:right;padding-right:6px;font-size:9px;color:var(--text-muted);">Amount</th><th style="width:30px;"></th><th style="width:40px;" class="no-print"></th></tr></thead><tbody>${rows||'<tr><td colspan="4" style="text-align:center;color:var(--text-muted);font-size:11px;padding:12px;">No items in this category</td></tr>'}</tbody></table>
-      <button class="add-row-btn no-print" onclick="openItemModal(${wi},-1)">+ Add Item</button>`;
+      <button class="add-row-btn no-print" data-action="openItemModal" data-arg="${wi}" data-arg2="-1">+ Add Item</button>`;
     grid.appendChild(card);
   });
   const gt=totalExp(),gp=paidExp(),gpd=pendExp();

@@ -92,7 +92,7 @@ function renderCatPills(selectedCls){
   document.getElementById('catPillGrid').innerHTML = allCats.map(cat=>{
     const isSel = cat.cls===selectedCls;
     const style = cat.custom ? 'background:'+cat.bg+';color:'+cat.color+';' : '';
-    return`<button class="cat-pill-opt ${cat.cls}${isSel?' selected':''}" style="${style}" onclick="selectCat('${cat.cls}')">${cat.icon} ${cat.lbl}</button>`;
+    return`<button class="cat-pill-opt ${cat.cls}${isSel?' selected':''}" style="${style}" data-action="selectCat" data-arg="${cat.cls}">${cat.icon} ${cat.lbl}</button>`;
   }).join('');
 }
 
@@ -110,7 +110,7 @@ function renderDueDayGrid(selectedDay){
   const days=[];
   for(let d=1;d<=31;d++) days.push(d);
   document.getElementById('dueDayGrid').innerHTML = days.map(d=>
-    `<button class="due-day-btn${d===selectedDay?' sel':''}" onclick="pickDueDay(${d})">${d}</button>`
+    `<button class="due-day-btn${d===selectedDay?' sel':''}" data-action="pickDueDay" data-arg="${d}">${d}</button>`
   ).join('');
 }
 
@@ -163,10 +163,14 @@ function renderItemReceiptPreview(){
   const zone = document.getElementById('iReceiptZone');
   const prev = document.getElementById('iReceiptPreview');
   if(_iModalReceipt){
-    prev.innerHTML = `<div style="position:relative;display:inline-block;margin-bottom:6px;">
-      <img src="${_iModalReceipt}" class="receipt-modal-preview" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'150px':'none'">
-      <button onclick="removeItemReceipt()" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.5);color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;" title="Remove receipt" aria-label="Remove receipt">✕</button>
-    </div>`;
+    const wrap=document.createElement('div');wrap.style.cssText='position:relative;display:inline-block;margin-bottom:6px;';
+    const img=document.createElement('img');img.src=_iModalReceipt;img.className='receipt-modal-preview';
+    img.addEventListener('click',function(){this.style.maxHeight=this.style.maxHeight==='none'?'150px':'none';});
+    const rmBtn=document.createElement('button');rmBtn.textContent='✕';rmBtn.title='Remove receipt';rmBtn.setAttribute('aria-label','Remove receipt');
+    rmBtn.style.cssText='position:absolute;top:4px;right:4px;background:rgba(0,0,0,.5);color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;';
+    rmBtn.addEventListener('click',removeItemReceipt);
+    wrap.appendChild(img);wrap.appendChild(rmBtn);
+    prev.innerHTML='';prev.appendChild(wrap);
     zone.style.display='none';
   } else {
     prev.innerHTML='';
@@ -487,9 +491,14 @@ function openReceiptModal(wi,ii){
   document.getElementById('receiptModalItemName').textContent=item.name;
   document.getElementById('receiptFileInput').value='';
   const wrap=document.getElementById('receiptImgWrap');
-  wrap.innerHTML=item.receipt
-    ?`<img src="${item.receipt}" class="receipt-thumb" onclick="this.style.maxHeight=this.style.maxHeight==='none'?'120px':'none'">`
-    :'<p style="color:var(--text-muted);font-size:12px;padding:16px 0;">No receipt attached yet.</p>';
+  wrap.innerHTML='';
+  if(item.receipt){
+    const thumb=document.createElement('img');thumb.src=item.receipt;thumb.className='receipt-thumb';
+    thumb.addEventListener('click',function(){this.style.maxHeight=this.style.maxHeight==='none'?'120px':'none';});
+    wrap.appendChild(thumb);
+  } else {
+    wrap.innerHTML='<p style="color:var(--text-muted);font-size:12px;padding:16px 0;">No receipt attached yet.</p>';
+  }
   document.getElementById('receiptModal').classList.add('open');
   trapFocus(document.getElementById('receiptModal'));
   setTimeout(()=>{const _f=document.querySelector('#receiptModal button');if(_f)_f.focus();},120);
@@ -598,7 +607,7 @@ function renderCatManagerList(){
     <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
       <span class="cat-badge" style="background:${c.bg};color:${c.color};">${c.name}</span>
       <span style="font-size:11px;color:var(--text-muted);flex:1;">Keywords: ${c.keywords.join(', ')}</span>
-      <button class="tbtn" style="font-size:10px;padding:2px 7px;color:var(--danger);" onclick="delCustomCat(${i})">Remove</button>
+      <button class="tbtn" style="font-size:10px;padding:2px 7px;color:var(--danger);" data-action="delCustomCat" data-arg="${i}">Remove</button>
     </div>`).join('');
 }
 

@@ -186,7 +186,7 @@ function renderArchive() {
         const groupId = k.replace(' ','-');
         return `
           <div class="archive-month-group">
-            <div class="archive-month-group-hdr" onclick="toggleArchiveGroup('${groupId}',this)" id="hdr-${groupId}">
+            <div class="archive-month-group-hdr" data-action="toggleArchiveGroup" data-arg="${groupId}" data-arg-self id="hdr-${groupId}">
               <div class="amg-title">
                 <span>&#128197;</span> ${k}
                 <span style="font-size:11px;font-weight:400;color:var(--text-muted);">
@@ -194,7 +194,7 @@ function renderArchive() {
                 </span>
               </div>
               <div style="display:flex;align-items:center;gap:8px;">
-                <button class="restore-btn" onclick="event.stopPropagation();openRestoreModal('${k}')">&#128260; Restore</button>
+                <button class="restore-btn" data-action="openRestoreModal" data-arg="${k}" data-stop-prop>&#128260; Restore</button>
                 <span class="amg-chevron">&#9654;</span>
               </div>
             </div>

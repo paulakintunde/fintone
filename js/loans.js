@@ -8,7 +8,7 @@ function renderLoans(){
     ?'<span>⚡</span><div><strong>Avalanche strategy active</strong> — Sorted highest interest first. Pay minimums on all, throw every extra dollar at #1. Saves the most interest overall.</div>'
     :'<span>⛄</span><div><strong>Snowball strategy active</strong> — Sorted smallest balance first. Pay off #1 completely, then roll that freed payment into #2. Builds momentum.</div>';
   const list=document.getElementById('loanList');list.innerHTML='';
-  if(!sorted.length){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;border:2px dashed var(--border);border-radius:var(--radius);">No loans added yet.<br><button class="nm-btn" style="margin-top:10px" onclick="openLoanModal(-1)">+ Add your first loan</button></div>';document.getElementById('loan-total').textContent='$0';document.getElementById('loan-pmts').textContent='$0';document.getElementById('loan-int').textContent='$0';document.getElementById('loan-free').textContent='—';return;}
+  if(!sorted.length){list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;border:2px dashed var(--border);border-radius:var(--radius);">No loans added yet.<br><button class="nm-btn" style="margin-top:10px" data-action="openLoanModal" data-arg="-1">+ Add your first loan</button></div>';document.getElementById('loan-total').textContent='$0';document.getElementById('loan-pmts').textContent='$0';document.getElementById('loan-int').textContent='$0';document.getElementById('loan-free').textContent='—';return;}
   // Debt-free banner when all loans have zero balance
   if(sorted.every(l=>l.amount<=0)){
     const dfBanner=document.createElement('div');
@@ -22,7 +22,7 @@ function renderLoans(){
     const pdPct=Math.min(100,Math.max(4,((oa-loan.amount)/oa)*100));
     const ml=calcMTP(amt(loan.amount),loan.rate,amt(loan.minPayment));
     const isTop=si===0;
-    const chips=loan.payments.map((p,pi)=>`<div class="pchip ${p.paid?'paid':'pending'}" onclick="toggleLP(${oi},${pi})">${p.paid?'✓':'○'} ${esc(p.month)}</div>`).join('');
+    const chips=loan.payments.map((p,pi)=>`<div class="pchip ${p.paid?'paid':'pending'}" data-action="toggleLP" data-arg="${oi}" data-arg2="${pi}">${p.paid?'✓':'○'} ${esc(p.month)}</div>`).join('');
     const isPaidOff=loan.amount<=0;
     const div=document.createElement('div');div.className='debt-item'+(isPaidOff?' loan-paid-off':'');
     if(isTop)div.style.borderLeft='3px solid '+(S.strategy==='avalanche'?'var(--danger)':'var(--blue)');
@@ -39,7 +39,7 @@ function renderLoans(){
         <div style="text-align:right;">
           <div class="bal-edit-wrap" style="justify-content:flex-end;margin-bottom:2px;">
             <div class="debt-bal" id="bal-disp-${oi}">${fmt(amt(loan.amount))}</div>
-            <button class="bal-edit-btn" onclick="startEditBal(${oi})" title="Edit balance">&#9998;</button>
+            <button class="bal-edit-btn" data-action="startEditBal" data-arg="${oi}" title="Edit balance">&#9998;</button>
           </div>
           <div style="font-size:11px;color:var(--sage);font-weight:600;">Payoff: ${getPayoffDate(ml)}</div>
         </div>
@@ -51,10 +51,10 @@ function renderLoans(){
       <div style="font-size:11px;font-weight:600;color:var(--text-secondary);margin:7px 0 4px;">Payment History — tap to toggle</div>
       <div style="display:flex;flex-wrap:wrap;gap:4px;">${chips}</div>
       <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;" class="no-print">
-        <button class="nm-btn" style="font-size:11px;padding:4px 10px;" onclick="openLoanModal(${oi})">&#9998; Edit Loan</button>
-        <button class="tbtn" style="font-size:11px;padding:4px 9px;" onclick="addLP(${oi})">+ Log Month</button>
-        <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--sage);border-color:var(--sage);" onclick="useInCalc(${oi})">⊕ Calculator</button>
-        <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--blue);border-color:var(--blue-mid);" onclick="generatePaySchedule(${oi})" title="Pre-create 12 months of payment chips">&#128197; Generate Schedule</button>
+        <button class="nm-btn" style="font-size:11px;padding:4px 10px;" data-action="openLoanModal" data-arg="${oi}">&#9998; Edit Loan</button>
+        <button class="tbtn" style="font-size:11px;padding:4px 9px;" data-action="addLP" data-arg="${oi}">+ Log Month</button>
+        <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--sage);border-color:var(--sage);" data-action="useInCalc" data-arg="${oi}">⊕ Calculator</button>
+        <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--blue);border-color:var(--blue-mid);" data-action="generatePaySchedule" data-arg="${oi}" title="Pre-create 12 months of payment chips">&#128197; Generate Schedule</button>
       </div>`;
     list.appendChild(div);
   });
@@ -130,8 +130,15 @@ function startEditBal(li){
   const disp=document.getElementById('bal-disp-'+li);
   if(!disp)return;
   const cur=amt(S.loans[li].amount);
-  disp.outerHTML=`<input class="bal-edit-input" id="bal-inp-${li}" type="number" value="${cur}" onblur="saveEditBal(this,${li})" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value=${cur};this.blur();}" autofocus>`;
-  setTimeout(()=>{const inp=document.getElementById('bal-inp-'+li);if(inp)inp.select();},30);
+  const inp=document.createElement('input');
+  inp.className='bal-edit-input';inp.id='bal-inp-'+li;inp.type='number';inp.value=cur;
+  inp.addEventListener('blur',function(){saveEditBal(this,li);});
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter')this.blur();
+    if(e.key==='Escape'){this.value=cur;this.blur();}
+  });
+  disp.replaceWith(inp);
+  setTimeout(()=>{inp.select();inp.focus();},30);
 }
 function saveEditBal(inp,li){
   if(!inp||!document.getElementById('bal-inp-'+li))return; // already removed from DOM

@@ -136,7 +136,7 @@ function obRenderIncome(){
     <div class="ob-item-row">
       <span class="ob-item-name">${e.name.replace(/</g,'&lt;')}</span>
       <span class="ob-item-amt">${sym}${e.amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
-      <button class="ob-item-del" onclick="obRemoveIncome(${i})" title="Remove" aria-label="Remove ${e.name.replace(/"/g,'')}">&times;</button>
+      <button class="ob-item-del" data-action="obRemoveIncome" data-arg="${i}" title="Remove" aria-label="Remove ${e.name.replace(/"/g,'')}">&times;</button>
     </div>`).join('');
 }
 
@@ -205,7 +205,7 @@ function obRenderExpenses(){
       <span class="ob-item-name">${e.name.replace(/</g,'&lt;')}${fb}${e.dueDay?` <span style="font-size:9px;color:var(--text-muted);">due ${e.dueDay}</span>`:''}${e.note?` <span style="font-size:9px;color:var(--text-muted);">&#128203;</span>`:''}</span>
       ${wkLabel}
       <span class="ob-item-amt">${sym}${e.amount.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}${e.receipt?` <span style="font-size:9px;">&#128248;</span>`:''}</span>
-      <button class="ob-item-del" onclick="obRemoveExpense(${i})" title="Remove" aria-label="Remove ${e.name.replace(/"/g,'')}">&times;</button>
+      <button class="ob-item-del" data-action="obRemoveExpense" data-arg="${i}" title="Remove" aria-label="Remove ${e.name.replace(/"/g,'')}">&times;</button>
     </div>`;
   }).join('');
 }
@@ -251,7 +251,7 @@ function obRenderSavings(){
     <div class="ob-item-row">
       <span class="ob-item-name">${g.name.replace(/</g,'&lt;')}</span>
       <span class="ob-item-amt" style="font-size:10px;color:var(--text-muted);">${sym}${g.balance.toFixed(2)} / ${sym}${g.target.toFixed(2)}</span>
-      <button class="ob-item-del" onclick="obRemoveSaving(${i})" title="Remove" aria-label="Remove ${g.name.replace(/"/g,'')}">&times;</button>
+      <button class="ob-item-del" data-action="obRemoveSaving" data-arg="${i}" title="Remove" aria-label="Remove ${g.name.replace(/"/g,'')}">&times;</button>
     </div>`).join('');
 }
 
@@ -303,7 +303,7 @@ function obRenderLoans(){
     <div class="ob-item-row">
       <span class="ob-item-name">${l.name.replace(/</g,'&lt;')}</span>
       <span class="ob-item-amt">${sym}${l.amount.toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:0})} &bull; ${l.rate}% &bull; min ${sym}${l.minPayment}</span>
-      <button class="ob-item-del" onclick="obRemoveLoan(${i})" title="Remove" aria-label="Remove ${l.name.replace(/"/g,'')}">&times;</button>
+      <button class="ob-item-del" data-action="obRemoveLoan" data-arg="${i}" title="Remove" aria-label="Remove ${l.name.replace(/"/g,'')}">&times;</button>
     </div>`).join('');
 }
 

@@ -14,7 +14,7 @@ function renderSavings(){
 
   const grid=document.getElementById('savingsGrid');
   if(!goals.length){
-    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted);font-size:13px;border:2px dashed var(--border);border-radius:var(--radius);">No savings goals yet.<br><button class="nm-btn" style="margin-top:10px;" onclick="openSavModal(-1)">+ Add your first goal</button></div>`;
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted);font-size:13px;border:2px dashed var(--border);border-radius:var(--radius);">No savings goals yet.<br><button class="nm-btn" style="margin-top:10px;" data-action="openSavModal" data-arg="-1">+ Add your first goal</button></div>`;
     dc('savChart');return;
   }
   grid.innerHTML=goals.map((g,i)=>{
@@ -25,7 +25,7 @@ function renderSavings(){
     return`<div class="sav-card${isComplete?' sav-complete':''}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
         <div><div style="font-weight:700;font-size:13px;">${esc(g.name)}</div><div class="sav-interest">★ ${g.rate}% p.a. interest</div></div>
-        <button class="del-btn" style="opacity:1;" onclick="openDelSav(${i})" title="Delete savings goal" aria-label="Delete savings goal">✕</button>
+        <button class="del-btn" style="opacity:1;" data-action="openDelSav" data-arg="${i}" title="Delete savings goal" aria-label="Delete savings goal">✕</button>
       </div>
       <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:600;color:var(--blue);">${fmt(amt(g.balance))}</div>
       <div style="font-size:11px;color:var(--text-muted);margin-bottom:5px;">of ${fmt(amt(g.target))} goal</div>
@@ -35,12 +35,12 @@ function renderSavings(){
         <span>${isComplete?'<span class="sav-complete-badge">🏆 Goal Reached!</span>':moLeft>0?projDate+' est.':''}</span>
       </div>
       <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">
-        Monthly: ${fmt(amt(g.contribution))}/mo · Interest: ${fmt(g.balance*(g.rate/100/12))}/mo
+        Monthly: ${fmt(amt(g.contribution))}/mo · Interest: ${fmt(amt(g.balance)*(g.rate/100/12))}/mo
       </div>
       <div class="sav-actions">
-        <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--success);border-color:var(--success-mid);" onclick="openTxn('deposit',${i})">+ Deposit</button>
-        <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--amber);border-color:var(--amber-mid);" onclick="openTxn('withdraw',${i})">− Withdraw</button>
-        <button class="tbtn" style="font-size:11px;padding:4px 9px;" onclick="openSavModal(${i})">Edit</button>
+        <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--success);border-color:var(--success-mid);" data-action="openTxnDeposit" data-arg="${i}">+ Deposit</button>
+        <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--amber);border-color:var(--amber-mid);" data-action="openTxnWithdraw" data-arg="${i}">− Withdraw</button>
+        <button class="tbtn" style="font-size:11px;padding:4px 9px;" data-action="openSavModal" data-arg="${i}">Edit</button>
       </div>
     </div>`;
   }).join('');
@@ -313,9 +313,9 @@ function renderGoals(){
         <span class="${met?'sav-complete-badge':'goal-status-badge goal-unmet'}">${met?'🏆 Goal Met!':'⏳ In progress'}</span>
       </div>
       <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;" class="no-print">
-        ${g.type==='custom'?`<button class="tbtn" style="font-size:10px;padding:3px 7px;color:var(--purple);border-color:var(--purple-light);" onclick="logCustomGoalProgress(${i})">+ Log Progress</button>`:''}
-        <button class="tbtn" style="font-size:10px;padding:3px 7px;" onclick="openGoalModal(${i})">Edit</button>
-        <button class="tbtn" style="font-size:10px;padding:3px 7px;color:var(--danger);" onclick="deleteGoal(${i})">Delete</button>
+        ${g.type==='custom'?`<button class="tbtn" style="font-size:10px;padding:3px 7px;color:var(--purple);border-color:var(--purple-light);" data-action="logCustomGoalProgress" data-arg="${i}">+ Log Progress</button>`:''}
+        <button class="tbtn" style="font-size:10px;padding:3px 7px;" data-action="openGoalModal" data-arg="${i}">Edit</button>
+        <button class="tbtn" style="font-size:10px;padding:3px 7px;color:var(--danger);" data-action="deleteGoal" data-arg="${i}">Delete</button>
       </div>
     </div>`;
   }).join('');

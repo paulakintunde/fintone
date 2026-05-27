@@ -41,6 +41,17 @@ function handleReceiptFileFromEl(){var f=document.getElementById('receiptFileInp
 function handleCsvFileFromEl(){var f=document.getElementById('csvFileInput');if(f&&f.files&&f.files[0])handleCsvFile(f.files[0]);}
 function obHandleReceiptFileFromEl(){var f=document.getElementById('obExpReceipt');if(f)obHandleReceiptFile(f);}
 
+// Savings transaction wrappers (string arg + numeric arg)
+function openTxnDeposit(i){if(typeof openTxn==='function')openTxn('deposit',i);}
+function openTxnWithdraw(i){if(typeof openTxn==='function')openTxn('withdraw',i);}
+
+// AI provider wrappers (string arg variants)
+function aiRemoveKeyClaude(){if(typeof aiRemoveKey==='function')aiRemoveKey('claude');}
+function aiRemoveKeyOpenai(){if(typeof aiRemoveKey==='function')aiRemoveKey('openai');}
+function openAISetupClaude(){if(typeof openAISetup==='function')openAISetup('claude');}
+function openAISetupOpenai(){if(typeof openAISetup==='function')openAISetup('openai');}
+function openClaudeManageFromLink(){if(typeof openClaudeManage==='function')openClaudeManage();}
+
 // ════════════════════════════════════════════════
 // CLICK DELEGATION
 // ════════════════════════════════════════════════
@@ -53,47 +64,51 @@ document.addEventListener('click',function(e){
     return;
   }
 
-  // 2. Action buttons — data-action="fnName" [data-arg="..."] [data-arg-self] [data-arg-from="dataAttrName"]
+  // 2. Action buttons — data-action="fnName"
+  //    [data-arg="..."]          first argument (auto-coerced to number when numeric)
+  //    [data-arg2="..."]         second argument (auto-coerced)
+  //    [data-arg-self]           passes the element as the LAST positional argument
+  //    [data-arg-from="attr"]    read first arg from another data attribute on the element
+  //    [data-stop-prop]          call e.stopPropagation() before dispatching
   var el=e.target.closest('[data-action]');
   if(!el)return;
+
+  if(el.dataset.stopProp!==undefined) e.stopPropagation();
 
   var fn=el.dataset.action;
   var fn2=el.dataset.action2;
 
   if(typeof window[fn]==='function'){
     var rawArg=el.dataset.arg;
+    var rawArg2=el.dataset.arg2;
     var argFrom=el.dataset.argFrom;
     var argSelf=el.dataset.argSelf;
-    var finalArg;
+    var finalArg,finalArg2;
 
     if(argFrom!==undefined){
-      // Read arg from another data-* attribute on the same element
       finalArg=el.dataset[argFrom];
     } else if(rawArg!==undefined){
-      // Coerce to number when possible (handles negatives, decimals)
       finalArg=(rawArg.trim()!==''&&!isNaN(rawArg))?Number(rawArg):rawArg;
     }
 
+    if(rawArg2!==undefined){
+      finalArg2=(rawArg2.trim()!==''&&!isNaN(rawArg2))?Number(rawArg2):rawArg2;
+    }
+
     if(argSelf!==undefined){
-      // Pass element as second argument (mirrors `this` in inline handlers)
-      if(finalArg!==undefined) window[fn](finalArg,el);
+      // element is appended as the last argument after any data-arg / data-arg2
+      if(finalArg!==undefined&&finalArg2!==undefined) window[fn](finalArg,finalArg2,el);
+      else if(finalArg!==undefined) window[fn](finalArg,el);
       else window[fn](el);
     } else {
-      if(finalArg!==undefined) window[fn](finalArg);
+      if(finalArg!==undefined&&finalArg2!==undefined) window[fn](finalArg,finalArg2);
+      else if(finalArg!==undefined) window[fn](finalArg);
       else window[fn]();
     }
   }
 
-  // Optional second action — data-action2="fnName" [data-arg2="..."]
-  if(fn2&&typeof window[fn2]==='function'){
-    var raw2=el.dataset.arg2;
-    if(raw2!==undefined){
-      var v2=(raw2.trim()!==''&&!isNaN(raw2))?Number(raw2):raw2;
-      window[fn2](v2);
-    } else {
-      window[fn2]();
-    }
-  }
+  // Optional second action — data-action2="fnName" (no extra args, used for side-effects)
+  if(fn2&&typeof window[fn2]==='function') window[fn2]();
 });
 
 // ════════════════════════════════════════════════
@@ -126,6 +141,37 @@ document.addEventListener('input',function(e){
   if(el.dataset.inputVal!==undefined) window[fn](el.value);
   else if(el.dataset.inputArg!==undefined) window[fn](el.dataset.inputArg);
   else window[fn]();
+});
+
+// ════════════════════════════════════════════════
+// DRAG EVENT DELEGATION
+// Expense rows carry data-wi and data-ii; handlers
+// read those instead of receiving args via inline attrs.
+// ════════════════════════════════════════════════
+document.addEventListener('dragstart',function(e){
+  var el=e.target.closest('[data-wi]');
+  if(!el)return;
+  if(typeof dragStart==='function')dragStart(e,parseInt(el.dataset.wi),parseInt(el.dataset.ii));
+});
+document.addEventListener('dragover',function(e){
+  var el=e.target.closest('[data-wi]');
+  if(!el)return;
+  if(typeof dragOver==='function')dragOver(e);
+});
+document.addEventListener('dragleave',function(e){
+  var el=e.target.closest('[data-wi]');
+  if(!el)return;
+  if(typeof dragLeave==='function')dragLeave(e);
+});
+document.addEventListener('drop',function(e){
+  var el=e.target.closest('[data-wi]');
+  if(!el)return;
+  if(typeof dragDrop==='function')dragDrop(e,parseInt(el.dataset.wi),parseInt(el.dataset.ii));
+});
+document.addEventListener('dragend',function(e){
+  var el=e.target.closest('[data-wi]');
+  if(!el)return;
+  if(typeof dragEnd==='function')dragEnd(e);
 });
 
 // ════════════════════════════════════════════════

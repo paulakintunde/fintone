@@ -140,7 +140,7 @@ function switchToMonth(k){
 function renderMonthTags(){
   const keys=Object.keys(S.months);
   const canDelete=keys.length>1;
-  document.getElementById('monthTags').innerHTML=keys.map(k=>`<span class="month-tag${k===CMK?' active-month':''}" onclick="switchToMonth('${k}')">${k}<span class="no-print month-tag-actions"><span title="Archive ${k}" onclick="event.stopPropagation();confirmArchiveMonth('${k}')" style="opacity:.45;font-size:9px;cursor:pointer;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.45">&#128230;</span>${canDelete?`<span title="Delete ${k}" onclick="event.stopPropagation();confirmDeleteMonth('${k}')" style="opacity:.35;font-size:9px;cursor:pointer;color:var(--danger);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.35">&#128465;</span>`:''}</span></span>`).join('');
+  document.getElementById('monthTags').innerHTML=keys.map(k=>`<span class="month-tag${k===CMK?' active-month':''}" data-action="switchToMonth" data-arg="${k}">${k}<span class="no-print month-tag-actions"><span title="Archive ${k}" data-action="confirmArchiveMonth" data-arg="${k}" data-stop-prop style="opacity:.45;font-size:9px;cursor:pointer;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.45">&#128230;</span>${canDelete?`<span title="Delete ${k}" data-action="confirmDeleteMonth" data-arg="${k}" data-stop-prop style="opacity:.35;font-size:9px;cursor:pointer;color:var(--danger);" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.35">&#128465;</span>`:''}</span></span>`).join('');
 }
 let _deleteMonthTarget='';
 function confirmDeleteMonth(k){
@@ -269,7 +269,7 @@ function renderEnvelopes(){
     const over=pct>=100,warn=pct>=80&&pct<100;
     const col=over?'var(--danger)':warn?'var(--amber)':'var(--sage)';
     return`<div class="be${over?' over':warn?' warn':''}">
-      <div class="be-lbl">${cat}<button class="be-edit" onclick="openEnvModal('${cat}')" title="Edit ${cat} budget" aria-label="Edit budget">edit</button></div>
+      <div class="be-lbl">${cat}<button class="be-edit" data-action="openEnvModal" data-arg="${cat}" title="Edit ${cat} budget" aria-label="Edit budget">edit</button></div>
       <div class="be-amt"><span class="be-spent" style="color:${col}">${fmt(spent)}</span><span class="be-cap">/ ${fmt(cap)}</span></div>
       <div class="pbar" style="height:6px;"><div class="pfill" style="width:${pct}%;background:${col};border-radius:3px;height:100%;transition:width .4s;"></div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
