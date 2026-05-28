@@ -255,6 +255,10 @@ async function initState(){
       if(!S.financialGoals) S.financialGoals=[];
       if(!S.customCategories) S.customCategories=[];
       if(!S.scheduledExpenses) S.scheduledExpenses=[];
+      if(!S.achievements) S.achievements=[];
+      if(S.xp===undefined) S.xp=0;
+      if(S.xpLevel===undefined) S.xpLevel=0;
+      if(!S.monthChallenge) S.monthChallenge={};
       CMK=S.currentMonthKey||Object.keys(S.months)[0];
       return;
     }catch(e){}

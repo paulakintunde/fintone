@@ -166,6 +166,10 @@ function confirmTxn(){
   });
   const newPct=g.target>0?g.balance/g.target:0;
   persist();closeTxnModal();renderSavings();updateHealth();
+  if(_txnMode==='deposit'){
+    if(typeof awardXP==='function') awardXP('sav_deposit');
+    if(typeof checkAchievements==='function') checkAchievements('sav_starter','goal_crusher');
+  }
   if(_txnMode==='deposit'&&prevPct<1&&newPct>=1){
     setTimeout(()=>{launchConfetti(160);showToast('🏆 Savings goal reached: '+g.name);},200);
   } else {

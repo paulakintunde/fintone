@@ -50,10 +50,16 @@ function updateHealth(){
       badge.classList.add('milestone');
       setTimeout(()=>badge.classList.remove('milestone'),500);
       launchConfetti(60);showToast('🎉 Great financial health — score hit 75!');
+      if(typeof awardXP==='function') awardXP('health_milestone');
     }
+    if(prev<100&&total===100){if(typeof awardXP==='function') awardXP('health_milestone');}
     const[bg,bc,col]=total>=75?['var(--success-light)','var(--success-mid)','var(--success)']:total>=50?['var(--amber-light)','var(--amber-mid)','var(--amber)']:['var(--danger-light)','var(--danger-mid)','var(--danger)'];
     badge.style.background=bg;badge.style.borderColor=bc;badgeScore.style.color=col;lblEl.style.color=col;
   }
+
+  // Gamification hooks
+  if(typeof renderHealthTierPill==='function') renderHealthTierPill(total);
+  if(typeof checkAchievements==='function') checkAchievements('perfect_score');
 }
 function openHealthModal(){
   const{total,details}=calcHealth();

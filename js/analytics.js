@@ -26,6 +26,18 @@ function renderAnalytics(){
   renderVarianceTable(keys);
   renderShortfallBanner();
   updateAIActionGrid();
+  // Scorecard history — all closed months (i.e. not the current month)
+  var scRow=document.getElementById('an-scorecard-row');
+  if(scRow){
+    var past=keys.filter(function(k){return k!==CMK;});
+    if(!past.length){
+      scRow.innerHTML='<span style="font-size:11px;color:var(--text-muted);">No closed months yet — scorecards appear here after you close your first month.</span>';
+    } else {
+      scRow.innerHTML=past.map(function(k){
+        return '<button class="tbtn" style="font-size:11px;" data-action="openScorecardModal" data-arg="'+k+'">'+k+'</button>';
+      }).join('');
+    }
+  }
 }
 
 function renderVarianceTable(keys){
@@ -180,12 +192,12 @@ function renderSavingsChart(goals){
 }
 
 function _dashGreeting(){
+  const score=calcHealth().total;
+  const mood=score>=100?'🌟':score>=75?'😄':score>=51?'😊':score>=26?'😐':'😰';
   const h=new Date().getHours();
   const name=S.userName?', '+S.userName:'';
-  if(h>=5&&h<12) return'Good morning'+name+' ☀️';
-  if(h>=12&&h<17) return'Good afternoon'+name+' 👋';
-  if(h>=17&&h<21) return'Good evening'+name+' 🌆';
-  return'Good night'+name+' 🌙';
+  const time=h>=5&&h<12?'Good morning':h>=12&&h<17?'Good afternoon':h>=17&&h<21?'Good evening':'Good night';
+  return mood+' '+time+name;
 }
 function renderDash(){
   const exp=totalExp(), paid=paidExp(), pend=pendExp(), rev=totalRev(), debt=totalDebt(), net=Math.round((rev-exp)*100)/100;
@@ -400,6 +412,18 @@ function renderDash(){
     const nwSub=document.getElementById('d-nw-sub');
     if(nwSub){nwSub.textContent=fmt(sv)+' savings − '+fmt(debt)+' debt';}
   }
+
+  // Award XP for positive historical months (once per month per session)
+  if(net>0){
+    const xpKey='fintone_xp_pos_'+CMK;
+    if(!sessionStorage.getItem(xpKey)){
+      if(typeof awardXP==='function') awardXP('positive_month');
+      sessionStorage.setItem(xpKey,'1');
+    }
+  }
+
+  // Gamification — streak, challenge, achievements, XP bar, heatmap
+  if(typeof renderGamification==='function') renderGamification();
 }
 
 function renderExpSumChart(){

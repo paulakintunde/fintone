@@ -203,7 +203,10 @@ function cloneCurrentMonth(doExp=true,doRev=true,keepPaid=false){
   S.months[nk]={weeks:newWeeks,revenue:newRev};
   applyBudgetRollovers(CMK,nk);
   expandScheduledExpenses(nk);
+  const _clonePrevKey=CMK;
+  if(typeof calcHealth==='function') S.months[CMK].closedScore=calcHealth().total;
   CMK=nk;S.currentMonthKey=nk;persist();updateMonthLabel();renderMonthTags();renderExpenses();updateHealth();showToast('✓ Cloned to '+nk);
+  if(typeof openScorecardModal==='function') setTimeout(()=>openScorecardModal(_clonePrevKey),400);
 }
 function openNewMonthModal(){
   const monSel=document.getElementById('newMonSelMonth');
@@ -255,7 +258,10 @@ function createNewMonth(){
     S.months[key]={weeks:deepClone(src.weeks).map(w=>({items:w.items.map(i=>({...i,paid:false}))})),revenue:deepClone(src.revenue).map(r=>({...r,received:false}))};
   }
   expandScheduledExpenses(key);
+  const _newMonPrevKey=CMK;
+  if(typeof calcHealth==='function') S.months[CMK].closedScore=calcHealth().total;
   CMK=key;S.currentMonthKey=key;persist();updateMonthLabel();closeNewMonthModal();renderMonthTags();renderExpenses();updateHealth();showToast('✓ Created '+key);
+  if(typeof openScorecardModal==='function') setTimeout(()=>openScorecardModal(_newMonPrevKey),400);
 }
 
 // ══════════════════════════════════════════════
@@ -470,6 +476,7 @@ async function resetAllData(){
   loadTheme();
   applyDark();
   updateMonthLabel();
+  renderMonthTags();
 // Set strategy buttons correctly
 document.getElementById('btn-avalanche').classList.toggle('active',S.strategy==='avalanche');
 document.getElementById('btn-snowball').classList.toggle('active',(S.strategy||'avalanche')==='snowball');

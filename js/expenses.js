@@ -308,12 +308,15 @@ function toggleExp(wi,ii){
   if(!wasPaid){
     const btn=document.querySelector('.week-table .stog.paid');
     launchConfettiFromEl(btn,22);
+    if(typeof awardXP==='function') awardXP('bill_paid');
     const weekDone=cw()[wi].items.length>0&&cw()[wi].items.every(i=>i.paid);
     if(weekDone){
       setTimeout(()=>{launchConfetti(110);showToast('🎉 Week '+(wi+1)+' — all paid!');},300);
+      if(typeof awardXP==='function') awardXP('week_complete');
     }
     setTimeout(checkMonthComplete,600);
   }
+  if(typeof checkAchievements==='function') checkAchievements('first_paid','week_champ');
 }
 function delExpItem(wi,ii){cw()[wi].items.splice(ii,1);persist();renderExpenses();updateHealth();}
 function bulkMarkPaid(wi){

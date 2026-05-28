@@ -119,11 +119,13 @@ function toggleLP(li,pi){
     if(loan.amount<=0&&prevAmount>0){
       celebrateLoanPaidOff(loan.name);
       checkAllLoansDebtFree();
+      if(typeof checkAchievements==='function') checkAchievements('debt_slayer','debt_free');
     }
     // All chips for this loan are paid?
     else if(loan.payments.length>0&&loan.payments.every(p=>p.paid)){
       setTimeout(()=>{launchConfetti(70);showToast('🎉 All payments logged for '+loan.name+'!');},200);
     }
+    if(typeof awardXP==='function') awardXP('loan_payment');
   }
 }
 function startEditBal(li){
