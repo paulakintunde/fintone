@@ -382,6 +382,8 @@ function updateLockDots(){
     const d=document.getElementById('ld'+i);
     if(d) d.classList.toggle('filled', i<_lockBuffer.length);
   }
+  const s=document.getElementById('lockPinStatus');
+  if(s) s.textContent=_lockBuffer.length===4?'PIN complete':_lockBuffer.length+' of 4 digits entered';
 }
 
 // ── PIN SETUP ──
@@ -430,4 +432,6 @@ function updateSetupDots(){
     const d=document.getElementById('sd'+i);
     if(d) d.classList.toggle('filled', i<_setupBuffer.length);
   }
+  const s=document.getElementById('setupPinStatus');
+  if(s) s.textContent=_setupBuffer.length===4?'PIN complete':_setupBuffer.length+' of 4 digits entered';
 }

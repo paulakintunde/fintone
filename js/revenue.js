@@ -15,7 +15,7 @@ function renderRevenue(){
     tr.title='Click to edit';
     tr.innerHTML=`<td style="font-weight:500;">${esc(item.name)}${item.note?'<div style="font-size:10px;color:var(--text-muted);margin-top:1px;">'+esc(item.note)+'</div>':''}</td>
       <td class="acol" style="font-family:'DM Mono',monospace;font-weight:600;">${fmt(amt(item.amount))}</td>
-      <td class="scol"><button class="stog ${item.received?'paid':'pending'}" data-action="toggleRev" data-arg="${i}" data-stop-prop>${item.received?'✓':'○'}</button></td>
+      <td class="scol"><button class="stog ${item.received?'paid':'pending'}" data-action="toggleRev" data-arg="${i}" data-stop-prop aria-label="Toggle ${esc(item.name)} received status">${item.received?'✓':'○'}</button></td>
       <td class="no-print"><button class="del-btn" data-action="openRevModal" data-arg="${i}" data-stop-prop title="Edit income source" aria-label="Edit income source">&#9998;</button></td>`;
     tbody.appendChild(tr);
   });
