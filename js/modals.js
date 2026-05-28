@@ -462,18 +462,7 @@ function saveRevModal() {
 // ══════════════════════════════════════════════
 // NOTES & RECEIPTS
 // ══════════════════════════════════════════════
-function openNoteModal(wi,ii){ openItemModal(wi,ii); return; // redirected to item modal
-  if(false){
-  _noteWi=wi;_noteIi=ii;
-  const item=cw()[wi].items[ii];
-  document.getElementById('noteModalItemName').textContent=item.name;
-  document.getElementById('noteModalInput').value=item.note||'';
-  document.getElementById('noteModal').classList.add('open');
-  trapFocus(document.getElementById('noteModal'));
-  setTimeout(()=>{const _f=document.querySelector('#noteModal textarea');if(_f)_f.focus();},120);
-  setTimeout(()=>document.getElementById('noteModalInput').focus(),100);
-  } // end if(false)
-}
+function openNoteModal(wi,ii){ openItemModal(wi,ii); }
 function closeNoteModal(){releaseTrap(document.getElementById('noteModal'));
   document.getElementById('noteModal').classList.remove('open');}
 function saveNote(){
@@ -522,10 +511,20 @@ function clearReceipt(){
 
 function openImport(){const _im2=document.getElementById('importModal');_im2.classList.add('open');trapFocus(_im2);}
 function closeImport(){const _im2=document.getElementById('importModal');releaseTrap(_im2);_im2.classList.remove('open');}
+function validateImport(p){
+  if(!p||typeof p!=='object')return false;
+  if(!p.months||typeof p.months!=='object')return false;
+  const key=p.currentMonthKey||Object.keys(p.months)[0];
+  if(!key||!p.months[key])return false;
+  if(p.loans!==undefined&&!Array.isArray(p.loans))return false;
+  if(p.savings!==undefined&&!Array.isArray(p.savings))return false;
+  if(p.financialGoals!==undefined&&!Array.isArray(p.financialGoals))return false;
+  return true;
+}
 function doImport(){
   try{
     const p=JSON.parse(document.getElementById('importJson').value);
-    if(!p.months)throw new Error();
+    if(!validateImport(p))throw new Error();
     S=p;CMK=S.currentMonthKey||Object.keys(S.months)[0];
     if(!S.savings)S.savings=[];if(!S.budgets)S.budgets={...BDFT};
     persist();closeImport();applyDark();updateMonthLabel();renderSection(getTab());updateHealth();

@@ -298,7 +298,7 @@ function renderGoals(){
       const cur=g.customCurrent||0;const tgt=g.customTarget||0;
       progress=tgt>0?Math.min(100,(cur/tgt)*100):cur>0?100:0;
       met=tgt>0?cur>=tgt:false;
-      const unit=g.customUnit||'';
+      const unit=esc(g.customUnit||'');
       detail=tgt>0?(cur+unit+' / '+tgt+unit):(cur>0?'Current: '+cur+unit:'Not started');
       barColor='var(--purple)';
     }

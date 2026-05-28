@@ -135,7 +135,7 @@ function switchToMonth(k){
   if(keyToYM(k)>maxYM){showToast('Cannot plan more than 6 months ahead','warn-t');return;}
   CMK=k;S.currentMonthKey=k;_lastMonthComplete='';
   const b=document.getElementById('monthCompleteBanner');if(b)b.remove();
-  persist();updateMonthLabel();tagFilter='';renderExpenses();updateHealth();
+  persist();updateMonthLabel();tagFilter='';renderMonthTags();renderExpenses();updateHealth();
 }
 function renderMonthTags(){
   const keys=Object.keys(S.months);
@@ -170,7 +170,7 @@ function executeDeleteMonth(){
     CMK=remaining.length?remaining[remaining.length-1]:'';
     S.currentMonthKey=CMK;
   }
-  persist();updateMonthLabel();renderExpenses();updateHealth();updateArchiveBadge();
+  persist();updateMonthLabel();renderMonthTags();renderExpenses();updateHealth();updateArchiveBadge();
   closeDeleteMonthModal();
   showToast(`✓ ${k} deleted`);
 }
@@ -197,7 +197,7 @@ function cloneCurrentMonth(doExp=true,doRev=true,keepPaid=false){
   S.months[nk]={weeks:newWeeks,revenue:newRev};
   applyBudgetRollovers(CMK,nk);
   expandScheduledExpenses(nk);
-  CMK=nk;S.currentMonthKey=nk;persist();updateMonthLabel();renderExpenses();updateHealth();showToast('✓ Cloned to '+nk);
+  CMK=nk;S.currentMonthKey=nk;persist();updateMonthLabel();renderMonthTags();renderExpenses();updateHealth();showToast('✓ Cloned to '+nk);
 }
 function openNewMonthModal(){
   const monSel=document.getElementById('newMonSelMonth');
@@ -209,8 +209,9 @@ function openNewMonthModal(){
 
   // Populate year select — current year to 2100
   const curYr=new Date().getFullYear();
-  yrSel.innerHTML='';
-  for(let y=curYr;y<=2100;y++) yrSel.innerHTML+=`<option value="${y}">${y}</option>`;
+  const _yrOpts=[];
+  for(let y=curYr;y<=2100;y++) _yrOpts.push(`<option value="${y}">${y}</option>`);
+  yrSel.innerHTML=_yrOpts.join('');
 
   // Default to the month after the latest existing month
   const existingKeys=Object.keys(S.months||{});
@@ -248,7 +249,7 @@ function createNewMonth(){
     S.months[key]={weeks:deepClone(src.weeks).map(w=>({items:w.items.map(i=>({...i,paid:false}))})),revenue:deepClone(src.revenue).map(r=>({...r,received:false}))};
   }
   expandScheduledExpenses(key);
-  CMK=key;S.currentMonthKey=key;persist();updateMonthLabel();closeNewMonthModal();renderExpenses();updateHealth();showToast('✓ Created '+key);
+  CMK=key;S.currentMonthKey=key;persist();updateMonthLabel();closeNewMonthModal();renderMonthTags();renderExpenses();updateHealth();showToast('✓ Created '+key);
 }
 
 // ══════════════════════════════════════════════

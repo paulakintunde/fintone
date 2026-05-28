@@ -79,7 +79,12 @@ async function migrateToIDB(){
   }
 }
 
+let _persistTimer=null;
 function persist(toast=true){
+  clearTimeout(_persistTimer);
+  _persistTimer=setTimeout(()=>_doPersist(toast),400);
+}
+function _doPersist(toast=true){
   S.currentMonthKey=CMK;
   const json=JSON.stringify(S);
   // Update storage banner using blob size estimate

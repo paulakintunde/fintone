@@ -68,6 +68,7 @@ function archiveMonth(k) {
   }
   persist();
   updateArchiveBadge();
+  renderMonthTags();
   renderExpenses();
   updateMonthLabel();
   showToast(`✓ ${k} archived`);
@@ -102,6 +103,7 @@ function executeRestore() {
   updateArchiveBadge();
   closeRestoreModal();
   updateMonthLabel();
+  renderMonthTags();
   renderExpenses();
   updateHealth();
   showToast(`✓ ${k} restored`);

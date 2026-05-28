@@ -102,7 +102,6 @@ function dragDrop(e,wi,ii){
 function dragEnd(e){e.currentTarget.classList.remove('dragging');}
 
 function renderExpenses(){
-  renderMonthTags();
   document.getElementById('expMonthHdr').textContent=CMK+' Expenses';
   // Guard: if CMK is somehow in archivedMonths, warn and bail
   if(S.archivedMonths && S.archivedMonths[CMK]){
@@ -128,8 +127,6 @@ function renderExpenses(){
   if(_afBtn)_afBtn.style.display=_hasNew?'inline-flex':'none';
   renderEnvelopes();
   renderTagFilter();
-  // Build recurring set once per render (O(months) not O(items*months))
-  const _recurringSet=buildRecurringSet();
   const isCurMonth=(()=>{const p=CMK.split(' ');const mo=MS.indexOf(p[0]);const yr=parseInt(p[1]);const n=new Date();return mo===n.getMonth()&&yr===n.getFullYear();})();
   const today=isCurMonth?new Date().getDate():0; // only flag overdue in current real month
   const grid=document.getElementById('weeksGrid');grid.innerHTML='';
@@ -142,7 +139,7 @@ function renderExpenses(){
     const rows=week.items
       .filter(item=>!tagFilter||CAT_LABELS[getCat(item.name)]===tagFilter)
       .map((item,ii)=>{
-        const rec=_recurringSet.has(item.name.trim().toLowerCase());
+        const rec=_recSet.has(item.name.trim().toLowerCase());
         const dd=item.dueDay;
         const isOverdue=dd&&!item.paid&&dd<today;
         const catCls=getCat(item.name);
@@ -318,16 +315,7 @@ function bulkMarkPaid(wi){
 function addExpItem(wi){openItemModal(wi,-1);} // now opens modal
 
 // ── DUE DATE MODAL ──
-function openDueDateModal(wi,ii){ openItemModal(wi,ii); return; // redirected to item modal
-  if(false){
-  _pendingDueWi=wi;_pendingDueIi=ii;
-  const item=cw()[wi].items[ii];
-  document.getElementById('dueDateItemName').textContent=item.name;
-  document.getElementById('dueDayInput').value=item.dueDay||'';
-  document.getElementById('dueDateModal').classList.add('open');
-  setTimeout(()=>{ const f=document.getElementById('dueDayInput'); if(f)f.focus(); },120);
-  } // end if(false)
-}
+function openDueDateModal(wi,ii){ openItemModal(wi,ii); }
 function closeDueDateModal(){document.getElementById('dueDateModal').classList.remove('open');}
 function saveDueDate(){
   const d=parseInt(document.getElementById('dueDayInput').value);
