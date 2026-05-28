@@ -36,6 +36,9 @@ function runInsightModeQa(){if(typeof runInsightMode==='function')runInsightMode
 // Switch-to-specific-tab wrappers
 function switchToExpensesTab(){switchTab('expenses',document.getElementById('tab-expenses'));}
 
+// Theme wrapper (arg comes as string from data-arg)
+function setThemeFromSwatch(name){setTheme(name||'');}
+
 // File input wrappers (file inputs can't use value delegation)
 function handleItemReceiptFromEl(){var f=document.getElementById('iReceiptInput');if(f&&f.files&&f.files[0])handleItemReceipt(f.files[0]);}
 function handleReceiptFileFromEl(){var f=document.getElementById('receiptFileInput');if(f&&f.files&&f.files[0])handleReceiptFile(f.files[0]);}

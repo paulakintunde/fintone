@@ -419,6 +419,17 @@
   <button class="tab" id="tab-archive"            data-action="switchTab" data-arg="archive"   data-arg-self="true"><span class="ti">&#128230;</span><span class="tl"> Archive</span> <span class="tbadge" id="archiveBadge">0</span></button>
 </div>
 
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav no-print" id="mobileBottomNav" aria-label="Main navigation">
+  <div class="mbn-items">
+    <button class="mbn-item mbn-active" id="mbn-dashboard" data-action="switchTab" data-arg="dashboard" data-arg-self="true" aria-label="Dashboard"><span class="mbn-icon">&#127974;</span><span>Home</span><span class="mbn-dot"></span></button>
+    <button class="mbn-item" id="mbn-expenses" data-action="switchTab" data-arg="expenses" data-arg-self="true" aria-label="Expenses"><span class="mbn-icon">&#128179;</span><span>Bills</span><span class="mbn-dot"></span></button>
+    <button class="mbn-item" id="mbn-revenue" data-action="switchTab" data-arg="revenue" data-arg-self="true" aria-label="Revenue"><span class="mbn-icon">&#128200;</span><span>Income</span><span class="mbn-dot"></span></button>
+    <button class="mbn-item" id="mbn-savings" data-action="switchTab" data-arg="savings" data-arg-self="true" aria-label="Savings"><span class="mbn-icon">&#127381;</span><span>Goals</span><span class="mbn-dot"></span></button>
+    <button class="mbn-item" id="mbn-more" data-action="toggleMobileMenu" aria-label="More options"><span class="mbn-icon">&#8943;</span><span>More</span></button>
+  </div>
+</nav>
+
 <div class="main" id="main-content">
 <!-- ═══ DASHBOARD ═══ -->
 <div class="section active" id="section-dashboard">
@@ -468,6 +479,11 @@
       <div class="dkl">Monthly Pmts</div>
       <div class="dkv" id="d-minpmts">—</div>
       <div class="dkd" id="d-dti-lbl" style="background:var(--success-light);color:var(--success);">DTI</div>
+    </div>
+    <div class="dash-kpi dkpi-purple">
+      <div class="dkl">Net Worth</div>
+      <div class="dkv" id="d-networth">—</div>
+      <div class="dkd" id="d-nw-sub" style="background:var(--purple-light);color:var(--purple);">Assets − Debt</div>
     </div>
   </div>
 
@@ -1478,6 +1494,16 @@
   <div class="pmodal" style="max-width:440px;max-height:80vh;overflow-y:auto;">
     <button class="close-btn" data-action="closeSettings" title="Close" aria-label="Close">&#215;</button>
     <h4 id="settingsModalLabel">&#9881; Settings &amp; Danger Zone</h4>
+    <div style="margin-bottom:14px;">
+      <div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px;">Appearance</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;">Accent colour</div>
+      <div class="theme-swatch-row" id="themeSwatches">
+        <button class="theme-swatch ts-active" data-action="setTheme" data-arg="" title="Sage (default)" aria-label="Sage theme" style="background:#5C7A6B;"></button>
+        <button class="theme-swatch" data-action="setTheme" data-arg="indigo" title="Indigo" aria-label="Indigo theme" style="background:#5A67D8;"></button>
+        <button class="theme-swatch" data-action="setTheme" data-arg="coral" title="Coral" aria-label="Coral theme" style="background:#D53F3A;"></button>
+        <button class="theme-swatch" data-action="setTheme" data-arg="amber" title="Amber" aria-label="Amber theme" style="background:#B7791F;"></button>
+      </div>
+    </div>
     <div style="margin-bottom:14px;">
       <div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px;">Data &amp; Backup</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">

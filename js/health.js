@@ -18,13 +18,25 @@ function calcHealth(){
   return{total,details:[{label:'Cash Flow',score:Math.round(cf),max:25},{label:'Debt-to-Income',score:Math.round(dti),max:25},{label:'Payment Rate',score:Math.round(pmt),max:20},{label:'Debt Load',score:Math.round(dl),max:15},{label:'Savings Buffer',score:Math.round(ss),max:10},{label:'Income Diversity',score:Math.round(div),max:5}]};
 }
 let _lastHealthScore=0;
+function _animateScore(el,from,to){
+  if(from===to){el.textContent=to;return;}
+  const dur=600,start=performance.now();
+  function step(now){
+    const p=Math.min((now-start)/dur,1);
+    const e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(from+(to-from)*e);
+    if(p<1)requestAnimationFrame(step);else el.textContent=to;
+  }
+  requestAnimationFrame(step);
+}
 function updateHealth(){
   const{total}=calcHealth();
   const prev=_lastHealthScore;
   _lastHealthScore=total;
-  document.getElementById('healthScore').textContent=total;
+  const scoreEl=document.getElementById('healthScore');
+  _animateScore(scoreEl,prev,total);
   const badge=document.querySelector('.health-badge');
-  const scoreEl=badge.querySelector('.score'),lblEl=badge.querySelector('.hlabel');
+  const badgeScore=badge.querySelector('.score'),lblEl=badge.querySelector('.hlabel');
 
   // Score 100 — perfect score
   if(total===100){
@@ -40,7 +52,7 @@ function updateHealth(){
       launchConfetti(60);showToast('🎉 Great financial health — score hit 75!');
     }
     const[bg,bc,col]=total>=75?['var(--success-light)','var(--success-mid)','var(--success)']:total>=50?['var(--amber-light)','var(--amber-mid)','var(--amber)']:['var(--danger-light)','var(--danger-mid)','var(--danger)'];
-    badge.style.background=bg;badge.style.borderColor=bc;scoreEl.style.color=col;lblEl.style.color=col;
+    badge.style.background=bg;badge.style.borderColor=bc;badgeScore.style.color=col;lblEl.style.color=col;
   }
 }
 function openHealthModal(){

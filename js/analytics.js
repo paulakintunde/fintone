@@ -378,6 +378,16 @@ function renderDash(){
   const savGoalsList=S.savings||[];
   document.getElementById('d-sav-summary').textContent=savGoalsList.length+' goals · '+fmt(sv)+' saved';
   renderDashSavings(savGoalsList);
+
+  // ── NET WORTH ──
+  const nw=sv-debt;
+  const nwEl=document.getElementById('d-networth');
+  if(nwEl){
+    nwEl.textContent=(nw<0?'-':'')+fmt(Math.abs(nw));
+    nwEl.className='dkv '+(nw>=0?'nw-pos':'nw-neg');
+    const nwSub=document.getElementById('d-nw-sub');
+    if(nwSub){nwSub.textContent=fmt(sv)+' savings − '+fmt(debt)+' debt';}
+  }
 }
 
 function renderExpSumChart(){

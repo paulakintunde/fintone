@@ -76,10 +76,16 @@
 // NAVIGATION
 // ══════════════════════════════════════════════
 function switchTab(name,btn){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active','slide-fwd','slide-back'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('section-'+name).classList.add('active');
+  const sec=document.getElementById('section-'+name);
+  sec.classList.add('active','slide-fwd');
+  setTimeout(()=>sec.classList.remove('slide-fwd'),250);
   if(btn)btn.classList.add('active');
+  // Sync mobile bottom nav
+  document.querySelectorAll('.mbn-item').forEach(b=>b.classList.remove('mbn-active'));
+  const mbnTarget=document.getElementById('mbn-'+name);
+  if(mbnTarget)mbnTarget.classList.add('mbn-active');
   renderSection(name);
 }
 function renderSection(name){
@@ -269,8 +275,8 @@ function renderEnvelopes(){
     const pct=Math.min(100,spent/cap*100);
     const over=pct>=100,warn=pct>=80&&pct<100;
     const col=over?'var(--danger)':warn?'var(--amber)':'var(--sage)';
-    return`<div class="be${over?' over':warn?' warn':''}">
-      <div class="be-lbl">${cat}<button class="be-edit" data-action="openEnvModal" data-arg="${cat}" title="Edit ${cat} budget" aria-label="Edit budget">edit</button></div>
+    return`<div class="be${over?' over':warn?' warn':''}" data-action="drillDownCategory" data-arg="${cat}" title="View ${cat} expenses" role="button" tabindex="0">
+      <div class="be-lbl">${cat}<button class="be-edit" data-action="openEnvModal" data-arg="${cat}" data-stop-prop title="Edit ${cat} budget" aria-label="Edit budget">edit</button></div>
       <div class="be-amt"><span class="be-spent" style="color:${col}">${fmt(spent)}</span><span class="be-cap">/ ${fmt(cap)}</span></div>
       <div class="pbar" style="height:6px;"><div class="pfill" style="width:${pct}%;background:${col};border-radius:3px;height:100%;transition:width .4s;"></div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
@@ -283,6 +289,10 @@ function renderEnvelopes(){
     </div>`;
   }).join('');
   checkBudgetThresholds();
+}
+function drillDownCategory(cat){
+  tagFilter=cat;
+  switchTab('expenses',document.getElementById('tab-expenses'));
 }
 function checkBudgetThresholds(){
   if(!_notifEnabled||Notification.permission!=='granted')return;
@@ -457,6 +467,7 @@ async function resetAllData(){
   runAutoArchive();
   // Expand any quarterly/yearly scheduled expenses into current month
   expandScheduledExpenses(CMK);
+  loadTheme();
   applyDark();
   updateMonthLabel();
 // Set strategy buttons correctly

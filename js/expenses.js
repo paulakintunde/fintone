@@ -1,5 +1,12 @@
 // === expenses.js ===
 
+const _collapsedWeeks=new Set();
+function toggleWeekCollapse(wi){
+  if(_collapsedWeeks.has(wi))_collapsedWeeks.delete(wi);
+  else _collapsedWeeks.add(wi);
+  renderExpenses();
+}
+
 function renderTagFilter(){
   const cats=[...new Set(cw().flatMap(w=>w.items.map(i=>CAT_LABELS[getCat(i.name)])))];
   document.getElementById('tagFilterBar').innerHTML=
@@ -135,7 +142,14 @@ function renderExpenses(){
     const wPaid=week.items.filter(i=>i.paid).reduce((s,i)=>s+i.amount,0);
     const wPend=wTotal-wPaid;
     const allItemsPaid=week.items.length>0&&week.items.every(i=>i.paid);
-    const card=document.createElement('div');card.className='week-card'+(allItemsPaid?' all-paid-card':'');
+    const hasOverdue=week.items.some(i=>i.dueDay&&!i.paid&&i.dueDay<today);
+    const hasPartial=!allItemsPaid&&wPaid>0;
+    const isCollapsed=_collapsedWeeks.has(wi);
+    let statusCls='';
+    if(allItemsPaid)statusCls=' all-paid-card';
+    else if(hasOverdue)statusCls=' wk-overdue';
+    else if(hasPartial)statusCls=' wk-partial';
+    const card=document.createElement('div');card.className='week-card'+statusCls+(isCollapsed?' wk-collapsed':'');
     const rows=week.items
       .filter(item=>!tagFilter||CAT_LABELS[getCat(item.name)]===tagFilter)
       .map((item,ii)=>{
@@ -171,11 +185,12 @@ function renderExpenses(){
         </tr>`;
       }).join('');
     card.innerHTML=`
-      <div class="week-header">
+      <div class="week-header" style="cursor:pointer;" data-action="toggleWeekCollapse" data-arg="${wi}">
         <div class="week-title-row">
           <span class="week-title">Week ${wi+1}</span>
           <div style="display:flex;align-items:center;gap:5px;">
-            <button class="no-print" data-action="bulkMarkPaid" data-arg="${wi}" title="Mark all paid" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--sage);padding:1px 4px;border-radius:3px;border:1px solid var(--sage-mid);">✓ All</button>
+            <button class="no-print week-collapse-btn" data-action="toggleWeekCollapse" data-arg="${wi}" data-stop-prop title="${isCollapsed?'Expand':'Collapse'} week" aria-label="${isCollapsed?'Expand':'Collapse'} week ${wi+1}">${isCollapsed?'▸':'▾'}</button>
+            <button class="no-print" data-action="bulkMarkPaid" data-arg="${wi}" data-stop-prop title="Mark all paid" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--sage);padding:1px 4px;border-radius:3px;border:1px solid var(--sage-mid);">✓ All</button>
             <span class="week-grand">${fmt(wTotal)}</span>
           </div>
         </div>

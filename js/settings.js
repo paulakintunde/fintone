@@ -1,5 +1,22 @@
 // === settings.js ===
 
+// ── THEME ──
+function setTheme(name){
+  if(name)document.documentElement.setAttribute('data-theme',name);
+  else document.documentElement.removeAttribute('data-theme');
+  localStorage.setItem('fintone_theme',name||'');
+  document.querySelectorAll('.theme-swatch').forEach(s=>{
+    s.classList.toggle('ts-active',s.dataset.arg===(name||''));
+  });
+}
+function loadTheme(){
+  const t=localStorage.getItem('fintone_theme')||'';
+  if(t)document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-swatch').forEach(s=>{
+    s.classList.toggle('ts-active',s.dataset.arg===t);
+  });
+}
+
 // ── AI provider key management ──
 var _CLAUDE_KEY='finflow_claude_key';
 var _OPENAI_KEY='finflow_openai_key';

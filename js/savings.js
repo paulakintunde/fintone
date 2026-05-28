@@ -17,25 +17,38 @@ function renderSavings(){
     grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--text-muted);font-size:13px;border:2px dashed var(--border);border-radius:var(--radius);">No savings goals yet.<br><button class="nm-btn" style="margin-top:10px;" data-action="openSavModal" data-arg="-1">+ Add your first goal</button></div>`;
     dc('savChart');return;
   }
+  const _ringR=38,_ringC=2*Math.PI*_ringR;
   grid.innerHTML=goals.map((g,i)=>{
     const pct=Math.min(100,amt(g.target)>0?amt(g.balance)/amt(g.target)*100:0);
     const moLeft=g.contribution>0&&amt(g.balance)<amt(g.target)?Math.ceil((amt(g.target)-amt(g.balance))/amt(g.contribution)):0;
     const projDate=moLeft>0?getPayoffDate(moLeft):'';
     const isComplete=pct>=100;
+    const ringOffset=(_ringC*(1-pct/100)).toFixed(1);
+    const ringColor=isComplete?'var(--success)':'var(--blue)';
     return`<div class="sav-card${isComplete?' sav-complete':''}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
         <div><div style="font-weight:700;font-size:13px;">${esc(g.name)}</div><div class="sav-interest">★ ${g.rate}% p.a. interest</div></div>
         <button class="del-btn" style="opacity:1;" data-action="openDelSav" data-arg="${i}" title="Delete savings goal" aria-label="Delete savings goal">✕</button>
       </div>
-      <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:600;color:var(--blue);">${fmt(amt(g.balance))}</div>
-      <div style="font-size:11px;color:var(--text-muted);margin-bottom:5px;">of ${fmt(amt(g.target))} goal</div>
-      <div class="sav-goal-bar"><div class="sav-goal-fill" style="width:${pct}%;"></div></div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:3px;margin-bottom:10px;">
-        <span>${pct.toFixed(0)}% complete</span>
-        <span>${isComplete?'<span class="sav-complete-badge">🏆 Goal Reached!</span>':moLeft>0?projDate+' est.':''}</span>
+      <div class="sav-ring-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100" class="sav-ring" role="img" aria-label="${pct.toFixed(0)}% saved towards ${esc(g.name)}" style="transform:rotate(-90deg);">
+          <circle cx="50" cy="50" r="${_ringR}" class="sav-ring-track"/>
+          <circle cx="50" cy="50" r="${_ringR}" class="sav-ring-fill${isComplete?' ring-complete':''}"
+            stroke-dasharray="${_ringC.toFixed(1)}"
+            stroke-dashoffset="${ringOffset}"
+            style="stroke:${ringColor};"/>
+          <g style="transform:rotate(90deg);transform-origin:50px 50px;">
+            <text x="50" y="44" class="sav-ring-center" style="font-size:14px;font-weight:700;fill:${ringColor};font-family:'DM Mono',monospace;">${pct.toFixed(0)}%</text>
+            <text x="50" y="57" class="sav-ring-center" style="font-size:8px;fill:var(--text-muted);font-family:'DM Sans',sans-serif;">complete</text>
+            ${isComplete?`<text x="50" y="68" class="sav-ring-center" style="font-size:10px;fill:var(--success);">🏆</text>`:''}
+          </g>
+        </svg>
       </div>
-      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">
-        Monthly: ${fmt(amt(g.contribution))}/mo · Interest: ${fmt(amt(g.balance)*(g.rate/100/12))}/mo
+      <div style="text-align:center;font-family:'DM Mono',monospace;font-size:20px;font-weight:600;color:var(--blue);">${fmt(amt(g.balance))}</div>
+      <div style="text-align:center;font-size:11px;color:var(--text-muted);margin-bottom:6px;">of ${fmt(amt(g.target))} goal${isComplete?'':moLeft>0?' · '+projDate+' est.':''}</div>
+      ${isComplete?'<div style="text-align:center;margin-bottom:8px;"><span class="sav-complete-badge">🏆 Goal Reached!</span></div>':''}
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;text-align:center;">
+        ${fmt(amt(g.contribution))}/mo · Interest: ${fmt(amt(g.balance)*(g.rate/100/12))}/mo
       </div>
       <div class="sav-actions">
         <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--success);border-color:var(--success-mid);" data-action="openTxnDeposit" data-arg="${i}">+ Deposit</button>
