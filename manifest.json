@@ -1,6 +1,6 @@
 {
-  "name": "FinFlow — Personal Finance",
-  "short_name": "FinFlow",
+  "name": "FinteOne — Personal Finance",
+  "short_name": "FinteOne",
   "description": "Personal finance dashboard",
   "start_url": "./",
   "display": "standalone",

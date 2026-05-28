@@ -17,6 +17,7 @@ function settingsAndCloseMenu(){openSettings();toggleMobileMenu();}
 
 // Settings modal wrappers
 function exportFromSettings(){exportData();closeSettings();}
+function exportCSVFromSettings(){exportCSV();closeSettings();}
 function importFromSettings(){openImport();closeSettings();}
 function currencyFromSettings(){openCurrencyModal();closeSettings();}
 function compareFromSettings(){openCompareModal();closeSettings();}

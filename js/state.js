@@ -289,17 +289,18 @@ function expandScheduledExpenses(monthKey){
     let applies=false;
     if(se.frequency==='quarterly') applies=(mo%3===0); // Jan/Apr/Jul/Oct
     else if(se.frequency==='yearly') applies=(mo===(se.yearMonth||0));
+    else if(se.frequency==='monthly') applies=true;
     if(!applies)return;
     // Already expanded into this month?
     const already=md.weeks.some(w=>w.items.some(i=>i._scheduledId===se.id));
     if(already)return;
     // Place in the right week: stored week preference, or auto-detect from due day
     const wk=se.week!==undefined?Math.min(3,Math.max(0,se.week)):getWeekForDay(se.dueDay,monthKey);
-    const freqTag=se.frequency==='quarterly'?'[quarterly]':'[yearly]';
+    const freqTag=se.frequency==='quarterly'?'[quarterly]':se.frequency==='yearly'?'[yearly]':'';
     md.weeks[wk].items.push({
       name:se.name,amount:se.amount,paid:false,
       dueDay:se.dueDay||null,
-      note:(se.note?se.note+' ':'')+freqTag,
+      note:(se.note?se.note+(freqTag?' ':'')+freqTag:freqTag).trim()||undefined,
       receipt:null,
       frequency:se.frequency,
       _scheduledId:se.id

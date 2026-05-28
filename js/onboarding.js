@@ -423,7 +423,7 @@ function obFinish(){
 
   renderDash();
   updateHealth();
-  const greeting=name?'Welcome, '+name+'!':'Welcome to FinFlow!';
+  const greeting=name?'Welcome, '+name+'!':'Welcome to FinteOne!';
   const extras=[];
   if(_obIncome.length) extras.push(_obIncome.length+' income source'+(_obIncome.length>1?'s':''));
   if(_obExpenses.length) extras.push(_obExpenses.length+' expense'+(_obExpenses.length>1?'s':''));

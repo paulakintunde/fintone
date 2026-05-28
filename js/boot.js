@@ -282,6 +282,24 @@ function renderEnvelopes(){
       </div>
     </div>`;
   }).join('');
+  checkBudgetThresholds();
+}
+function checkBudgetThresholds(){
+  if(!_notifEnabled||Notification.permission!=='granted')return;
+  const totals=catTotalsForMonth();
+  Object.keys(S.budgets||BDFT).forEach(cat=>{
+    const spent=totals[cat]||0;
+    const cap=(S.budgets&&S.budgets[cat])||BDFT[cat]||500;
+    const pct=spent/cap*100;
+    const base=`fintone_bnotif_${CMK}_${cat}`;
+    if(pct>=100&&!sessionStorage.getItem(base+'_100')){
+      try{new Notification('FinteOne — Budget Exceeded',{body:`${cat}: ${fmt(spent)} spent (${pct.toFixed(0)}% of ${fmt(cap)} cap)`,tag:base+'_100'});}catch(e){}
+      sessionStorage.setItem(base+'_100','1');
+    }else if(pct>=80&&!sessionStorage.getItem(base+'_80')){
+      try{new Notification('FinteOne — Budget Warning',{body:`${cat}: ${pct.toFixed(0)}% of ${fmt(cap)} cap used`,tag:base+'_80'});}catch(e){}
+      sessionStorage.setItem(base+'_80','1');
+    }
+  });
 }
 function toggleRollover(cat,enabled){
   if(!S.budgetRollover)S.budgetRollover={};

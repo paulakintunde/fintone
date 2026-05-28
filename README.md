@@ -61,7 +61,7 @@ The 8-step wizard runs automatically on first launch. Every step except the firs
 
 The **top bar** contains:
 
-- **FinFlow logo** (left) — returns to the Dashboard tab
+- **FinteOne logo** (left) — returns to the Dashboard tab
 - **Month navigator** (← May 2025 →) — step backward or forward one month at a time
 - **Health badge** (e.g. "82 · Good") — click it to see the score breakdown
 - **Dark mode toggle** (🌙/☀)
@@ -155,7 +155,7 @@ Grab any expense row by its left edge and drag it to a new position within the s
 
 ### Recurring detection
 
-FinFlow watches for items with the same name across multiple months. If it detects a recurring pattern it shows a **↻ badge** on the item. The **Auto-fill recurring** button (top of Expenses) pre-populates the current month with all detected recurring bills in one click.
+FinteOne watches for items with the same name across multiple months. If it detects a recurring pattern it shows a **↻ badge** on the item. The **Auto-fill recurring** button (top of Expenses) pre-populates the current month with all detected recurring bills in one click.
 
 ### Tag filter
 
@@ -524,7 +524,7 @@ Each reset requires typing the word **RESET** to confirm.
 
 ## Privacy & Security (PIN Lock)
 
-FinFlow stores all data in your browser's **IndexedDB** — it never leaves your device. No account, no cloud sync, no third-party tracking.
+FinteOne stores all data in your browser's **IndexedDB** — it never leaves your device. No account, no cloud sync, no third-party tracking.
 
 ### Setting up a PIN
 
@@ -582,7 +582,7 @@ The CSV importer expects at minimum a name/description column and an amount colu
 
 ## AI Insights (Claude / OpenAI)
 
-FinFlow can send an anonymised summary of your financial data to the Claude or OpenAI API to generate advice and forecasts. **Your actual transaction names and amounts are included in the prompt — only connect an API key you trust.**
+FinteOne can send an anonymised summary of your financial data to the Claude or OpenAI API to generate advice and forecasts. **Your actual transaction names and amounts are included in the prompt — only connect an API key you trust.**
 
 ### Connecting Claude
 
@@ -617,7 +617,7 @@ Settings → AI section → **Remove** next to the provider. The key is deleted 
 
 ## Installing as an App (PWA)
 
-FinFlow is a Progressive Web App. When served over HTTPS (e.g. via GitHub Pages or a local server), browsers offer an **Install** prompt.
+FinteOne is a Progressive Web App. When served over HTTPS (e.g. via GitHub Pages or a local server), browsers offer an **Install** prompt.
 
 - **Chrome / Edge:** look for the install icon in the address bar
 - **Safari on iOS:** Share → Add to Home Screen
@@ -631,7 +631,7 @@ Once installed it runs in standalone mode (no browser chrome) and works fully of
 
 ### Recurring auto-fill
 
-If you track the same bills every month (Netflix, rent, utilities), use **Auto-fill recurring** at the top of the Expenses tab. FinFlow detects names that have appeared in 2+ prior months and adds them to the current month in one click — saving you from re-entering them manually.
+If you track the same bills every month (Netflix, rent, utilities), use **Auto-fill recurring** at the top of the Expenses tab. FinteOne detects names that have appeared in 2+ prior months and adds them to the current month in one click — saving you from re-entering them manually.
 
 ### Clone instead of re-entering
 
@@ -647,7 +647,7 @@ You can edit an expense **name** directly by clicking on it in the table (no mod
 
 ### Drag-to-reorder expenses
 
-Grab any expense row by its drag handle and drop it into a different position in the week. FinFlow saves the order.
+Grab any expense row by its drag handle and drop it into a different position in the week. FinteOne saves the order.
 
 ### Budget rollover
 
@@ -679,7 +679,7 @@ Press **Ctrl+P** (or **⌘+P** on Mac) to print the current tab's content. Print
 
 | What | Where |
 |------|-------|
-| All financial data | Browser IndexedDB (`FinFlow` database) |
+| All financial data | Browser IndexedDB (`FinteOne` database) |
 | Dark mode preference | `localStorage` |
 | PIN hash | IndexedDB (`meta` store) |
 | API keys | `localStorage` (base64 encoded) |
@@ -689,4 +689,4 @@ Clearing browser site data will erase everything. Export regularly.
 
 ---
 
-*FinFlow is a client-side app — your data never leaves your browser.*
+*FinteOne is a client-side app — your data never leaves your browser.*

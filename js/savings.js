@@ -42,6 +42,7 @@ function renderSavings(){
         <button class="tbtn" style="font-size:11px;padding:4px 9px;color:var(--amber);border-color:var(--amber-mid);" data-action="openTxnWithdraw" data-arg="${i}">− Withdraw</button>
         <button class="tbtn" style="font-size:11px;padding:4px 9px;" data-action="openSavModal" data-arg="${i}">Edit</button>
       </div>
+      ${(g.transactions&&g.transactions.length)?`<details style="margin-top:8px;font-size:11px;"><summary style="cursor:pointer;color:var(--text-muted);font-size:10px;user-select:none;">History (${g.transactions.length})</summary><div style="margin-top:6px;max-height:140px;overflow-y:auto;">${g.transactions.slice(0,20).map(t=>`<div style="display:flex;justify-content:space-between;padding:3px 0;border-top:1px solid var(--border);"><span style="color:var(--text-muted);">${t.date}</span><span style="color:${t.type==='deposit'?'var(--success)':'var(--amber)'};">${t.type==='deposit'?'+':'-'}${fmt(t.amount)}</span></div>${t.note?`<div style="font-size:10px;color:var(--text-muted);padding-bottom:2px;">${esc(t.note)}</div>`:''}`).join('')}</div></details>`:''}
     </div>`;
   }).join('');
 
@@ -154,6 +155,14 @@ function confirmTxn(){
     if(aAmt>amt(g.balance)){g.balance=0;showToast('Balance set to $0');}
     else g.balance=Math.round((amt(g.balance)-aAmt)*100)/100;
   }
+  if(!g.transactions)g.transactions=[];
+  g.transactions.unshift({
+    date:new Date().toISOString().slice(0,10),
+    type:_txnMode,
+    amount:aAmt,
+    note:document.getElementById('txnNote').value.trim(),
+    balance:g.balance
+  });
   const newPct=g.target>0?g.balance/g.target:0;
   persist();closeTxnModal();renderSavings();updateHealth();
   if(_txnMode==='deposit'&&prevPct<1&&newPct>=1){

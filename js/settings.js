@@ -499,7 +499,7 @@ function scheduleBillReminders(){
     const msg=b.daysUntil===0?'Due TODAY':b.daysUntil===1?'Due TOMORROW':'Due in '+b.daysUntil+' days';
     setTimeout(()=>{
       try{
-        new Notification('FinFlow — Bill Reminder',{
+        new Notification('FinteOne — Bill Reminder',{
           body:b.name+' ('+fmt(b.amount)+') — '+msg,
           icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%235C7A6B"/><text y="70" font-size="60" text-anchor="middle" x="50" fill="white">$</text></svg>',
           tag:'finflow-'+b.name
@@ -609,10 +609,10 @@ function checkDemoBanner(){
 
 function exportData(){
   const json=JSON.stringify(S,null,2);
-  const filename='finflow-'+new Date().toISOString().slice(0,10)+'.json';
+  const filename='fintone-'+new Date().toISOString().slice(0,10)+'.json';
   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[new File([json],'x.json',{type:'application/json'})]})){
     const file=new File([json],filename,{type:'application/json'});
-    navigator.share({files:[file],title:'FinFlow Backup'}).catch(()=>downloadExport(json,filename));
+    navigator.share({files:[file],title:'FinteOne Backup'}).catch(()=>downloadExport(json,filename));
   } else { downloadExport(json,filename); }
 }
 function downloadExport(json,filename){
@@ -621,4 +621,23 @@ function downloadExport(json,filename){
   const a=document.createElement('a');a.href=url;a.download=filename;a.click();
   setTimeout(()=>URL.revokeObjectURL(url),100);
   showToast('✓ Backup downloaded');
+}
+function exportCSV(){
+  const rows=[['Month','Week','Name','Category','Amount','Status','Due Day','Note']];
+  Object.keys(S.months).sort().forEach(key=>{
+    S.months[key].weeks.forEach((w,wi)=>{
+      w.items.forEach(item=>{
+        rows.push([key,'Week '+(wi+1),item.name,item.category||'',
+          amt(item.amount),item.paid?'Paid':'Pending',
+          item.dueDay||'',(item.note||'').replace(/\n/g,' ')]);
+      });
+    });
+  });
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.href=url;a.download='fintone-expenses-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),100);
+  showToast('✓ CSV downloaded');
 }
