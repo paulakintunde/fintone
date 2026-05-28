@@ -434,6 +434,9 @@
 <!-- ═══ DASHBOARD ═══ -->
 <div class="section active" id="section-dashboard">
 
+  <!-- ── GREETING ── -->
+  <div id="d-greeting" style="font-size:13px;font-weight:600;color:var(--text-secondary);padding:12px 0 2px;"></div>
+
   <!-- ── HERO STRIP ── -->
   <div class="dash-hero">
     <div class="hero-left">
@@ -1494,6 +1497,13 @@
   <div class="pmodal" style="max-width:440px;max-height:80vh;overflow-y:auto;">
     <button class="close-btn" data-action="closeSettings" title="Close" aria-label="Close">&#215;</button>
     <h4 id="settingsModalLabel">&#9881; Settings &amp; Danger Zone</h4>
+    <div style="margin-bottom:14px;">
+      <div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px;">Profile</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input class="fi" id="settingsName" type="text" placeholder="Your name (optional)" maxlength="40" style="flex:1;" data-enter="saveUserName">
+        <button class="btn-p" style="padding:6px 14px;font-size:12px;white-space:nowrap;" data-action="saveUserName">Save</button>
+      </div>
+    </div>
     <div style="margin-bottom:14px;">
       <div style="font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);margin-bottom:8px;">Appearance</div>
       <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;">Accent colour</div>

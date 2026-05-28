@@ -179,10 +179,22 @@ function renderSavingsChart(goals){
   CH['savChart']=new Chart(document.getElementById('savChart'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8,boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{ticks:{callback:v=>fmtK(v),font:{size:9}},grid:{color:'rgba(0,0,0,0.03)'}}}}});
 }
 
+function _dashGreeting(){
+  const h=new Date().getHours();
+  const name=S.userName?', '+S.userName:'';
+  if(h>=5&&h<12) return'Good morning'+name+' ☀️';
+  if(h>=12&&h<17) return'Good afternoon'+name+' 👋';
+  if(h>=17&&h<21) return'Good evening'+name+' 🌆';
+  return'Good night'+name+' 🌙';
+}
 function renderDash(){
   const exp=totalExp(), paid=paidExp(), pend=pendExp(), rev=totalRev(), debt=totalDebt(), net=Math.round((rev-exp)*100)/100;
   const sv=totalSav(), mp=minPmts(), dti=rev>0?mp/rev*100:0;
   const {total:healthScore}=calcHealth();
+
+  // ── GREETING ──
+  const greetEl=document.getElementById('d-greeting');
+  if(greetEl) greetEl.textContent=_dashGreeting();
 
   // ── HERO ──
   document.getElementById('d-hero-month').textContent=CMK;

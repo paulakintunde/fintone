@@ -296,30 +296,31 @@ async function runInsightMode(mode){
   if(ab)ab.classList.add('ai-active');
   var ctx=_buildFinancialContext(6);
   var ctxStr=JSON.stringify(ctx,null,2);
+  var nameCtx=S.userName?'The user\'s name is '+S.userName+'. Address them by name where it feels natural.\n\n':'';
   var prompt,label;
   if(mode==='general'){
     label='Analysing your finances…';
-    prompt='You are a friendly personal finance advisor. Based on the financial data below, provide 3-4 concise, actionable insights in plain English. Be specific with numbers and amounts. Be encouraging but honest. Format as short paragraphs, no bullet points, no markdown headers.\n\nData:\n'+ctxStr;
+    prompt=nameCtx+'You are a friendly personal finance advisor. Based on the financial data below, provide 3-4 concise, actionable insights in plain English. Be specific with numbers and amounts. Be encouraging but honest. Format as short paragraphs, no bullet points, no markdown headers.\n\nData:\n'+ctxStr;
   }else if(mode==='debt'){
     label='Optimising debt payoff strategy…';
-    prompt='You are a debt payoff advisor. Review the loans below and recommend either the avalanche (highest rate first) or snowball (lowest balance first) method — explain why this fits this situation. Name each loan, give the payoff order, and estimate interest saved. Be concrete and specific with numbers.\n\nData:\n'+ctxStr;
+    prompt=nameCtx+'You are a debt payoff advisor. Review the loans below and recommend either the avalanche (highest rate first) or snowball (lowest balance first) method — explain why this fits this situation. Name each loan, give the payoff order, and estimate interest saved. Be concrete and specific with numbers.\n\nData:\n'+ctxStr;
   }else if(mode==='anomaly'){
     label='Scanning for spending anomalies…';
-    prompt='You are a spending analyst. Review the monthly spending by category over the last 6 months. Identify: categories with unusual spikes, months that look significantly different from the trend, and any consistently over-budget areas. Be specific about months and dollar amounts. Use plain English, no markdown headers.\n\nData:\n'+ctxStr;
+    prompt=nameCtx+'You are a spending analyst. Review the monthly spending by category over the last 6 months. Identify: categories with unusual spikes, months that look significantly different from the trend, and any consistently over-budget areas. Be specific about months and dollar amounts. Use plain English, no markdown headers.\n\nData:\n'+ctxStr;
   }else if(mode==='budget'){
     label='Building budget recommendations…';
-    prompt='You are a budget planner. Based on the income level and actual spending patterns, recommend specific monthly budget amounts for each category. Use the 50/30/20 guideline as a reference. State each category and its recommended amount. Explain your reasoning briefly. Use plain English.\n\nData:\n'+ctxStr;
+    prompt=nameCtx+'You are a budget planner. Based on the income level and actual spending patterns, recommend specific monthly budget amounts for each category. Use the 50/30/20 guideline as a reference. State each category and its recommended amount. Explain your reasoning briefly. Use plain English.\n\nData:\n'+ctxStr;
   }else if(mode==='summary'){
     label='Summarising this month…';
-    prompt='You are a personal finance summariser. Write a concise summary of the current month financial situation: income vs expenses, how it compares to recent months, top spending categories, and one specific actionable recommendation. Keep it to 3 short paragraphs, plain English.\n\nData:\n'+ctxStr;
+    prompt=nameCtx+'You are a personal finance summariser. Write a concise summary of the current month financial situation: income vs expenses, how it compares to recent months, top spending categories, and one specific actionable recommendation. Keep it to 3 short paragraphs, plain English.\n\nData:\n'+ctxStr;
   }else if(mode==='forecast'){
     label='Forecasting cash flow next 3 months…';
-    prompt='You are a cash flow forecaster. Based on income and expense trends in the data, project what the next 3 months might look like financially. Identify which months look risky and why. Give one concrete recommendation to improve cash position. Use specific estimated numbers.\n\nData:\n'+ctxStr;
+    prompt=nameCtx+'You are a cash flow forecaster. Based on income and expense trends in the data, project what the next 3 months might look like financially. Identify which months look risky and why. Give one concrete recommendation to improve cash position. Use specific estimated numbers.\n\nData:\n'+ctxStr;
   }else if(mode==='qa'){
     var q=(document.getElementById('aiQuestion').value||'').trim();
     if(!q){showToast('Type a question first');return;}
     label='Answering your question…';
-    prompt='You are a personal finance advisor. The user asks: "'+q+'"\n\nAnswer based on their actual financial data below. Be specific, concise, and actionable. Refer to their real numbers where relevant.\n\nData:\n'+ctxStr;
+    prompt=nameCtx+'You are a personal finance advisor. The user asks: "'+q+'"\n\nAnswer based on their actual financial data below. Be specific, concise, and actionable. Refer to their real numbers where relevant.\n\nData:\n'+ctxStr;
   }else{return;}
   var result=await callAI(prompt,label);
   if(!result)return;
@@ -572,8 +573,18 @@ function saveCurrency(){
 // SETTINGS MODAL
 // ══════════════════════════════════════════════
 function openSettings(){
+  const nameEl=document.getElementById('settingsName');
+  if(nameEl) nameEl.value=S.userName||'';
   document.getElementById('settingsModal').classList.add('open');
   trapFocus(document.getElementById('settingsModal'));
+  setTimeout(()=>{if(nameEl)nameEl.focus();},120);
+}
+function saveUserName(){
+  const v=(document.getElementById('settingsName').value||'').trim();
+  S.userName=v||undefined;
+  persist();
+  showToast(v?'✓ Hi, '+v+'! Name saved.':'✓ Name cleared');
+  if(typeof renderDash==='function') renderDash();
 }
 function closeSettings(){
   releaseTrap(document.getElementById('settingsModal'));
