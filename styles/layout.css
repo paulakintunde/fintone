@@ -340,14 +340,6 @@
 .week-card.wk-partial .week-title{color:var(--amber)!important;}
 .week-card.wk-partial .week-grand{color:var(--amber)!important;}
 
-/* ── SVG SAVINGS RING ── */
-.sav-ring-wrap{display:flex;justify-content:center;margin:8px 0 4px;}
-.sav-ring{overflow:visible;}
-.sav-ring-track{fill:none;stroke:var(--slate-mid);stroke-width:7;}
-.sav-ring-fill{fill:none;stroke:var(--blue);stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1);}
-.sav-ring-fill.ring-complete{stroke:var(--success);}
-.sav-ring-center{text-anchor:middle;dominant-baseline:middle;}
-
 /* ── ENVELOPE DRILL-DOWN ── */
 .be{cursor:pointer;transition:all .2s;}
 .be:not(.over):not(.warn):hover{border-color:var(--sage-mid);transform:translateY(-1px);box-shadow:var(--shadow-lg);}

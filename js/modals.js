@@ -272,7 +272,8 @@ function saveItemModal(){
     newItem._savingsItem = existing._savingsItem||false;
     cw()[_iModalWi].items[_iModalIi] = newItem;
   } else {
-    cw()[_iModalWi].items.push(newItem);
+    const targetWi = dueDay ? getWeekForDay(dueDay, CMK) : _iModalWi;
+    cw()[targetWi].items.push(newItem);
   }
 
   const wasNew=_iModalIi<0;
